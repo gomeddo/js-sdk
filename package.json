@@ -1,0 +1,16 @@
+{
+  "name": "booker25-js-sdk",
+  "version": "0.0.1",
+  "description": "Package allowing for the easy use of Booker25 APIs.",
+  "main": "dist/index.js",
+  "repository": "git@bitbucket.org:gen25-development-team/booker25-js-sdk.git",
+  "author": "Booker25 <b25@gen25.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^27.5.1",
+    "jest": "^28.1.0",
+    "ts-jest": "^28.0.3",
+    "ts-standard": "^11.0.0",
+    "typescript": "^4.7.2"
+  }
+}
