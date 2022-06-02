@@ -3,7 +3,7 @@ import { ResourceGenerator } from './__utils__/resource-responses'
 
 test('It generates a resource object for each resource passed', () => {
   const resourceGenerator = new ResourceGenerator('Id', 'Name')
-  const resourceResult = new ResourceResult(resourceGenerator.getSimpleResourceArray(2))
+  const resourceResult = new ResourceResult(resourceGenerator.getResourceArray(2))
   expect(resourceResult.numberOfresources()).toBe(2)
   expect(resourceResult.getResourceById('Id 1')).not.toBeUndefined()
   expect(resourceResult.getResourceById('Id 2')).not.toBeUndefined()
@@ -11,7 +11,7 @@ test('It generates a resource object for each resource passed', () => {
 
 test('getResource returns the correct resource by id', () => {
   const resourceGenerator = new ResourceGenerator('Id', 'Name')
-  const resourceResult = new ResourceResult(resourceGenerator.getSimpleResourceArray(2))
+  const resourceResult = new ResourceResult(resourceGenerator.getResourceArray(2))
   expect(resourceResult.numberOfresources()).toBe(2)
   const resourceOne = resourceResult.getResourceById('Id 1')
   expect(resourceOne?.id).toBe('Id 1')
@@ -24,7 +24,7 @@ test('getResource returns the correct resource by id', () => {
 
 test('getResource returns the correct resource by name', () => {
   const resourceGenerator = new ResourceGenerator('Id', 'Name')
-  const resourceResult = new ResourceResult(resourceGenerator.getSimpleResourceArray(2))
+  const resourceResult = new ResourceResult(resourceGenerator.getResourceArray(2))
   expect(resourceResult.numberOfresources()).toBe(2)
   const resourceOne = resourceResult.getResourceByName('Name 1')
   expect(resourceOne?.id).toBe('Id 1')
