@@ -8,7 +8,7 @@
   "author": "Booker25 <b25@gen25.com>",
   "license": "MIT",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc --project tsconfig.build.json"
   },
   "devDependencies": {
     "@types/jest": "^27.5.1",
