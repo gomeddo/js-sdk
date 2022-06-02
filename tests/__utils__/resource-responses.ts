@@ -16,8 +16,8 @@ class ResourceGenerator {
 
   public addResourceType (): void {
     const resourceType = {
-      Name: `Type ${this.namePrefix} ${this.resourceTypeCounter}`,
-      Id: `Type ${this.idPrefix} ${this.resourceTypeCounter}`
+      Name: this.getTypeNameString(this.resourceTypeCounter),
+      Id: this.getTypeIdString(this.resourceTypeCounter)
     }
     this.resourceTypes.set(this.resourceTypeCounter, resourceType)
     this.resourceTypeCounter++
@@ -35,16 +35,38 @@ class ResourceGenerator {
     return new Array(size).fill(undefined).map(() => this.getResource())
   }
 
+  public getResourceWithParent (parent: number): any {
+    const resourceWithType = this.getResourceOfType(1)
+    resourceWithType.B25__Parent__c = this.getIdString(parent)
+    return resourceWithType
+  }
+
   public getResourceOfType (type: number): any {
     const resourceType = this.resourceTypes.get(type)
     const resource = {
-      Id: this.idPrefix + ' ' + this.resourceCounter.toString(),
-      Name: this.namePrefix + ' ' + this.resourceCounter.toString(),
+      Id: this.getIdString(this.resourceCounter),
+      Name: this.getNameString(this.resourceCounter),
       B25__Resource_Type__c: resourceType.Id,
       B25__Resource_Type__r: resourceType
     }
     this.resourceCounter++
     return resource
+  }
+
+  private getIdString (counter: number): string {
+    return `${this.idPrefix} ${counter}`
+  }
+
+  private getNameString (counter: number): string {
+    return `${this.namePrefix} ${counter}`
+  }
+
+  private getTypeIdString (counter: number): string {
+    return `Type ${this.getIdString(counter)}`
+  }
+
+  private getTypeNameString (counter: number): string {
+    return `Type ${this.getNameString(counter)}`
   }
 }
 
