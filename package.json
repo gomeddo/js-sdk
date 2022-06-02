@@ -3,9 +3,13 @@
   "version": "0.0.1",
   "description": "Package allowing for the easy use of Booker25 APIs.",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "repository": "git@bitbucket.org:gen25-development-team/booker25-js-sdk.git",
   "author": "Booker25 <b25@gen25.com>",
   "license": "MIT",
+  "scripts": {
+    "build": "tsc"
+  },
   "devDependencies": {
     "@types/jest": "^27.5.1",
     "jest": "^28.1.0",
