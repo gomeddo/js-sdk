@@ -11,8 +11,8 @@ class ResourceGenerator {
 
   public getSimpleResource (): any {
     const resource = {
-      Id: this.idPrefix + ' ' + this.counter.toString(),
-      Name: this.namePrefix + ' ' + this.counter.toString()
+      Id: `${this.idPrefix} ${this.counter}`,
+      Name: `${this.namePrefix} ${this.counter}`
     }
     this.counter++
     return resource
