@@ -38,8 +38,8 @@ class ResourceGenerator {
   public getResourceOfType (type: number): any {
     const resourceType = this.resourceTypes.get(type)
     const resource = {
-      Id: this.idPrefix + ' ' + this.resourceCounter.toString(),
-      Name: this.namePrefix + ' ' + this.resourceCounter.toString(),
+      Id: `${this.idPrefix} ${this.resourceCounter}`,
+      Name: `${this.namePrefix} ${this.resourceCounter}`,
       B25__Resource_Type__c: resourceType.Id,
       B25__Resource_Type__r: resourceType
     }
