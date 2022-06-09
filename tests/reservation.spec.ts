@@ -31,3 +31,25 @@ test('Set resource sets the resource id', () => {
     }
   })
 })
+
+test('Set start datetime sets the start datetime of the reservation', () => {
+  const date = new Date(Date.UTC(2020, 0, 1, 12, 0, 0))
+  const reservation = new Reservation().setStartDatetime(date)
+  const restData = reservation.getRestData()
+  expect(restData).toStrictEqual({
+    reservation: {
+      B25__Start__c: '2020-01-01T12:00:00.000Z'
+    }
+  })
+})
+
+test('Set end datetime sets the end datetime of the reservation', () => {
+  const date = new Date(Date.UTC(2020, 0, 1, 12, 0, 0))
+  const reservation = new Reservation().setEndDatetime(date)
+  const restData = reservation.getRestData()
+  expect(restData).toStrictEqual({
+    reservation: {
+      B25__End__c: '2020-01-01T12:00:00.000Z'
+    }
+  })
+})
