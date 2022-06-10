@@ -33,6 +33,9 @@ export default class ResourceResult {
         return
       }
       matchingResource.addAvailabilitySlotData(slotData)
+      if (matchingResource.isClosed()) {
+        this.resourcesById.delete(slotData.dimensionId)
+      }
     })
   }
 

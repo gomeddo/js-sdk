@@ -77,7 +77,7 @@ test('It adds timelines if requested', async () => {
     method: 'POST',
     body: JSON.stringify(requestBody)
   })
-  expect(result.numberOfresources()).toBe(2)
+  expect(result.numberOfresources()).toBe(1)
   const resourceOne = result.getResourceById('Id 1')
   expect(resourceOne).not.toBeUndefined()
   expect(resourceOne?.getTimeslots().length).toBe(4)
@@ -94,10 +94,7 @@ test('It adds timelines if requested', async () => {
   expect(resourceOne?.getTimeslots()[3].startOfSlot).toBe('2022-01-01T16:00:00.000Z')
   expect(resourceOne?.getTimeslots()[3].endOfSlot).toBe('2022-01-02T00:00:00.000Z')
 
+  // Fully closed so should be filtered out
   const resourceTwo = result.getResourceById('Id 2')
-  expect(resourceTwo).not.toBeUndefined()
-  expect(resourceTwo?.getTimeslots().length).toBe(1)
-  expect(resourceTwo?.getTimeslots()[0].type).toBe(SlotType.CLOSED)
-  expect(resourceTwo?.getTimeslots()[0].startOfSlot).toBe('2022-01-01T00:00:00.000Z')
-  expect(resourceTwo?.getTimeslots()[0].endOfSlot).toBe('2022-01-02T00:00:00.000Z')
+  expect(resourceTwo).toBeUndefined()
 })

@@ -1,4 +1,4 @@
-import { DimensionAvailabilityTimeslots, TimeSlot } from './availability-timeslots'
+import { DimensionAvailabilityTimeslots, SlotType, TimeSlot } from './availability-timeslots'
 import ResourceType from './resource-type'
 import SObject from './s-object'
 
@@ -19,6 +19,10 @@ export default class Resource extends SObject {
 
   public addAvailabilitySlotData (slotData: DimensionAvailabilityTimeslots): void {
     this.timeslots = slotData.timeSlots
+  }
+
+  public isClosed (): boolean {
+    return !this.timeslots.some(timeslot => timeslot.type === SlotType.OPEN)
   }
 
   public getTimeslots (): TimeSlot[] {
