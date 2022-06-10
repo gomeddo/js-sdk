@@ -1,4 +1,5 @@
 import { Enviroment } from '.'
+import { AvailabilityTimeslotsRequestBody, DimensionAvailabilityTimeslots } from './availability-timeslots'
 export default class Booker25API {
   private readonly baseUrl: string
   constructor (enviroment: Enviroment) {
@@ -49,6 +50,17 @@ export default class Booker25API {
     })
     await this.checkResponse(response)
     return await response.json()
+  }
+
+  public async getAvailability (requestBody: AvailabilityTimeslotsRequestBody): Promise<DimensionAvailabilityTimeslots[]> {
+    const url = new URL('availability', this.baseUrl)
+    const response = await fetch(url.href, {
+      method: 'POST',
+      body: JSON.stringify(requestBody)
+    })
+    await this.checkResponse(response)
+    const data = (await response.json()) as any[]
+    return data.map(data => new DimensionAvailabilityTimeslots(data))
   }
 
   private addFieldsToUrl (url: URL, fields: Set<string>): void {
