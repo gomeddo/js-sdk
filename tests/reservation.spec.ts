@@ -2,6 +2,7 @@ import Contact from '../src/s-objects/contact'
 import Lead from '../src/s-objects/lead'
 import Reservation from '../src/s-objects/reservation'
 import Resource from '../src/s-objects/resource'
+import Service from '../src/s-objects/service'
 import { getBlankReservationRestData } from './__utils__/reservation-rest-data'
 import { ResourceGenerator } from './__utils__/resource-responses'
 
@@ -74,5 +75,23 @@ test('Set lead adds a lead to the reservation', () => {
       Email: 'email'
     }
   }
+  expect(restData).toStrictEqual(expectedRestData)
+})
+
+test('Add service reservations to the reservation', () => {
+  const service = new Service({ Id: 'Service Id 1' }, [])
+  const service2 = new Service({ Id: 'Service Id 2' }, [])
+  const reservation = new Reservation()
+  reservation.addService(service, 2)
+  reservation.addService(service2, 12)
+  const restData = reservation.getRestData()
+  const expectedRestData = getBlankReservationRestData()
+  expectedRestData.serviceReservations = [{
+    B25__Service__c: 'Service Id 1',
+    B25__Quantity__c: 2
+  }, {
+    B25__Service__c: 'Service Id 2',
+    B25__Quantity__c: 12
+  }]
   expect(restData).toStrictEqual(expectedRestData)
 })

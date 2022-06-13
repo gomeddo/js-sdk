@@ -2,6 +2,8 @@ import Contact from './contact'
 import Lead from './lead'
 import Resource from './resource'
 import SObject from './s-object'
+import Service from './service'
+import ServiceReservation from './service-reservation'
 
 export default class Reservation extends SObject {
   private startDatetime: Date | null = null
@@ -9,6 +11,7 @@ export default class Reservation extends SObject {
   private resource: Resource | null = null
   private contact: Contact | null = null
   private lead: Lead | null = null
+  private readonly serviceReservations: ServiceReservation[] = []
 
   public setResource (resource: Resource): Reservation {
     this.resource = resource
@@ -35,6 +38,12 @@ export default class Reservation extends SObject {
     return this
   }
 
+  public addService (service: Service, quantity: number): ServiceReservation {
+    const serviceReservation = new ServiceReservation(service, quantity)
+    this.serviceReservations.push(serviceReservation)
+    return serviceReservation
+  }
+
   // TODO any structure or property names here are subject to change
   // The endpoint has not yet been written and will have to be designed later when all requirements are more clear
   public override getRestData (): { [key: string]: any } {
@@ -42,6 +51,7 @@ export default class Reservation extends SObject {
     requestData.reservation = this.getReservationRestData()
     requestData.leadConfig = this.getLeadConfig()
     requestData.contactConfig = this.getContactConfig()
+    requestData.serviceReservations = this.getServiceReservationRestData()
     return requestData
   }
 
@@ -81,6 +91,10 @@ export default class Reservation extends SObject {
     return {
       contact: contactData
     }
+  }
+
+  private getServiceReservationRestData (): Array<{ [key: string]: any }> {
+    return this.serviceReservations.map(serviceReservation => serviceReservation.getRestData())
   }
 
   private getStartdatetimeString (): string | null {
