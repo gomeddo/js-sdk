@@ -1,5 +1,5 @@
 import Booker25, { Enviroment } from '../src/index'
-import Reservation from '../src/reservation'
+import Reservation from '../src/s-objects/reservation'
 import { getBlankReservationRestData } from './__utils__/reservation-rest-data'
 
 test('Booker25 has a version number', () => {

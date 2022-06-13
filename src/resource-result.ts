@@ -1,5 +1,6 @@
 import AvailabilityTimeSlotResponse from './api/availability-reponse'
-import Resource from './resource'
+import ServiceTimeSlotResponse from './api/service-availability-response'
+import Resource from './s-objects/resource'
 
 export default class ResourceResult {
   private readonly resourcesById: Map<string, Resource>
@@ -36,6 +37,16 @@ export default class ResourceResult {
       if (matchingResource.isClosed()) {
         this.resourcesById.delete(slotData.dimensionId)
       }
+    })
+  }
+
+  public addServiceSlotData (dimensionsServiceSlotData: ServiceTimeSlotResponse[]): void {
+    dimensionsServiceSlotData.forEach((slotData) => {
+      const matchingResource = this.resourcesById.get(slotData.dimensionId)
+      if (matchingResource === undefined) {
+        return
+      }
+      matchingResource.addServiceData(slotData)
     })
   }
 

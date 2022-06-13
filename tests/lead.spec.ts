@@ -1,4 +1,4 @@
-import Lead from '../src/lead'
+import Lead from '../src/s-objects/lead'
 
 test('properties are set based on the constructor', () => {
   const lead = new Lead('firstname', 'lastname', 'email')

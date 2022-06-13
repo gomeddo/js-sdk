@@ -1,7 +1,7 @@
-import Contact from '../src/contact'
-import Lead from '../src/lead'
-import Reservation from '../src/reservation'
-import Resource from '../src/resource'
+import Contact from '../src/s-objects/contact'
+import Lead from '../src/s-objects/lead'
+import Reservation from '../src/s-objects/reservation'
+import Resource from '../src/s-objects/resource'
 import { getBlankReservationRestData } from './__utils__/reservation-rest-data'
 import { ResourceGenerator } from './__utils__/resource-responses'
 
