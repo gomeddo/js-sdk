@@ -1,5 +1,7 @@
-import { Enviroment } from '.'
-import { AvailabilityTimeslotsRequestBody, DimensionAvailabilityTimeslots } from './availability-timeslots'
+import { Enviroment } from '..'
+import AvailabilityTimeSlotResponse from './availability-reponse'
+import AvailabilityTimeSlotRequest from './availability-request'
+
 export default class Booker25API {
   private readonly baseUrl: string
   constructor (enviroment: Enviroment) {
@@ -52,7 +54,7 @@ export default class Booker25API {
     return await response.json()
   }
 
-  public async getAvailability (requestBody: AvailabilityTimeslotsRequestBody): Promise<DimensionAvailabilityTimeslots[]> {
+  public async getAvailability (requestBody: AvailabilityTimeSlotRequest): Promise<AvailabilityTimeSlotResponse[]> {
     const url = new URL('availability', this.baseUrl)
     const response = await fetch(url.href, {
       method: 'POST',
@@ -60,7 +62,7 @@ export default class Booker25API {
     })
     await this.checkResponse(response)
     const data = (await response.json()) as any[]
-    return data.map(data => new DimensionAvailabilityTimeslots(data))
+    return data.map(data => new AvailabilityTimeSlotResponse(data))
   }
 
   private addFieldsToUrl (url: URL, fields: Set<string>): void {

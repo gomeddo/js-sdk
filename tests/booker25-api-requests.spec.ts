@@ -1,6 +1,6 @@
 import { Enviroment } from '../src'
-import { AvailabilityTimeslotsRequestBody } from '../src/availability-timeslots'
-import Booker25API from '../src/booker25-api-requests'
+import AvailabilityTimeSlotRequest from '../src/api/availability-request'
+import Booker25API from '../src/api/booker25-api-requests'
 import { getResponse, getSlot } from './__utils__/availability-responses'
 
 beforeEach(() => {
@@ -48,7 +48,7 @@ test('the get availabilities makes the correct request', async () => {
       getResponse(ids, [getSlot(1, 1, 10, 12, 'Open')])
     )
   )
-  const requestBody = new AvailabilityTimeslotsRequestBody(
+  const requestBody = new AvailabilityTimeSlotRequest(
     new Date(Date.UTC(2020, 0, 1)),
     new Date(Date.UTC(2020, 0, 10)),
     ids

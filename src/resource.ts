@@ -1,6 +1,7 @@
-import { DimensionAvailabilityTimeslots, SlotType, TimeSlot } from './availability-timeslots'
+import AvailabilityTimeSlotResponse from './api/availability-reponse'
 import ResourceType from './resource-type'
 import SObject from './s-object'
+import { AvailabilitySlotType, AvailabilityTimeSlot } from './time-slots/availability-time-slot'
 
 export default class Resource extends SObject {
   public name: string
@@ -8,7 +9,7 @@ export default class Resource extends SObject {
   public parentId: string
   public parent: Resource | null = null
   public children: Resource[] = []
-  private timeslots: TimeSlot[] = []
+  private timeSlots: AvailabilityTimeSlot[] = []
 
   constructor (parsedResource: any) {
     super(parsedResource, new Set(['Id', 'Name', 'B25__Resource_Type__r', 'B25__Resource_Type__c', 'B25__Parent__c']))
@@ -17,15 +18,15 @@ export default class Resource extends SObject {
     this.resourceType = new ResourceType(parsedResource.B25__Resource_Type__r)
   }
 
-  public addAvailabilitySlotData (slotData: DimensionAvailabilityTimeslots): void {
-    this.timeslots = slotData.timeSlots
+  public addAvailabilitySlotData (slotData: AvailabilityTimeSlotResponse): void {
+    this.timeSlots = slotData.timeSlots
   }
 
   public isClosed (): boolean {
-    return !this.timeslots.some(timeslot => timeslot.type === SlotType.OPEN)
+    return !this.timeSlots.some(timeSlot => timeSlot.type === AvailabilitySlotType.OPEN)
   }
 
-  public getTimeslots (): TimeSlot[] {
-    return this.timeslots
+  public getTimeSlots (): AvailabilityTimeSlot[] {
+    return this.timeSlots
   }
 }

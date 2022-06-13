@@ -1,4 +1,4 @@
-import Booker25API from './booker25-api-requests'
+import Booker25API from './api/booker25-api-requests'
 import ResourceRequest from './resource-request'
 import Reservation from './reservation'
 

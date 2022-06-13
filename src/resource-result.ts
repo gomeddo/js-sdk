@@ -1,4 +1,4 @@
-import { DimensionAvailabilityTimeslots } from './availability-timeslots'
+import AvailabilityTimeSlotResponse from './api/availability-reponse'
 import Resource from './resource'
 
 export default class ResourceResult {
@@ -26,7 +26,7 @@ export default class ResourceResult {
     return this
   }
 
-  public addAvailabilitySlotData (dimensionsSlotData: DimensionAvailabilityTimeslots[]): void {
+  public addAvailabilitySlotData (dimensionsSlotData: AvailabilityTimeSlotResponse[]): void {
     dimensionsSlotData.forEach((slotData) => {
       const matchingResource = this.resourcesById.get(slotData.dimensionId)
       if (matchingResource === undefined) {
