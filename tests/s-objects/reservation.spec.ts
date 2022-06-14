@@ -1,10 +1,10 @@
-import Contact from '../src/s-objects/contact'
-import Lead from '../src/s-objects/lead'
-import Reservation from '../src/s-objects/reservation'
-import Resource from '../src/s-objects/resource'
-import Service from '../src/s-objects/service'
-import { getBlankReservationRestData } from './__utils__/reservation-rest-data'
-import { ResourceGenerator } from './__utils__/resource-responses'
+import Contact from '../../src/s-objects/contact'
+import Lead from '../../src/s-objects/lead'
+import Reservation from '../../src/s-objects/reservation'
+import Resource from '../../src/s-objects/resource'
+import Service from '../../src/s-objects/service'
+import { getBlankReservationRestData } from '../__utils__/reservation-rest-data'
+import { ResourceGenerator } from '../__utils__/resource-responses'
 
 test('You can set custom properties', () => {
   const reservation = new Reservation()

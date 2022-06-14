@@ -1,4 +1,4 @@
-import { validateSalesforceId } from '../src/utils/salesforce-utils'
+import { validateSalesforceId } from '../../src/utils/salesforce-utils'
 
 test('Allows through correct salesforce ids', () => {
   expect(() => validateSalesforceId('a0i1j000006uxAmAAI')).not.toThrow()

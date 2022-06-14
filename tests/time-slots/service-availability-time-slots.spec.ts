@@ -1,5 +1,5 @@
-import ServiceTimeSlotResponse from '../src/api/service-availability-response'
-import { getServiceResponse, getServiceSlot } from './__utils__/availability-responses'
+import ServiceTimeSlotResponse from '../../src/api/service-availability-response'
+import { getServiceResponse, getServiceSlot } from '../__utils__/availability-responses'
 
 test('It parses the slots into timelines', async () => {
   const result = new ServiceTimeSlotResponse(

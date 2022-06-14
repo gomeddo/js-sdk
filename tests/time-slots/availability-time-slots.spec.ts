@@ -1,6 +1,6 @@
-import AvailabilityTimeSlotResponse from '../src/api/availability-reponse'
-import { AvailabilitySlotType } from '../src/time-slots/availability-time-slot'
-import { getAvailabilityResponse, getAvailabilitySlot } from './__utils__/availability-responses'
+import AvailabilityTimeSlotResponse from '../../src/api/availability-reponse'
+import { AvailabilitySlotType } from '../../src/time-slots/availability-time-slot'
+import { getAvailabilityResponse, getAvailabilitySlot } from '../__utils__/availability-responses'
 
 test('It parses the slots into timelines', async () => {
   const result = new AvailabilityTimeSlotResponse(

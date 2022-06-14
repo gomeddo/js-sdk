@@ -1,7 +1,7 @@
-import { Enviroment } from '../src'
-import AvailabilityTimeSlotRequest from '../src/api/availability-request'
-import Booker25API from '../src/api/booker25-api-requests'
-import { getAvailabilityResponse, getAvailabilitySlot } from './__utils__/availability-responses'
+import { Enviroment } from '../../src'
+import AvailabilityTimeSlotRequest from '../../src/api/availability-request'
+import Booker25API from '../../src/api/booker25-api-requests'
+import { getAvailabilityResponse, getAvailabilitySlot } from '../__utils__/availability-responses'
 
 const dummyId = 'a0i1j000006uxAmAAI'
 

@@ -7,9 +7,13 @@ import AvailabilityTimeSlotRequest from '../src/api/availability-request'
 import { AvailabilitySlotType } from '../src/time-slots/availability-time-slot'
 import ServiceTimeSlotRequest from '../src/api/service-availability-request'
 
+const dummyId = 'a0i1j000006uxAmAAI'
+const secondDummyId = 'a0i1j000006uxBQAAY'
 const baseResourceRequestUrl = 'https://api.booker25.com/api/v3/proxy/resources'
 const availabilityRequestUrl = 'https://api.booker25.com/api/v3/proxy/availability'
 const serviceRequestUrl = 'https://api.booker25.com/api/v3/proxy/serviceAvailability'
+const childResourceUrl = (parentId: string): string => `https://api.booker25.com/api/v3/proxy/resources/${parentId}/children`
+
 beforeEach(() => {
   fetchMock.resetMocks()
 })
@@ -160,4 +164,43 @@ test('It adds service timelines if requested', async () => {
   expect(serviceOneOnResourceTwo).not.toBeUndefined()
   const serviceTwoOnResourceTwo = resourceTwo?.getService('Service Name 2')
   expect(serviceTwoOnResourceTwo).toBeUndefined()
+})
+
+test('It requests parent scope if requested', async () => {
+  const resourceGenerator = new ResourceGenerator('Id', 'Name')
+  const resourceFetchMock = fetchMock.once(JSON.stringify(resourceGenerator.getResourceArray(2)))
+
+  await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+    .includeAllResourcesAt(dummyId)
+    .getResults()
+  expect(resourceFetchMock).toBeCalledWith(`${childResourceUrl(dummyId)}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`)
+})
+
+test('It requests parent scope multiple times once for each parent', async () => {
+  const resourceGenerator = new ResourceGenerator('Id', 'Name')
+  const resourceFetchMock = fetchMock.doMock(JSON.stringify(resourceGenerator.getResourceArray(2)))
+
+  await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+    .includeAllResourcesAt(dummyId)
+    .includeAllResourcesAt(secondDummyId)
+    .getResults()
+  expect(resourceFetchMock).toBeCalledWith(`${childResourceUrl(dummyId)}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`)
+  expect(resourceFetchMock).toBeCalledWith(`${childResourceUrl(secondDummyId)}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`)
+})
+
+test('Duplicate results are filtered out', async () => {
+  const resourceGenerator = new ResourceGenerator('Id', 'Name')
+  // Both requests get the same result of two resources
+  const resourceFetchMock = fetchMock.doMock(JSON.stringify(resourceGenerator.getResourceArray(2)))
+
+  const result = await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+    .includeAllResourcesAt(dummyId)
+    .includeAllResourcesAt(secondDummyId)
+    .getResults()
+  // Call was ran twice
+  expect(resourceFetchMock).toBeCalledWith(`${childResourceUrl(dummyId)}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`)
+  expect(resourceFetchMock).toBeCalledWith(`${childResourceUrl(secondDummyId)}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`)
+
+  // Only two unique resources are returned
+  expect(result.numberOfresources()).toBe(2)
 })
