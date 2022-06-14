@@ -49,8 +49,8 @@ test('It parses the result into resources', async () => {
   const result = await resourceRequest.getResults()
   expect(mock).toBeCalledWith(`${baseResourceRequestUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`)
   expect(result.numberOfresources()).toBe(2)
-  expect(result.getResourceById('Id 1')).not.toBeUndefined()
-  expect(result.getResourceById('Id 2')).not.toBeUndefined()
+  expect(result.getResource('Name 1')).not.toBeUndefined()
+  expect(result.getResource('Name 2')).not.toBeUndefined()
 })
 
 test('It adds timelines if requested', async () => {
@@ -60,13 +60,13 @@ test('It adds timelines if requested', async () => {
   ))
   const availabilityFetchMock = fetchMock.once(JSON.stringify(
     [
-      getAvailabilityResponse(['Id 1'], [
+      getAvailabilityResponse(['1'], [
         getAvailabilitySlot(1, 0, 1, 8, 'Closed'),
         getAvailabilitySlot(1, 8, 1, 16, 'Open'),
         getAvailabilitySlot(1, 16, 2, 0, 'Closed'),
         getAvailabilitySlot(1, 6, 1, 12, 'Reservation')
       ])[0],
-      getAvailabilityResponse(['Id 2'], [
+      getAvailabilityResponse(['2'], [
         getAvailabilitySlot(1, 0, 2, 0, 'Closed')
       ])[0]
     ]
@@ -85,7 +85,7 @@ test('It adds timelines if requested', async () => {
     body: JSON.stringify(requestBody)
   })
   expect(result.numberOfresources()).toBe(1)
-  const resourceOne = result.getResourceById('Id 1')
+  const resourceOne = result.getResource('Name 1')
   expect(resourceOne).not.toBeUndefined()
   expect(resourceOne?.getTimeSlots().length).toBe(4)
   expect(resourceOne?.getTimeSlots()[0].type).toBe(AvailabilitySlotType.CLOSED)
@@ -102,23 +102,23 @@ test('It adds timelines if requested', async () => {
   expect(resourceOne?.getTimeSlots()[3].endOfSlot).toBe('2022-01-02T00:00:00.000Z')
 
   // Fully closed so should be filtered out
-  const resourceTwo = result.getResourceById('Id 2')
+  const resourceTwo = result.getResource('Name 2')
   expect(resourceTwo).toBeUndefined()
 })
 
 test('It adds service timelines if requested', async () => {
   const resourceGenerator = new ResourceGenerator('Id', 'Name')
   const resourceFetchMock = fetchMock.once(JSON.stringify(resourceGenerator.getResourceArray(2)))
-  const availabilityFetchMock = fetchMock.once(JSON.stringify(getAvailabilityResponse(['Id 1', 'Id 2'], [
+  const availabilityFetchMock = fetchMock.once(JSON.stringify(getAvailabilityResponse(['1', '2'], [
     getAvailabilitySlot(1, 0, 2, 0, 'Open')
   ])))
   const serviceAvailabilityFetchMock = fetchMock.once(JSON.stringify(
     [
-      getServiceResponse(['Id 1'], ['Service Id 1', 'Service Id 2'], [
+      getServiceResponse(['1'], ['1', '2'], [
         getServiceSlot(1, 0, 2, 0, 'Availability', 10),
         getServiceSlot(1, 10, 1, 16, 'Reservation', 5)
       ])[0],
-      getServiceResponse(['Id 2'], ['Service Id 1'], [])[0]
+      getServiceResponse(['2'], ['1'], [])[0]
     ]
   ))
 
@@ -139,10 +139,10 @@ test('It adds service timelines if requested', async () => {
     body: JSON.stringify(requestBody)
   })
   expect(result.numberOfresources()).toBe(2)
-  const resourceOne = result.getResourceById('Id 1')
+  const resourceOne = result.getResource('Name 1')
   expect(resourceOne).not.toBeUndefined()
   expect(resourceOne?.getAvailableServices().length).toBe(2)
-  const serviceOne = resourceOne?.getServiceById('Service Id 1')
+  const serviceOne = resourceOne?.getService('Service Name 1')
   expect(serviceOne?.timeSlots[0].remainingQuantity).toBe(10)
   expect(serviceOne?.timeSlots[0].startOfSlot).toBe('2022-01-01T00:00:00.000Z')
   expect(serviceOne?.timeSlots[0].endOfSlot).toBe('2022-01-01T10:00:00.000Z')
@@ -152,12 +152,12 @@ test('It adds service timelines if requested', async () => {
   expect(serviceOne?.timeSlots[2].remainingQuantity).toBe(10)
   expect(serviceOne?.timeSlots[2].startOfSlot).toBe('2022-01-01T16:00:00.000Z')
   expect(serviceOne?.timeSlots[2].endOfSlot).toBe('2022-01-02T00:00:00.000Z')
-  const serviceTwo = resourceOne?.getServiceById('Service Id 2')
+  const serviceTwo = resourceOne?.getService('Service Name 2')
   expect(serviceTwo).not.toBeUndefined()
 
-  const resourceTwo = result.getResourceById('Id 2')
-  const serviceOneOnResourceTwo = resourceTwo?.getServiceById('Service Id 1')
+  const resourceTwo = result.getResource('Name 2')
+  const serviceOneOnResourceTwo = resourceTwo?.getService('Service Name 1')
   expect(serviceOneOnResourceTwo).not.toBeUndefined()
-  const serviceTwoOnResourceTwo = resourceTwo?.getServiceById('Service Id 2')
+  const serviceTwoOnResourceTwo = resourceTwo?.getService('Service Name 2')
   expect(serviceTwoOnResourceTwo).toBeUndefined()
 })

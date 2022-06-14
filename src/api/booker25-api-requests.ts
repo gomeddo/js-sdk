@@ -1,4 +1,5 @@
 import { Enviroment } from '..'
+import { isSalesforceId } from '../utils/salesforce-utils'
 import AvailabilityTimeSlotResponse from './availability-reponse'
 import AvailabilityTimeSlotRequest from './availability-request'
 import ServiceTimeSlotRequest from './service-availability-request'
@@ -25,7 +26,11 @@ export default class Booker25API {
 
   public async getAllResources (type: string | undefined, fields: Set<string>): Promise<any[]> {
     const url = new URL('resources', this.baseUrl)
+
     if (type !== undefined) {
+      if (!isSalesforceId(type)) {
+        throw new Error('Only 18 character salesforce ids are supported for type')
+      }
       url.searchParams.append('resourceType', type)
     }
     this.addFieldsToUrl(url, fields)
@@ -35,8 +40,14 @@ export default class Booker25API {
   }
 
   public async getAllChildResources (parentId: string, type: string | undefined, fields: Set<string>): Promise<any[]> {
+    if (!isSalesforceId(parentId)) {
+      throw new Error('Only 18 character salesforce ids are supported for parent')
+    }
     const url = new URL(`resources/${parentId}/children`, this.baseUrl)
     if (type !== undefined) {
+      if (!isSalesforceId(type)) {
+        throw new Error('Only 18 character salesforce ids are supported for type')
+      }
       url.searchParams.append('resourceType', type)
     }
     this.addFieldsToUrl(url, fields)
@@ -86,7 +97,7 @@ export default class Booker25API {
     if (response.ok) {
       return
     }
-    throw new RequestException((await response.json()) as Booker25ApiError)
+    throw new RequestError((await response.json()) as Booker25ApiError)
   }
 }
 
@@ -98,11 +109,11 @@ class Booker25ApiError {
   fields: string[] = []
 }
 
-class RequestException extends Error {
+class RequestError extends Error {
   apiError: Booker25ApiError
   constructor (apiError: Booker25ApiError) {
     super(apiError.userMessage)
     this.apiError = apiError
-    Object.setPrototypeOf(this, RequestException.prototype)
+    Object.setPrototypeOf(this, RequestError.prototype)
   }
 }

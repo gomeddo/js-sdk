@@ -3,7 +3,7 @@ import { getServiceResponse, getServiceSlot } from './__utils__/availability-res
 
 test('It parses the slots into timelines', async () => {
   const result = new ServiceTimeSlotResponse(
-    getServiceResponse(['Id 1'], ['Service Id 1'], [
+    getServiceResponse(['1'], ['1'], [
       getServiceSlot(1, 0, 2, 0, 'Availability', 10),
       getServiceSlot(1, 8, 1, 12, 'Reservation', 5),
       getServiceSlot(1, 10, 1, 14, 'Reservation', 5),

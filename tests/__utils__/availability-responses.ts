@@ -3,7 +3,7 @@ const getAvailabilityResponse = (dimensionIds: string[], slots: any[]): any[] =>
     return {
       startDateTime: '2022-01-01T00:00:00.000Z',
       endDateTime: '2022-01-10T00:00:00.000Z',
-      dimensionId: dimensionId,
+      dimensionId: `Id ${dimensionId}`,
       timeSlots: slots
     }
   })
@@ -24,9 +24,9 @@ const getServiceResponse = (dimensionIds: string[], serviceIds: string[], slots:
     return {
       startDateTime: '2022-01-01T00:00:00.000Z',
       endDateTime: '2022-01-10T00:00:00.000Z',
-      dimensionId: dimensionId,
+      dimensionId: `Id ${dimensionId}`,
       services: serviceIds.map(serviceId => ({
-        service: { Id: serviceId },
+        service: { Id: `Service Id ${serviceId}`, Name: `Service Name ${serviceId}` },
         timeSlots: slots
       }))
     }

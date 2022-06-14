@@ -4,6 +4,7 @@ import SObject from './s-object'
 import { AvailabilitySlotType, AvailabilityTimeSlot } from '../time-slots/availability-time-slot'
 import Service from './service'
 import ServiceTimeSlotResponse from '../api/service-availability-response'
+import { isSalesforceId } from '../utils/salesforce-utils'
 
 export default class Resource extends SObject {
   public name: string
@@ -41,7 +42,10 @@ export default class Resource extends SObject {
     return [...this.services.values()].filter(service => service.isAvailable())
   }
 
-  public getServiceById (serviceId: string): Service | undefined {
-    return this.services.get(serviceId)
+  public getService (idOrName: string): Service | undefined {
+    if (isSalesforceId(idOrName)) {
+      return this.services.get(idOrName)
+    }
+    return [...this.services.values()].find(service => service.name === idOrName)
   }
 }

@@ -4,7 +4,7 @@ import { getAvailabilityResponse, getAvailabilitySlot } from './__utils__/availa
 
 test('It parses the slots into timelines', async () => {
   const result = new AvailabilityTimeSlotResponse(
-    getAvailabilityResponse(['Id 1'], [
+    getAvailabilityResponse(['1'], [
       getAvailabilitySlot(1, 0, 1, 8, 'Closed'),
       getAvailabilitySlot(1, 8, 1, 16, 'Open'),
       getAvailabilitySlot(1, 16, 2, 0, 'Closed'),

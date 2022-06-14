@@ -1,6 +1,7 @@
 import AvailabilityTimeSlotResponse from './api/availability-reponse'
 import ServiceTimeSlotResponse from './api/service-availability-response'
 import Resource from './s-objects/resource'
+import { isSalesforceId } from './utils/salesforce-utils'
 
 export default class ResourceResult {
   private readonly resourcesById: Map<string, Resource>
@@ -58,11 +59,10 @@ export default class ResourceResult {
     return [...this.resourcesById.keys()]
   }
 
-  public getResourceById (id: string): Resource | undefined {
-    return this.resourcesById.get(id)
-  }
-
-  public getResourceByName (name: string): Resource | undefined {
-    return [...this.resourcesById.values()].find(resource => resource.name === name)
+  public getResource (idOrName: string): Resource | undefined {
+    if (isSalesforceId(idOrName)) {
+      return this.resourcesById.get(idOrName)
+    }
+    return [...this.resourcesById.values()].find(resource => resource.name === idOrName)
   }
 }
