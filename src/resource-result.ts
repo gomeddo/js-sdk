@@ -1,6 +1,7 @@
 import AvailabilityTimeSlotResponse from './api/availability-reponse'
 import ServiceTimeSlotResponse from './api/service-availability-response'
 import Resource from './s-objects/resource'
+import { Condition } from './s-objects/s-object'
 import { isSalesforceId } from './utils/salesforce-utils'
 
 export default class ResourceResult {
@@ -48,6 +49,18 @@ export default class ResourceResult {
         return
       }
       matchingResource.addServiceData(slotData)
+    })
+  }
+
+  public filterOnConditions (conditions: Condition[][]): void {
+    if (conditions.length === 0) {
+      return
+    }
+    this.resourcesById.forEach((resource) => {
+      const shouldBeKept = conditions.some(conditions => conditions.every(condition => condition.matches(resource)))
+      if (!shouldBeKept) {
+        this.resourcesById.delete(resource.id)
+      }
     })
   }
 

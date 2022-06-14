@@ -24,13 +24,3 @@ test('Custom properties are loaded and can be accessed', () => {
   const resource = new Resource(parsedResourceJSON)
   expect(resource.getCustomProperty('Is_Wheelchair_Accessible__c')).toBe(true)
 })
-
-test('Standard properties are not custom properties', () => {
-  const resourceGenerator = new ResourceGenerator('Id', 'Name')
-  const parsedResourceJSON = resourceGenerator.getResource()
-  const resource = new Resource(parsedResourceJSON)
-  expect(resource.getCustomProperty('Id')).toBeUndefined()
-  expect(resource.getCustomProperty('Name')).toBeUndefined()
-  expect(resource.getCustomProperty('B25__Resource_Type__c')).toBeUndefined()
-  expect(resource.getCustomProperty('B25__Resource_Type__r')).toBeUndefined()
-})

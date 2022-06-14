@@ -33,3 +33,40 @@ export default class SObject {
     return sObjectData
   }
 }
+
+enum Opperator {
+  EQUAL,
+  NOT_EQUAL,
+  LESS_THAN,
+  GREATER_THAN
+}
+
+class Condition {
+  field: string
+  opperator: Opperator
+  value: any
+  constructor (field: string, opperator: Opperator, value: any) {
+    this.field = field
+    this.opperator = opperator
+    this.value = value
+  }
+
+  matches (resource: SObject): boolean {
+    const value = resource.getCustomProperty(this.field)
+    if (this.opperator === Opperator.EQUAL) {
+      return value === this.value
+    }
+    if (this.opperator === Opperator.LESS_THAN) {
+      return value < this.value
+    }
+    if (this.opperator === Opperator.GREATER_THAN) {
+      return value > this.value
+    }
+    return value !== this.value
+  }
+}
+
+export {
+  Condition,
+  Opperator
+}
