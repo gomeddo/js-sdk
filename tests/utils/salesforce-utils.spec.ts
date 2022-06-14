@@ -1,15 +1,15 @@
 import { validateSalesforceId } from '../../src/utils/salesforce-utils'
+import { dummyId0, dummyId1, dummyId2, dummyId3, dummyId4, dummyId5, dummyId6, dummyId7, dummyId8, dummyId9 } from '../__utils__/salesforce-dummy-ids'
 
 test('Allows through correct salesforce ids', () => {
-  expect(() => validateSalesforceId('a0i1j000006uxAmAAI')).not.toThrow()
-  expect(() => validateSalesforceId('a0i1j000006uxBQAAY')).not.toThrow()
-  expect(() => validateSalesforceId('a0i1j000006uxGcAAI')).not.toThrow()
-  expect(() => validateSalesforceId('a0i1j000006uxbJAAQ')).not.toThrow()
-  expect(() => validateSalesforceId('a0c1j000003kyYdAAI')).not.toThrow()
-  expect(() => validateSalesforceId('0031j00001M1z58AAB')).not.toThrow()
-  expect(() => validateSalesforceId('0011j00001PHt6MAAT')).not.toThrow()
-  expect(() => validateSalesforceId('0011j00001OjFjVAAV')).not.toThrow()
-  expect(() => validateSalesforceId('0051j00000AhgOUAAZ')).not.toThrow()
-  expect(() => validateSalesforceId('0051j00000AipAyAAJ')).not.toThrow()
-  expect(() => validateSalesforceId('0051j00000AhgOaAAJ')).not.toThrow()
+  expect(() => validateSalesforceId(dummyId0)).not.toThrow()
+  expect(() => validateSalesforceId(dummyId1)).not.toThrow()
+  expect(() => validateSalesforceId(dummyId2)).not.toThrow()
+  expect(() => validateSalesforceId(dummyId3)).not.toThrow()
+  expect(() => validateSalesforceId(dummyId4)).not.toThrow()
+  expect(() => validateSalesforceId(dummyId5)).not.toThrow()
+  expect(() => validateSalesforceId(dummyId6)).not.toThrow()
+  expect(() => validateSalesforceId(dummyId7)).not.toThrow()
+  expect(() => validateSalesforceId(dummyId8)).not.toThrow()
+  expect(() => validateSalesforceId(dummyId9)).not.toThrow()
 })
