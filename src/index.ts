@@ -1,6 +1,7 @@
 import Booker25API from './api/booker25-api-requests'
 import ResourceRequest from './resource-request'
 import Reservation from './s-objects/reservation'
+import { SFServiceReservation } from './s-objects/service-reservation'
 
 enum Enviroment {
   DEVELOP,
@@ -22,7 +23,7 @@ class Booker25 {
   }
 
   public async saveReservation (reservation: Reservation): Promise<Reservation> {
-    const result = await this.api.saveReservation(JSON.stringify(reservation.getRestData())) as any
+    const result = await this.api.saveReservation(reservation.getReservationSaveRequest()) as any
     const outputReservation = new Reservation()
     Object.entries(result.reservation).forEach(([fieldName, fieldValue]) => {
       outputReservation.setCustomProperty(fieldName, fieldValue)
@@ -33,9 +34,9 @@ class Booker25 {
   // TODO what should we do with the new pricing fields in the extension package.
   // If we calculate them here and you don't have it installed the save will fail.
   public async calculatePrice (reservation: Reservation): Promise<Reservation> {
-    const updatedPriceCalculationData = await this.api.calculatePrice(JSON.stringify(reservation.getPriceCalculationData()))
+    const updatedPriceCalculationData = await this.api.calculatePrice(reservation.getPriceCalculationData())
     Object.entries(updatedPriceCalculationData.reservation).forEach(([fieldName, value]) => reservation.setCustomProperty(fieldName, value))
-    updatedPriceCalculationData.serviceReservations.forEach((serviceReservationData: any, index: number) => {
+    updatedPriceCalculationData.serviceReservations.forEach((serviceReservationData: Partial<SFServiceReservation>, index: number) => {
       Object.entries(serviceReservationData).forEach(([fieldName, value]) => reservation.serviceReservations[index].setCustomProperty(fieldName, value))
     })
     const totalServiceCost = reservation.serviceReservations.reduce((serviceCosts, serviceReservation) => {

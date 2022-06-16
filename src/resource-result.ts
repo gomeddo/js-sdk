@@ -1,16 +1,16 @@
 import AvailabilityTimeSlotResponse from './api/availability-reponse'
 import ServiceTimeSlotResponse from './api/service-availability-response'
-import Resource from './s-objects/resource'
+import Resource, { SFResource } from './s-objects/resource'
 import { Condition } from './s-objects/s-object'
 import { isSalesforceId } from './utils/salesforce-utils'
 
 export default class ResourceResult {
   private readonly resourcesById: Map<string, Resource>
 
-  constructor (parsedResources: any[]) {
+  constructor (sfResourcedata: SFResource[]) {
     // Map all resources to their ids
-    this.resourcesById = parsedResources.reduce((map, parsedResource) => {
-      const resource = new Resource(parsedResource)
+    this.resourcesById = sfResourcedata.reduce((map, sfResourcedata) => {
+      const resource = new Resource(sfResourcedata)
       map.set(resource.id, resource)
       return map
     }, new Map())
@@ -19,6 +19,9 @@ export default class ResourceResult {
   public computeTreeStructure (): ResourceResult {
     // Go through all of the resources and set the parent and children fields
     this.resourcesById.forEach((resource, id, map) => {
+      if (resource.parentId === null) {
+        return
+      }
       const parentResource = map.get(resource.parentId)
       if (parentResource === undefined) {
         return

@@ -1,9 +1,11 @@
+import ReservationPriceCalculationRequest from '../api/reservation-price-calculation-request'
+import { ContactConfig, LeadConfig, ReservationSaveRequest } from '../api/reservation-save-request'
 import Contact from './contact'
 import Lead from './lead'
 import Resource from './resource'
-import SObject from './s-object'
+import SObject, { CustomSFSObject } from './s-object'
 import Service from './service'
-import ServiceReservation from './service-reservation'
+import ServiceReservation, { SFServiceReservation } from './service-reservation'
 
 export default class Reservation extends SObject {
   private startDatetime: Date | null = null
@@ -46,29 +48,29 @@ export default class Reservation extends SObject {
 
   // TODO any structure or property names here are subject to change
   // The endpoint has not yet been written and will have to be designed later when all requirements are more clear
-  public override getRestData (): { [key: string]: any } {
-    const requestData: { [key: string]: any } = {}
-    requestData.reservation = this.getReservationRestData()
-    requestData.leadConfig = this.getLeadConfig()
-    requestData.contactConfig = this.getContactConfig()
-    requestData.serviceReservations = this.getServiceReservationRestData()
-    return requestData
+  public getReservationSaveRequest (): ReservationSaveRequest {
+    return new ReservationSaveRequest(
+      this.getSFSObject(),
+      this.getLeadConfig(),
+      this.getContactConfig(),
+      this.getServiceReservationRestData()
+    )
   }
 
-  public getPriceCalculationData (): { [key: string]: any } {
-    const requestData: { [key: string]: any } = {}
-    requestData.reservation = this.getReservationRestData()
-    requestData.serviceReservations = this.getServiceReservationRestData()
-    requestData.serviceCosts = this.serviceReservations.reduce((serviceCosts, serviceReservation) => {
-      const quantity = serviceReservation.quantity ?? 0
-      const unitPrice = serviceReservation.unitPrice ?? 0
-      return serviceCosts + (quantity * unitPrice)
-    }, 0)
-    return requestData
+  public getPriceCalculationData (): ReservationPriceCalculationRequest {
+    return new ReservationPriceCalculationRequest(
+      this.getSFSObject(),
+      this.getServiceReservationRestData(),
+      this.serviceReservations.reduce((serviceCosts, serviceReservation) => {
+        const quantity = serviceReservation.quantity ?? 0
+        const unitPrice = serviceReservation.unitPrice ?? 0
+        return serviceCosts + (quantity * unitPrice)
+      }, 0)
+    )
   }
 
-  private getReservationRestData (): { [key: string]: any } {
-    const reservationData = super.getRestData()
+  public override getSFSObject (): Partial<SFReservation> {
+    const reservationData = super.getSFSObject() as Partial<SFReservation>
     if (this.resource !== null) {
       reservationData.B25__Resource__c = this.resource.id
     }
@@ -83,30 +85,24 @@ export default class Reservation extends SObject {
 
   // TODO this is a more complex object because it is anticipated that it will include info
   // On how to link the lead and potential duplicate rule use.
-  private getLeadConfig (): { [key: string]: any } | null {
+  private getLeadConfig (): LeadConfig | null {
     if (this.lead === null) {
       return null
     }
-    const leadData = this.lead.getRestData()
-    return {
-      lead: leadData
-    }
+    return new LeadConfig(this.lead.getSFSObject())
   }
 
   // TODO this is a more complex object because it is anticipated that it will include info
   // On how to link the contact and potential duplicate rule use.
-  private getContactConfig (): { [key: string]: any } | null {
+  private getContactConfig (): ContactConfig | null {
     if (this.contact === null) {
       return null
     }
-    const contactData = this.contact.getRestData()
-    return {
-      contact: contactData
-    }
+    return new ContactConfig(this.contact.getSFSObject())
   }
 
-  private getServiceReservationRestData (): Array<{ [key: string]: any }> {
-    return this.serviceReservations.map(serviceReservation => serviceReservation.getRestData())
+  private getServiceReservationRestData (): Array<Partial<SFServiceReservation>> {
+    return this.serviceReservations.map(serviceReservation => serviceReservation.getSFSObject())
   }
 
   private getStartdatetimeString (): string | null {
@@ -122,4 +118,73 @@ export default class Reservation extends SObject {
     }
     return this.endDatetime.toISOString()
   }
+}
+
+interface SFReservation extends CustomSFSObject {
+  B25__ABRCompositeKey__c?: string | null
+  B25__ABRSerialNr__c?: number | null
+  B25__ABRSerialPartNr__c?: number | null
+  B25__Account__c?: string | null
+  B25__Additional_Attendees__c?: string | null
+  B25__Additional_Google_Data__c?: string | null
+  B25__Additional_Outlook_Data__c?: string | null
+  B25__AutomatedBookingRule__c?: string | null
+  B25__Base_Price__c?: number | null
+  B25__Calculation_Method__c?: string | null
+  B25__Contact__c?: string | null
+  B25__End__c?: string | null
+  B25__End_Buffer_Duration__c?: number | null
+  B25__End_Date__c?: string | null
+  B25__End_GMT__c?: string | null
+  B25__End_Local_DateTime__c?: string | null
+  B25__EndLocal__c?: string | null
+  B25__Event_Id__c?: string | null
+  B25__Google_Id__c?: string | null
+  B25__Group__c?: string | null
+  B25__Has_Conflicts__c?: boolean | null
+  B25__Has_Resource_Conflicts__c?: boolean | null
+  B25__Has_Staff_Conflicts__c?: boolean | null
+  B25__Hover__c?: string | null
+  B25__Info__c?: string | null
+  B25__IsUnassigned__c?: boolean | null
+  B25__Lead__c?: string | null
+  B25__Local_End_Time__c?: string | null
+  B25__Local_Start_Time__c?: string | null
+  B25__MaxCapacity__c?: number | null
+  B25__Notes__c?: string | null
+  B25__Opportunity__c?: string | null
+  B25__OpportunityLineItem__c?: string | null
+  B25__Outlook_Series_Master_Id__c?: string | null
+  B25__Price__c?: number | null
+  B25__Quantity__c?: number | null
+  B25__Recurring_Reservation__c?: string | null
+  B25__Reservation_Template__c?: string | null
+  B25__Reservation_Type__c?: string | null
+  B25__Resource__c?: string | null
+  B25__ResourceName__c?: string | null
+  B25__ResourceTimezone__c?: string | null
+  B25__Sample_Custom_Field__c?: string | null
+  B25__SelectedLayout__c?: string | null
+  B25__SelectedTimeframe__c?: string | null
+  B25__Service_Costs__c?: number | null
+  B25__Skip_Subtotal_Calculation__c?: boolean | null
+  B25__Staff__c?: string | null
+  B25__Start__c?: string | null
+  B25__Start_Buffer_Duration__c?: number | null
+  B25__Start_Date__c?: string | null
+  B25__Start_GMT__c?: string | null
+  B25__Start_Local_DateTime__c?: string | null
+  B25__StartLocal__c?: string | null
+  B25__Status__c?: string | null
+  B25__Subtotal__c?: number | null
+  B25__Title__c?: string | null
+  B25__Total_Price__c?: number | null
+  B25__Unique_Outlook_Id__c?: string | null
+  B25__User__c?: string | null
+  B25__Visit__c?: string | null
+  B25__What_Is_This__c?: string | null
+}
+
+export {
+  SFReservation
 }

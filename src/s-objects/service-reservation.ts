@@ -1,4 +1,4 @@
-import SObject from './s-object'
+import SObject, { CustomSFSObject } from './s-object'
 import Service from './service'
 
 export default class ServiceReservation extends SObject {
@@ -13,11 +13,26 @@ export default class ServiceReservation extends SObject {
     this.unitPrice = this.service.getCustomProperty('B25__Price__c')
   }
 
-  public getRestData (): { [key: string]: any } {
-    const restData = super.getRestData()
+  public override getSFSObject (): Partial<SFServiceReservation> {
+    const restData = super.getSFSObject() as Partial<SFServiceReservation>
     restData.B25__Quantity__c = this.quantity
     restData.B25__Service__c = this.service.id
     restData.B25__Unit_Price__c = this.unitPrice
     return restData
   }
+}
+
+interface SFServiceReservation extends CustomSFSObject {
+  B25__Key__c?: string | null
+  B25__Notes__c?: string | null
+  B25__Quantity__c?: number | null
+  B25__Reservation__c?: string | null
+  B25__Service__c?: string | null
+  B25__Subtotal__c?: number | null
+  B25__Time__c?: string | null
+  B25__Unit_Price__c?: number | null
+}
+
+export {
+  SFServiceReservation
 }

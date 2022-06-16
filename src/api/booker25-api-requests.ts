@@ -1,7 +1,10 @@
 import { Enviroment } from '..'
+import { SFResource } from '../s-objects/resource'
 import { isSalesforceId } from '../utils/salesforce-utils'
 import AvailabilityTimeSlotResponse from './availability-reponse'
 import AvailabilityTimeSlotRequest from './availability-request'
+import ReservationPriceCalculationRequest from './reservation-price-calculation-request'
+import { ReservationSaveRequest } from './reservation-save-request'
 import ServiceTimeSlotRequest from './service-availability-request'
 import ServiceTimeSlotResponse from './service-availability-response'
 
@@ -24,7 +27,7 @@ export default class Booker25API {
     }
   }
 
-  public async getAllResources (type: string | undefined, fields: Set<string>): Promise<any[]> {
+  public async getAllResources (type: string | undefined, fields: Set<string>): Promise<SFResource[]> {
     const url = new URL('resources', this.baseUrl)
 
     if (type !== undefined) {
@@ -39,7 +42,7 @@ export default class Booker25API {
     return await response.json()
   }
 
-  public async getAllChildResources (parentId: string, type: string | undefined, fields: Set<string>): Promise<any[]> {
+  public async getAllChildResources (parentId: string, type: string | undefined, fields: Set<string>): Promise<SFResource[]> {
     if (!isSalesforceId(parentId)) {
       throw new Error('Only 18 character salesforce ids are supported for parent')
     }
@@ -57,21 +60,21 @@ export default class Booker25API {
     return await response.json()
   }
 
-  public async saveReservation (data: string): Promise<object> {
+  public async saveReservation (saveRequest: ReservationSaveRequest): Promise<object> {
     const url = new URL('reservations', this.baseUrl)
     const response = await fetch(url.href, {
       method: 'POST',
-      body: data
+      body: JSON.stringify(saveRequest)
     })
     await this.checkResponse(response)
     return await response.json()
   }
 
-  public async calculatePrice (data: string): Promise<{ [key: string]: any }> {
+  public async calculatePrice (calculationRequest: ReservationPriceCalculationRequest): Promise<ReservationPriceCalculationRequest> {
     const url = new URL('priceCalculation', this.baseUrl)
     const response = await fetch(url.href, {
       method: 'POST',
-      body: data
+      body: JSON.stringify(calculationRequest)
     })
     await this.checkResponse(response)
     return await response.json()

@@ -2,6 +2,7 @@ import AvailabilityTimeSlotRequest from './api/availability-request'
 import Booker25API from './api/booker25-api-requests'
 import ServiceTimeSlotRequest from './api/service-availability-request'
 import ResourceResult from './resource-result'
+import { SFResource } from './s-objects/resource'
 import { Condition } from './s-objects/s-object'
 import { cartesianProductOf } from './utils/array-utils'
 
@@ -78,7 +79,7 @@ export default class ResourceRequest {
     return resourceResult.computeTreeStructure()
   }
 
-  private async getStartingResourceScope (): Promise<any[]> {
+  private async getStartingResourceScope (): Promise<SFResource[]> {
     if (this.parents.size === 0 && this.types.size === 0) {
       return await this.api.getAllResources(undefined, this.getRequestedFields())
     }
