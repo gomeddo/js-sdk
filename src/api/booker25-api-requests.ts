@@ -67,6 +67,16 @@ export default class Booker25API {
     return await response.json()
   }
 
+  public async calculatePrice (data: string): Promise<{ [key: string]: any }> {
+    const url = new URL('priceCalculation', this.baseUrl)
+    const response = await fetch(url.href, {
+      method: 'POST',
+      body: data
+    })
+    await this.checkResponse(response)
+    return await response.json()
+  }
+
   public async getAvailability (requestBody: AvailabilityTimeSlotRequest): Promise<AvailabilityTimeSlotResponse[]> {
     const url = new URL('availability', this.baseUrl)
     const response = await fetch(url.href, {

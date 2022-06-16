@@ -63,3 +63,25 @@ test('the get availabilities makes the correct request', async () => {
     }
   )
 })
+
+test('price calculation makes the correct request', async () => {
+  const mock = fetchMock.once(JSON.stringify({
+    reservation: {},
+    serviceReservations: [],
+    serviceCosts: 0
+  }))
+  const api = new Booker25API(Enviroment.PRODUCTION)
+  const body = JSON.stringify({
+    reservation: {},
+    serviceReservations: [],
+    serviceCosts: 0
+  })
+  await api.calculatePrice(body)
+  expect(mock).toHaveBeenCalledWith(
+    'https://api.booker25.com/api/v3/proxy/priceCalculation',
+    {
+      method: 'POST',
+      body: body
+    }
+  )
+})
