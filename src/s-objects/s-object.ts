@@ -34,7 +34,7 @@ export default class SObject {
   }
 }
 
-enum Opperator {
+enum Operator {
   EQUAL,
   NOT_EQUAL,
   LESS_THAN,
@@ -43,9 +43,9 @@ enum Opperator {
 
 class Condition {
   field: string
-  opperator: Opperator
+  opperator: Operator
   value: any
-  constructor (field: string, opperator: Opperator, value: any) {
+  constructor (field: string, opperator: Operator, value: any) {
     this.field = field
     this.opperator = opperator
     this.value = value
@@ -53,13 +53,13 @@ class Condition {
 
   matches (resource: SObject): boolean {
     const value = resource.getCustomProperty(this.field)
-    if (this.opperator === Opperator.EQUAL) {
+    if (this.opperator === Operator.EQUAL) {
       return value === this.value
     }
-    if (this.opperator === Opperator.LESS_THAN) {
+    if (this.opperator === Operator.LESS_THAN) {
       return value < this.value
     }
-    if (this.opperator === Opperator.GREATER_THAN) {
+    if (this.opperator === Operator.GREATER_THAN) {
       return value > this.value
     }
     return value !== this.value
@@ -68,5 +68,5 @@ class Condition {
 
 export {
   Condition,
-  Opperator
+  Operator
 }
