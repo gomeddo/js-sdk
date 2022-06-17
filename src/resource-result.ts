@@ -7,10 +7,10 @@ import { isSalesforceId } from './utils/salesforce-utils'
 export default class ResourceResult {
   private readonly resourcesById: Map<string, Resource>
 
-  constructor (sfResourcedata: SFResource[]) {
+  constructor (sfResourceData: SFResource[]) {
     // Map all resources to their ids
-    this.resourcesById = sfResourcedata.reduce((map, sfResourcedata) => {
-      const resource = new Resource(sfResourcedata)
+    this.resourcesById = sfResourceData.reduce((map, sfResourceData) => {
+      const resource = new Resource(sfResourceData)
       map.set(resource.id, resource)
       return map
     }, new Map())
