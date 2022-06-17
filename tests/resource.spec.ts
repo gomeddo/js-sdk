@@ -1,9 +1,18 @@
 import Resource from '../src/resource'
 import { ResourceGenerator } from './__utils__/resource-responses'
 
-test('The values are loaded from the parsed json', () => {
+test('The basic values are loaded from the parsed json', () => {
   const resourceGenerator = new ResourceGenerator('Id', 'Name')
-  const resource = new Resource(resourceGenerator.getSimpleResource())
+  const resource = new Resource(resourceGenerator.getResource())
   expect(resource.id).toBe('Id 1')
   expect(resource.name).toBe('Name 1')
+})
+
+test('The resource type is populated based on the parsed json', () => {
+  const resourceGenerator = new ResourceGenerator('Id', 'Name')
+  const resource = new Resource(resourceGenerator.getResourceOfType(1))
+  expect(resource.id).toBe('Id 1')
+  expect(resource.name).toBe('Name 1')
+  expect(resource.resourceType.name).toBe('Type Name 1')
+  expect(resource.resourceType.id).toBe('Type Id 1')
 })

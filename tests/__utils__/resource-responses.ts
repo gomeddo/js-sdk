@@ -1,25 +1,50 @@
 class ResourceGenerator {
   private readonly idPrefix: string
   private readonly namePrefix: string
-  private counter: number
+  private resourceCounter: number
+  private resourceTypeCounter: number
+  private readonly resourceTypes: Map<number, any>
 
   constructor (idPrefix: string, namePrefix: string) {
     this.idPrefix = idPrefix
     this.namePrefix = namePrefix
-    this.counter = 1
+    this.resourceCounter = 1
+    this.resourceTypeCounter = 1
+    this.resourceTypes = new Map()
+    this.addResourceType()
   }
 
-  public getSimpleResource (): any {
-    const resource = {
-      Id: `${this.idPrefix} ${this.counter}`,
-      Name: `${this.namePrefix} ${this.counter}`
+  public addResourceType (): void {
+    const resourceType = {
+      Name: `Type ${this.namePrefix} ${this.resourceTypeCounter}`,
+      Id: `Type ${this.idPrefix} ${this.resourceTypeCounter}`
     }
-    this.counter++
-    return resource
+    this.resourceTypes.set(this.resourceTypeCounter, resourceType)
+    this.resourceTypeCounter++
   }
 
-  public getSimpleResourceArray (size: number): any[] {
-    return new Array(size).fill(undefined).map(() => this.getSimpleResource())
+  public getResourceType (type: number): any {
+    return this.resourceTypes.get(type)
+  }
+
+  public getResource (): any {
+    return this.getResourceOfType(1)
+  }
+
+  public getResourceArray (size: number): any[] {
+    return new Array(size).fill(undefined).map(() => this.getResource())
+  }
+
+  public getResourceOfType (type: number): any {
+    const resourceType = this.resourceTypes.get(type)
+    const resource = {
+      Id: `${this.idPrefix} ${this.resourceCounter}`,
+      Name: `${this.namePrefix} ${this.resourceCounter}`,
+      B25__Resource_Type__c: resourceType.Id,
+      B25__Resource_Type__r: resourceType
+    }
+    this.resourceCounter++
+    return resource
   }
 }
 
