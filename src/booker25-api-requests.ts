@@ -67,7 +67,7 @@ class Booker25ApiError {
   devMessage: string = ''
   userMessage: string = ''
   errorCode: number = 0
-  hardConflicts: any[] = []// TODO this is a conflict array this is currently just set to any[] but we might want to specify
+  hardConflicts: unknown[] = []// TODO this is a conflict array this is currently just set to any[] but we might want to specify
   fields: string[] = []
 }
 
