@@ -41,25 +41,25 @@ export default class Reservation {
     if (this.resource !== null) {
       reservationData.B25__Resource__c = this.resource.id
     }
-    if (this.getStartdatetimeString() !== null) {
-      reservationData.B25__Start__c = this.getStartdatetimeString()
+    if (this.getStartDatetimeString() !== null) {
+      reservationData.B25__Start__c = this.getStartDatetimeString()
     }
-    if (this.getEnddatetimeString() !== null) {
-      reservationData.B25__End__c = this.getEnddatetimeString()
+    if (this.getEndDatetimeString() !== null) {
+      reservationData.B25__End__c = this.getEndDatetimeString()
     }
     return {
       reservation: reservationData
     }
   }
 
-  private getStartdatetimeString (): string | null {
+  private getStartDatetimeString (): string | null {
     if (this.startDatetime === null) {
       return null
     }
     return this.startDatetime.toISOString()
   }
 
-  private getEnddatetimeString (): string | null {
+  private getEndDatetimeString (): string | null {
     if (this.endDatetime === null) {
       return null
     }
