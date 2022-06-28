@@ -55,7 +55,7 @@ export default class Booker25API {
   }
 
   public async getAvailability (requestBody: AvailabilityTimeSlotRequest): Promise<AvailabilityTimeSlotResponse[]> {
-    const url = new URL('availability', this.baseUrl)
+    const url = new URL('B25/v1/availability', this.baseUrl)
     const response = await fetch(url.href, {
       method: 'POST',
       body: JSON.stringify(requestBody)

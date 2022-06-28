@@ -7,7 +7,7 @@ import AvailabilityTimeSlotRequest from '../src/api/availability-request'
 import { AvailabilitySlotType } from '../src/time-slots/availability-time-slot'
 
 const baseResourceRequestUrl = 'https://api.booker25.com/api/v3/proxy/resources'
-const availabilityRequestUrl = 'https://api.booker25.com/api/v3/proxy/availability'
+const availabilityRequestUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/availability'
 test('It calls the booker25 resurces endpoint when provided with no additional info', async () => {
   const resourceRequest = new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
   const mock = fetchMock.once('[]')

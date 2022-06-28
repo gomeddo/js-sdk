@@ -56,7 +56,7 @@ test('the get availabilities makes the correct request', async () => {
   await api.getAvailability(requestBody)
   expect(mock).toHaveBeenCalled()
   expect(mock).toHaveBeenCalledWith(
-    'https://api.booker25.com/api/v3/proxy/availability',
+    'https://api.booker25.com/api/v3/proxy/B25/v1/availability',
     {
       method: 'POST',
       body: JSON.stringify(requestBody)
