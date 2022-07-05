@@ -20,17 +20,18 @@ test('You can save a reservations through it', async () => {
   }))
   const reservation = new Reservation()
   reservation.setCustomProperty('B25__Api_Visible__c', true)
-  const result = await (new Booker25(Enviroment.PRODUCTION)).saveReservation(reservation)
+  const result = await (new Booker25('key', Enviroment.PRODUCTION)).saveReservation(reservation)
   const expectedResult = new Reservation()
   expectedResult.setCustomProperty('B25__Resource__c', 'test')
   expect(result).toStrictEqual(expectedResult)
   expect(mock).toHaveBeenCalled()
   const expectedBodyData = new ReservationSaveRequest({ B25__Api_Visible__c: true }, null, null, [])
   expect(mock).toHaveBeenCalledWith(
-    'https://api.booker25.com/api/v3/proxy/reservations',
+    'https://api.booker25.com/api/v3/proxy/B25LP/v1/reservations',
     {
       method: 'POST',
-      body: JSON.stringify(expectedBodyData)
+      body: JSON.stringify(expectedBodyData),
+      headers: { Authorization: 'Bearer key' }
     }
   )
 })
@@ -51,7 +52,7 @@ test('You can recalculate the price of the reservation through it', async () => 
   reservation.setCustomProperty('B25__Base_Price__c', 15)
   const service = new Service({ ...getSObject(), B25__Price__c: 23 }, [])
   reservation.addService(service, 12)
-  const result = await (new Booker25(Enviroment.PRODUCTION)).calculatePrice(reservation)
+  const result = await (new Booker25('key', Enviroment.PRODUCTION)).calculatePrice(reservation)
   expect(result.getCustomProperty('B25__Subtotal__c')).toStrictEqual(150)
   expect(result.getCustomProperty('B25__Service_Costs__c')).toStrictEqual(276)
   expect(result.getCustomProperty('Total_Price__c')).toStrictEqual(150 + 276)
