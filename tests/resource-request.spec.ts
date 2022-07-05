@@ -13,13 +13,13 @@ const baseResourceRequestUrl = 'https://api.booker25.com/api/v3/proxy/resources'
 const availabilityRequestUrl = 'https://api.booker25.com/api/v3/proxy/availability'
 const serviceRequestUrl = 'https://api.booker25.com/api/v3/proxy/serviceAvailability'
 const childResourceUrl = (parentId: string): string => `https://api.booker25.com/api/v3/proxy/resources/${parentId}/children`
-
+const getResourceRequest = (): ResourceRequest => new ResourceRequest(new Booker25API('key', Enviroment.PRODUCTION))
 beforeEach(() => {
   fetchMock.resetMocks()
 })
 
 test('It calls the booker25 resurces endpoint when provided with no additional info', async () => {
-  const resourceRequest = new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  const resourceRequest = getResourceRequest()
   const mock = fetchMock.once('[]')
   const result = await resourceRequest.getResults()
   expect(mock).toBeCalledWith(`${baseResourceRequestUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`)
@@ -27,7 +27,7 @@ test('It calls the booker25 resurces endpoint when provided with no additional i
 })
 
 test('It adds the field if added to the request', async () => {
-  const resourceRequest = new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  const resourceRequest = getResourceRequest()
   resourceRequest.withAdditionalField('B25__Api_Visible__c')
   const mock = fetchMock.once('[]')
   const result = await resourceRequest.getResults()
@@ -36,7 +36,7 @@ test('It adds the field if added to the request', async () => {
 })
 
 test('It adds the fields if added to the request', async () => {
-  const resourceRequest = new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  const resourceRequest = getResourceRequest()
   resourceRequest.withAdditionalFields(new Set(['B25__Api_Visible__c', 'B25__Booker25_Id__c']))
   const mock = fetchMock.once('[]')
   const result = await resourceRequest.getResults()
@@ -46,7 +46,7 @@ test('It adds the fields if added to the request', async () => {
 
 test('It parses the result into resources', async () => {
   const resourceGenerator = new ResourceGenerator('Id', 'Name')
-  const resourceRequest = new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  const resourceRequest = getResourceRequest()
   const mock = fetchMock.once(JSON.stringify(
     resourceGenerator.getResourceArray(2)
   ))
@@ -75,7 +75,7 @@ test('It adds timelines if requested', async () => {
       ])[0]
     ]
   ))
-  const result = await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  const result = await getResourceRequest()
     .withAvailableSlotsBetween(new Date(Date.UTC(2022, 0, 1)), new Date(Date.UTC(2022, 0, 2)))
     .getResults()
   expect(resourceFetchMock).toBeCalledWith(`${baseResourceRequestUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`)
@@ -126,7 +126,7 @@ test('It adds service timelines if requested', async () => {
     ]
   ))
 
-  const result = await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  const result = await getResourceRequest()
     .withAvailableSlotsBetween(new Date(Date.UTC(2022, 0, 1)), new Date(Date.UTC(2022, 0, 2)))
     .includeServices(true)
     .getResults()
@@ -168,7 +168,7 @@ test('It requests parent scope if requested', async () => {
   const resourceGenerator = new ResourceGenerator('Id', 'Name')
   const resourceFetchMock = fetchMock.once(JSON.stringify(resourceGenerator.getResourceArray(2)))
 
-  await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  await getResourceRequest()
     .includeAllResourcesAt(dummyId0)
     .getResults()
   expect(resourceFetchMock).toBeCalledWith(`${childResourceUrl(dummyId0)}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`)
@@ -178,7 +178,7 @@ test('It requests parent scope multiple times once for each parent', async () =>
   const resourceGenerator = new ResourceGenerator('Id', 'Name')
   const resourceFetchMock = fetchMock.doMock(JSON.stringify(resourceGenerator.getResourceArray(2)))
 
-  await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  await getResourceRequest()
     .includeAllResourcesAt(dummyId0, dummyId1)
     .getResults()
   expect(resourceFetchMock).toBeCalledTimes(2)
@@ -191,7 +191,7 @@ test('Duplicate results are filtered out', async () => {
   // Both requests get the same result of two resources
   const resourceFetchMock = fetchMock.doMock(JSON.stringify(resourceGenerator.getResourceArray(2)))
 
-  const result = await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  const result = await getResourceRequest()
     .includeAllResourcesAt(dummyId0, dummyId1)
     .getResults()
   // Call was ran twice
@@ -207,7 +207,7 @@ test('It adds a type id to the request if a type is requested', async () => {
   const resourceGenerator = new ResourceGenerator('Id', 'Name')
   const resourceFetchMock = fetchMock.doMock(JSON.stringify(resourceGenerator.getResourceArray(2)))
 
-  await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  await getResourceRequest()
     .withType(dummyId0, dummyId1)
     .getResults()
   expect(resourceFetchMock).toBeCalledTimes(2)
@@ -219,7 +219,7 @@ test('It generates combined requests when both parent resources and types are re
   const resourceGenerator = new ResourceGenerator('Id', 'Name')
   const resourceFetchMock = fetchMock.doMock(JSON.stringify(resourceGenerator.getResourceArray(2)))
 
-  await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  await getResourceRequest()
     .includeAllResourcesAt(dummyId0, dummyId1)
     .withType(dummyId2, dummyId3)
     .getResults()
@@ -237,7 +237,7 @@ test('It filters the results based on a simple condition', async () => {
   resources[1].B25__Api_Visible__c = false
   fetchMock.doMock(JSON.stringify(resources))
 
-  const result = await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  const result = await getResourceRequest()
     .withCondition(new Condition('B25__Api_Visible__c', Opperator.EQUAL, true))
     .getResults()
 
@@ -254,7 +254,7 @@ test('It filters the results based on a combined condition', async () => {
   resources[1].B25__Capacity__c = 30
   fetchMock.doMock(JSON.stringify(resources))
 
-  const result = await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  const result = await getResourceRequest()
     .withCondition(
       new Condition('B25__Api_Visible__c', Opperator.EQUAL, true),
       new Condition('B25__Capacity__c', Opperator.LESS_THAN, 25)
@@ -274,7 +274,7 @@ test('It filters the results based on multiple conditions', async () => {
   resources[1].B25__Capacity__c = 30
   fetchMock.doMock(JSON.stringify(resources))
 
-  const result = await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  const result = await getResourceRequest()
     .withCondition(new Condition('B25__Api_Visible__c', Opperator.EQUAL, true))
     .withCondition(new Condition('B25__Capacity__c', Opperator.GREATER_THAN, 25))
     .getResults()

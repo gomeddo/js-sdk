@@ -13,9 +13,9 @@ class Booker25 {
   static version: string = '0.0.1'
   private readonly enviroment: Enviroment
   private readonly api: Booker25API
-  constructor (enviroment: Enviroment = Enviroment.DEVELOP) {
+  constructor (apiKey: string, enviroment: Enviroment = Enviroment.DEVELOP) {
     this.enviroment = enviroment
-    this.api = new Booker25API(enviroment)
+    this.api = new Booker25API(apiKey, enviroment)
   }
 
   public buildResourceRequest (): ResourceRequest {

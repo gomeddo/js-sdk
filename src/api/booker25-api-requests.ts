@@ -10,7 +10,9 @@ import ServiceTimeSlotResponse from './service-availability-response'
 
 export default class Booker25API {
   private readonly baseUrl: string
-  constructor (enviroment: Enviroment) {
+  private readonly apiKey: string
+  constructor (apiKey: string, enviroment: Enviroment) {
+    this.apiKey = apiKey
     switch (enviroment) {
       case Enviroment.DEVELOP:
         this.baseUrl = 'https://dev.api.booker25.com/api/v3/proxy/'
@@ -28,7 +30,7 @@ export default class Booker25API {
   }
 
   public async getAllResources (type: string | undefined, fields: Set<string>): Promise<SFResource[]> {
-    const url = new URL('resources', this.baseUrl)
+    const url = new URL('B25/v1/resources', this.baseUrl)
 
     if (type !== undefined) {
       if (!isSalesforceId(type)) {
@@ -37,16 +39,19 @@ export default class Booker25API {
       url.searchParams.append('resourceType', type)
     }
     this.addFieldsToUrl(url, fields)
-    const response = await fetch(url.href)
+    const response = await fetch(url.href, {
+      headers: this.getHeaders()
+    })
     await this.checkResponse(response)
-    return await response.json()
+    const responseJSON = await response.json()
+    return responseJSON
   }
 
   public async getAllChildResources (parentId: string, type: string | undefined, fields: Set<string>): Promise<SFResource[]> {
     if (!isSalesforceId(parentId)) {
       throw new Error('Only 18 character salesforce ids are supported for parent')
     }
-    const url = new URL(`resources/${parentId}/children`, this.baseUrl)
+    const url = new URL(`B25/v1/resources/${parentId}/children`, this.baseUrl)
     if (type !== undefined) {
       if (!isSalesforceId(type)) {
         throw new Error('Only 18 character salesforce ids are supported for type')
@@ -55,36 +60,41 @@ export default class Booker25API {
     }
     this.addFieldsToUrl(url, fields)
     url.searchParams.append('recursive', 'true')
-    const response = await fetch(url.href)
+    const response = await fetch(url.href, {
+      headers: this.getHeaders()
+    })
     await this.checkResponse(response)
     return await response.json()
   }
 
   public async saveReservation (saveRequest: ReservationSaveRequest): Promise<object> {
-    const url = new URL('reservations', this.baseUrl)
+    const url = new URL('B25LP/v1/reservations', this.baseUrl)
     const response = await fetch(url.href, {
       method: 'POST',
-      body: JSON.stringify(saveRequest)
+      body: JSON.stringify(saveRequest),
+      headers: this.getHeaders()
     })
     await this.checkResponse(response)
     return await response.json()
   }
 
   public async calculatePrice (calculationRequest: ReservationPriceCalculationRequest): Promise<ReservationPriceCalculationRequest> {
-    const url = new URL('priceCalculation', this.baseUrl)
+    const url = new URL('B25/v1/priceCalculation', this.baseUrl)
     const response = await fetch(url.href, {
       method: 'POST',
-      body: JSON.stringify(calculationRequest)
+      body: JSON.stringify(calculationRequest),
+      headers: this.getHeaders()
     })
     await this.checkResponse(response)
     return await response.json()
   }
 
   public async getAvailability (requestBody: AvailabilityTimeSlotRequest): Promise<AvailabilityTimeSlotResponse[]> {
-    const url = new URL('availability', this.baseUrl)
+    const url = new URL('B25/v1/availability', this.baseUrl)
     const response = await fetch(url.href, {
       method: 'POST',
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
+      headers: this.getHeaders()
     })
     await this.checkResponse(response)
     const data = (await response.json()) as any[]
@@ -92,14 +102,21 @@ export default class Booker25API {
   }
 
   public async getServiceAvailability (requestBody: ServiceTimeSlotRequest): Promise<ServiceTimeSlotResponse[]> {
-    const url = new URL('serviceAvailability', this.baseUrl)
+    const url = new URL('B25/v1/services/availability', this.baseUrl)
     const response = await fetch(url.href, {
       method: 'POST',
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
+      headers: this.getHeaders()
     })
     await this.checkResponse(response)
     const data = (await response.json()) as any[]
     return data.map(data => new ServiceTimeSlotResponse(data))
+  }
+
+  private getHeaders (): Record<string, string> {
+    return {
+      Authorization: `Bearer ${this.apiKey}`
+    }
   }
 
   private addFieldsToUrl (url: URL, fields: Set<string>): void {

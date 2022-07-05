@@ -8,7 +8,8 @@
   "author": "Booker25 <b25@gen25.com>",
   "license": "MIT",
   "scripts": {
-    "build": "tsc --project tsconfig.build.json"
+    "build": "tsc --project tsconfig.build.json",
+    "interactive": "yarn build && node nodeSetup.js"
   },
   "devDependencies": {
     "@types/jest": "^27.5.1",

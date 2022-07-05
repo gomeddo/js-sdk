@@ -99,6 +99,6 @@ export default class ResourceRequest {
   }
 
   private getRequestedFields (): Set<string> {
-    return new Set([...this.standardFields, ...this.additionalFields])
+    return new Set([...this.standardFields, ...this.additionalFields, ...this.conditions.flatMap(conditions => conditions.map(condition => condition.field))])
   }
 }

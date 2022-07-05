@@ -11,7 +11,7 @@ beforeEach(() => {
 })
 
 test('url is constructed correctly for getAllResources', async () => {
-  const api = new Booker25API(Enviroment.PRODUCTION)
+  const api = new Booker25API('key', Enviroment.PRODUCTION)
   const mock = fetchMock.once('[]')
   const result = await api.getAllResources(undefined, new Set(['Id', 'Name']))
   expect(result).toStrictEqual([])
@@ -20,7 +20,7 @@ test('url is constructed correctly for getAllResources', async () => {
 })
 
 test('url is constructed correctly for getAllChildren', async () => {
-  const api = new Booker25API(Enviroment.PRODUCTION)
+  const api = new Booker25API('key', Enviroment.PRODUCTION)
   const mock = fetchMock.once('[]')
   const result = await api.getAllChildResources(dummyId0, undefined, new Set(['Id', 'Name']))
   expect(result).toStrictEqual([])
@@ -29,7 +29,7 @@ test('url is constructed correctly for getAllChildren', async () => {
 })
 
 test('url and body are constructed correctly for saveReservation', async () => {
-  const api = new Booker25API(Enviroment.PRODUCTION)
+  const api = new Booker25API('key', Enviroment.PRODUCTION)
   const mock = fetchMock.once('{}')
   const saveRequest = new ReservationSaveRequest({}, null, null, [])
   const result = await api.saveReservation(saveRequest)
@@ -45,7 +45,7 @@ test('url and body are constructed correctly for saveReservation', async () => {
 })
 
 test('the get availabilities makes the correct request', async () => {
-  const api = new Booker25API(Enviroment.PRODUCTION)
+  const api = new Booker25API('key', Enviroment.PRODUCTION)
   const mock = fetchMock.once(
     JSON.stringify(
       getAvailabilityResponse(['1', '2'], [getAvailabilitySlot(1, 1, 10, 12, 'Open')])
@@ -73,7 +73,7 @@ test('price calculation makes the correct request', async () => {
     serviceReservations: [],
     serviceCosts: 0
   }))
-  const api = new Booker25API(Enviroment.PRODUCTION)
+  const api = new Booker25API('key', Enviroment.PRODUCTION)
   const body = new ReservationPriceCalculationRequest({}, [], 0)
   await api.calculatePrice(body)
   expect(mock).toHaveBeenCalledWith(
