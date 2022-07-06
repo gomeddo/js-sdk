@@ -12,7 +12,7 @@ class Booker25 {
   static version: string = '0.0.1'
   private readonly enviroment: Enviroment
   private readonly api: Booker25API
-  constructor (enviroment: Enviroment = Enviroment.DEVELOP) {
+  constructor (enviroment: Enviroment = Enviroment.PRODUCTION) {
     this.enviroment = enviroment
     this.api = new Booker25API(enviroment)
   }

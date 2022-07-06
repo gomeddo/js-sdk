@@ -57,7 +57,7 @@ export default class Booker25API {
   }
 
   public async getAvailability (requestBody: AvailabilityTimeSlotRequest): Promise<AvailabilityTimeSlotResponse[]> {
-    const url = new URL('availability', this.baseUrl)
+    const url = new URL('B25/v1/availability', this.baseUrl)
     const response = await fetch(url.href, {
       method: 'POST',
       body: JSON.stringify(requestBody)
@@ -94,7 +94,7 @@ class Booker25ApiError {
   devMessage: string = ''
   userMessage: string = ''
   errorCode: number = 0
-  hardConflicts: any[] = []// TODO this is a conflict array this is currently just set to any[] but we might want to specify
+  hardConflicts: unknown[] = []// TODO this is a conflict array this is currently just set to any[] but we might want to specify
   fields: string[] = []
 }
 
