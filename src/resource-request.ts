@@ -1,4 +1,5 @@
-import Booker25API from './booker25-api-requests'
+import AvailabilityTimeSlotRequest from './api/availability-request'
+import Booker25API from './api/booker25-api-requests'
 import ResourceResult from './resource-result'
 
 export default class ResourceRequest {
@@ -8,6 +9,8 @@ export default class ResourceRequest {
   ])
 
   private readonly additionalFields: Set<string> = new Set()
+  private startOfRange: Date | null = null
+  private endOfRange: Date | null = null
 
   constructor (api: Booker25API) {
     this.api = api
@@ -23,9 +26,22 @@ export default class ResourceRequest {
     return this
   }
 
+  public withAvailableSlotsBetween (startOfRange: Date, endOfRange: Date): ResourceRequest {
+    this.startOfRange = startOfRange
+    this.endOfRange = endOfRange
+    return this
+  }
+
   public async getResults (): Promise<ResourceResult> {
-    const results = await this.api.getAllResources(undefined, this.getRequestedFields())
-    return new ResourceResult(results)
+    const resources = await this.api.getAllResources(undefined, this.getRequestedFields())
+    const resourceResult = new ResourceResult(resources)
+    if (this.startOfRange !== null && this.endOfRange !== null) {
+      const availabilityData = await this.api.getAvailability(new AvailabilityTimeSlotRequest(
+        this.startOfRange, this.endOfRange, resourceResult.getResourceIds()
+      ))
+      resourceResult.addAvailabilitySlotData(availabilityData)
+    }
+    return resourceResult.computeTreeStructure()
   }
 
   private getRequestedFields (): Set<string> {

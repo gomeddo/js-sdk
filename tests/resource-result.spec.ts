@@ -38,7 +38,7 @@ test('getResource returns the correct resource by name', () => {
 test('Parent is set correctly', () => {
   const resourceGenerator = new ResourceGenerator('Id', 'Name')
   const parsedResourceJSON = [resourceGenerator.getResource(), resourceGenerator.getResourceWithParent(1)]
-  const resourceResult = new ResourceResult(parsedResourceJSON)
+  const resourceResult = new ResourceResult(parsedResourceJSON).computeTreeStructure()
   const resourceOne = resourceResult.getResourceById('Id 1')
   const resourceTwo = resourceResult.getResourceById('Id 2')
   expect(resourceOne?.parent).toBeNull()
@@ -48,7 +48,7 @@ test('Parent is set correctly', () => {
 test('children is set correctly', () => {
   const resourceGenerator = new ResourceGenerator('Id', 'Name')
   const parsedResourceJSON = [resourceGenerator.getResource(), resourceGenerator.getResourceWithParent(1)]
-  const resourceResult = new ResourceResult(parsedResourceJSON)
+  const resourceResult = new ResourceResult(parsedResourceJSON).computeTreeStructure()
   const resourceOne = resourceResult.getResourceById('Id 1')
   const resourceTwo = resourceResult.getResourceById('Id 2')
   expect(resourceOne?.children).toStrictEqual([resourceTwo])
@@ -63,7 +63,7 @@ test('Parent is set correctly with a gap in the tree', () => {
   const resourceFourParsedJSON = resourceGenerator.getResourceWithParent(3)
   // Some sort of condition causes resourceTwo to not be included
   const parsedResourceJSON = [resourceOneParsedJSON, resourceThreeParsedJSON, resourceFourParsedJSON]
-  const resourceResult = new ResourceResult(parsedResourceJSON)
+  const resourceResult = new ResourceResult(parsedResourceJSON).computeTreeStructure()
   const resourceOne = resourceResult.getResourceById('Id 1')
   const resourceTwo = resourceResult.getResourceById('Id 2')
   const resourceThree = resourceResult.getResourceById('Id 3')
@@ -86,7 +86,7 @@ test('Children is set correctly with a gap in the tree', () => {
   const resourceFourParsedJSON = resourceGenerator.getResourceWithParent(3)
   // Some sort of condition causes resourceTwo to not be included
   const parsedResourceJSON = [resourceOneParsedJSON, resourceThreeParsedJSON, resourceFourParsedJSON]
-  const resourceResult = new ResourceResult(parsedResourceJSON)
+  const resourceResult = new ResourceResult(parsedResourceJSON).computeTreeStructure()
   const resourceOne = resourceResult.getResourceById('Id 1')
   const resourceTwo = resourceResult.getResourceById('Id 2')
   const resourceThree = resourceResult.getResourceById('Id 3')
