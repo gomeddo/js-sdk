@@ -2,7 +2,8 @@ const getBlankReservationRestData = (): { [key: string]: any } => {
   return {
     reservation: {},
     leadConfig: null,
-    contactConfig: null
+    contactConfig: null,
+    serviceReservations: []
   }
 }
 export {
