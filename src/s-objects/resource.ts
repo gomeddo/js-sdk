@@ -1,7 +1,9 @@
-import AvailabilityTimeSlotResponse from './api/availability-reponse'
+import AvailabilityTimeSlotResponse from '../api/availability-reponse'
 import ResourceType from './resource-type'
 import SObject from './s-object'
-import { AvailabilitySlotType, AvailabilityTimeSlot } from './time-slots/availability-time-slot'
+import { AvailabilitySlotType, AvailabilityTimeSlot } from '../time-slots/availability-time-slot'
+import Service from './service'
+import ServiceTimeSlotResponse from '../api/service-availability-response'
 
 export default class Resource extends SObject {
   public name: string
@@ -9,6 +11,7 @@ export default class Resource extends SObject {
   public parentId: string
   public parent: Resource | null = null
   public children: Resource[] = []
+  public services: Map<string, Service> = new Map()
   private timeSlots: AvailabilityTimeSlot[] = []
 
   constructor (parsedResource: any) {
@@ -22,11 +25,23 @@ export default class Resource extends SObject {
     this.timeSlots = slotData.timeSlots
   }
 
+  public addServiceData (serviceData: ServiceTimeSlotResponse): void {
+    serviceData.services.forEach(service => this.services.set(service.id, service))
+  }
+
   public isClosed (): boolean {
     return !this.timeSlots.some(timeSlot => timeSlot.type === AvailabilitySlotType.OPEN)
   }
 
   public getTimeSlots (): AvailabilityTimeSlot[] {
     return this.timeSlots
+  }
+
+  public getAvailableServices (): Service[] {
+    return [...this.services.values()].filter(service => service.isAvailable())
+  }
+
+  public getServiceById (serviceId: string): Service | undefined {
+    return this.services.get(serviceId)
   }
 }

@@ -1,4 +1,4 @@
-import SObject from '../src/s-object'
+import SObject from '../src/s-objects/s-object'
 
 test('You can set/get custom properties', () => {
   const sObject = new SObject()

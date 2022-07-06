@@ -2,12 +2,18 @@ import { Enviroment } from '../src/index'
 import Booker25API from '../src/api/booker25-api-requests'
 import ResourceRequest from '../src/resource-request'
 import { ResourceGenerator } from './__utils__/resource-responses'
-import { getResponse, getSlot } from './__utils__/availability-responses'
+import { getAvailabilityResponse, getAvailabilitySlot, getServiceResponse, getServiceSlot } from './__utils__/availability-responses'
 import AvailabilityTimeSlotRequest from '../src/api/availability-request'
 import { AvailabilitySlotType } from '../src/time-slots/availability-time-slot'
+import ServiceTimeSlotRequest from '../src/api/service-availability-request'
 
 const baseResourceRequestUrl = 'https://api.booker25.com/api/v3/proxy/resources'
 const availabilityRequestUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/availability'
+const serviceRequestUrl = 'https://api.booker25.com/api/v3/proxy/serviceAvailability'
+beforeEach(() => {
+  fetchMock.resetMocks()
+})
+
 test('It calls the booker25 resurces endpoint when provided with no additional info', async () => {
   const resourceRequest = new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
   const mock = fetchMock.once('[]')
@@ -54,14 +60,14 @@ test('It adds timelines if requested', async () => {
   ))
   const availabilityFetchMock = fetchMock.once(JSON.stringify(
     [
-      getResponse(['Id 1'], [
-        getSlot(1, 0, 1, 8, 'Closed'),
-        getSlot(1, 8, 1, 16, 'Open'),
-        getSlot(1, 16, 2, 0, 'Closed'),
-        getSlot(1, 6, 1, 12, 'Reservation')
+      getAvailabilityResponse(['Id 1'], [
+        getAvailabilitySlot(1, 0, 1, 8, 'Closed'),
+        getAvailabilitySlot(1, 8, 1, 16, 'Open'),
+        getAvailabilitySlot(1, 16, 2, 0, 'Closed'),
+        getAvailabilitySlot(1, 6, 1, 12, 'Reservation')
       ])[0],
-      getResponse(['Id 2'], [
-        getSlot(1, 0, 2, 0, 'Closed')
+      getAvailabilityResponse(['Id 2'], [
+        getAvailabilitySlot(1, 0, 2, 0, 'Closed')
       ])[0]
     ]
   ))
@@ -98,4 +104,60 @@ test('It adds timelines if requested', async () => {
   // Fully closed so should be filtered out
   const resourceTwo = result.getResourceById('Id 2')
   expect(resourceTwo).toBeUndefined()
+})
+
+test('It adds service timelines if requested', async () => {
+  const resourceGenerator = new ResourceGenerator('Id', 'Name')
+  const resourceFetchMock = fetchMock.once(JSON.stringify(resourceGenerator.getResourceArray(2)))
+  const availabilityFetchMock = fetchMock.once(JSON.stringify(getAvailabilityResponse(['Id 1', 'Id 2'], [
+    getAvailabilitySlot(1, 0, 2, 0, 'Open')
+  ])))
+  const serviceAvailabilityFetchMock = fetchMock.once(JSON.stringify(
+    [
+      getServiceResponse(['Id 1'], ['Service Id 1', 'Service Id 2'], [
+        getServiceSlot(1, 0, 2, 0, 'Availability', 10),
+        getServiceSlot(1, 10, 1, 16, 'Reservation', 5)
+      ])[0],
+      getServiceResponse(['Id 2'], ['Service Id 1'], [])[0]
+    ]
+  ))
+
+  const result = await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+    .withAvailableSlotsBetween(new Date(Date.UTC(2022, 0, 1)), new Date(Date.UTC(2022, 0, 2)))
+    .includeServices(true)
+    .getResults()
+  // Clear the first two mock calls
+  expect(resourceFetchMock).toBeCalled()
+  expect(availabilityFetchMock).toBeCalled()
+  const requestBody = new ServiceTimeSlotRequest(
+    new Date(Date.UTC(2022, 0, 1)),
+    new Date(Date.UTC(2022, 0, 2)),
+    ['Id 1', 'Id 2']
+  )
+  expect(serviceAvailabilityFetchMock).toBeCalledWith(serviceRequestUrl, {
+    method: 'POST',
+    body: JSON.stringify(requestBody)
+  })
+  expect(result.numberOfresources()).toBe(2)
+  const resourceOne = result.getResourceById('Id 1')
+  expect(resourceOne).not.toBeUndefined()
+  expect(resourceOne?.getAvailableServices().length).toBe(2)
+  const serviceOne = resourceOne?.getServiceById('Service Id 1')
+  expect(serviceOne?.timeSlots[0].remainingQuantity).toBe(10)
+  expect(serviceOne?.timeSlots[0].startOfSlot).toBe('2022-01-01T00:00:00.000Z')
+  expect(serviceOne?.timeSlots[0].endOfSlot).toBe('2022-01-01T10:00:00.000Z')
+  expect(serviceOne?.timeSlots[1].remainingQuantity).toBe(5)
+  expect(serviceOne?.timeSlots[1].startOfSlot).toBe('2022-01-01T10:00:00.000Z')
+  expect(serviceOne?.timeSlots[1].endOfSlot).toBe('2022-01-01T16:00:00.000Z')
+  expect(serviceOne?.timeSlots[2].remainingQuantity).toBe(10)
+  expect(serviceOne?.timeSlots[2].startOfSlot).toBe('2022-01-01T16:00:00.000Z')
+  expect(serviceOne?.timeSlots[2].endOfSlot).toBe('2022-01-02T00:00:00.000Z')
+  const serviceTwo = resourceOne?.getServiceById('Service Id 2')
+  expect(serviceTwo).not.toBeUndefined()
+
+  const resourceTwo = result.getResourceById('Id 2')
+  const serviceOneOnResourceTwo = resourceTwo?.getServiceById('Service Id 1')
+  expect(serviceOneOnResourceTwo).not.toBeUndefined()
+  const serviceTwoOnResourceTwo = resourceTwo?.getServiceById('Service Id 2')
+  expect(serviceTwoOnResourceTwo).toBeUndefined()
 })

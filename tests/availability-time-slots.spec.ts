@@ -1,14 +1,14 @@
 import AvailabilityTimeSlotResponse from '../src/api/availability-reponse'
 import { AvailabilitySlotType } from '../src/time-slots/availability-time-slot'
-import { getResponse, getSlot } from './__utils__/availability-responses'
+import { getAvailabilityResponse, getAvailabilitySlot } from './__utils__/availability-responses'
 
 test('It parses the slots into timelines', async () => {
   const result = new AvailabilityTimeSlotResponse(
-    getResponse(['Id 1'], [
-      getSlot(1, 0, 1, 8, 'Closed'),
-      getSlot(1, 8, 1, 16, 'Open'),
-      getSlot(1, 16, 2, 0, 'Closed'),
-      getSlot(1, 6, 1, 12, 'Reservation')
+    getAvailabilityResponse(['Id 1'], [
+      getAvailabilitySlot(1, 0, 1, 8, 'Closed'),
+      getAvailabilitySlot(1, 8, 1, 16, 'Open'),
+      getAvailabilitySlot(1, 16, 2, 0, 'Closed'),
+      getAvailabilitySlot(1, 6, 1, 12, 'Reservation')
     ])[0]
   )
   expect(result.timeSlots.length).toBe(4)

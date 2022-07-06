@@ -1,6 +1,6 @@
 import Booker25API from './api/booker25-api-requests'
 import ResourceRequest from './resource-request'
-import Reservation from './reservation'
+import Reservation from './s-objects/reservation'
 
 enum Enviroment {
   DEVELOP,

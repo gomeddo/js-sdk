@@ -1,6 +1,8 @@
 import { Enviroment } from '..'
 import AvailabilityTimeSlotResponse from './availability-reponse'
 import AvailabilityTimeSlotRequest from './availability-request'
+import ServiceTimeSlotRequest from './service-availability-request'
+import ServiceTimeSlotResponse from './service-availability-response'
 
 export default class Booker25API {
   private readonly baseUrl: string
@@ -63,6 +65,17 @@ export default class Booker25API {
     await this.checkResponse(response)
     const data = (await response.json()) as any[]
     return data.map(data => new AvailabilityTimeSlotResponse(data))
+  }
+
+  public async getServiceAvailability (requestBody: ServiceTimeSlotRequest): Promise<ServiceTimeSlotResponse[]> {
+    const url = new URL('serviceAvailability', this.baseUrl)
+    const response = await fetch(url.href, {
+      method: 'POST',
+      body: JSON.stringify(requestBody)
+    })
+    await this.checkResponse(response)
+    const data = (await response.json()) as any[]
+    return data.map(data => new ServiceTimeSlotResponse(data))
   }
 
   private addFieldsToUrl (url: URL, fields: Set<string>): void {

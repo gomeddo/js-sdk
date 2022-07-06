@@ -1,7 +1,7 @@
 import { Enviroment } from '../src'
 import AvailabilityTimeSlotRequest from '../src/api/availability-request'
 import Booker25API from '../src/api/booker25-api-requests'
-import { getResponse, getSlot } from './__utils__/availability-responses'
+import { getAvailabilityResponse, getAvailabilitySlot } from './__utils__/availability-responses'
 
 beforeEach(() => {
   fetchMock.resetMocks()
@@ -45,7 +45,7 @@ test('the get availabilities makes the correct request', async () => {
   const ids = ['Id 1', 'Id 2']
   const mock = fetchMock.once(
     JSON.stringify(
-      getResponse(ids, [getSlot(1, 1, 10, 12, 'Open')])
+      getAvailabilityResponse(ids, [getAvailabilitySlot(1, 1, 10, 12, 'Open')])
     )
   )
   const requestBody = new AvailabilityTimeSlotRequest(
