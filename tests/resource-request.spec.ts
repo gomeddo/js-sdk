@@ -8,7 +8,7 @@ import { AvailabilitySlotType } from '../src/time-slots/availability-time-slot'
 import ServiceTimeSlotRequest from '../src/api/service-availability-request'
 
 const baseResourceRequestUrl = 'https://api.booker25.com/api/v3/proxy/resources'
-const availabilityRequestUrl = 'https://api.booker25.com/api/v3/proxy/availability'
+const availabilityRequestUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/availability'
 const serviceRequestUrl = 'https://api.booker25.com/api/v3/proxy/serviceAvailability'
 beforeEach(() => {
   fetchMock.resetMocks()

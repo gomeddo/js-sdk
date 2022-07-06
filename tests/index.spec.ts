@@ -3,7 +3,7 @@ import Reservation from '../src/s-objects/reservation'
 import { getBlankReservationRestData } from './__utils__/reservation-rest-data'
 
 test('Booker25 has a version number', () => {
-  expect(Booker25.version).toBe('0.0.1')
+  expect(Booker25.version).toMatch(/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/)
 })
 
 test('You can save a reservations through it', async () => {
