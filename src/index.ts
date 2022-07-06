@@ -1,5 +1,6 @@
 import Booker25API from './booker25-api-requests'
 import ResourceRequest from './resource-request'
+import Reservation from './reservation'
 
 enum Enviroment {
   DEVELOP,
@@ -18,6 +19,15 @@ class Booker25 {
 
   public buildResourceRequest (): ResourceRequest {
     return new ResourceRequest(this.api)
+  }
+
+  public async saveReservation (reservation: Reservation): Promise<Reservation> {
+    const result = await this.api.saveReservation(JSON.stringify(reservation.getRestData())) as any
+    const outputReservation = new Reservation()
+    Object.entries(result.reservation).forEach(([fieldName, fieldValue]) => {
+      outputReservation.setCustomProperty(fieldName, fieldValue)
+    })
+    return outputReservation
   }
 }
 export {
