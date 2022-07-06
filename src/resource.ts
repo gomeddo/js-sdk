@@ -1,31 +1,17 @@
 import ResourceType from './resource-type'
+import SObject from './s-object'
 
-const standardProperies: Set<string> = new Set(['Id', 'Name', 'B25__Resource_Type__r', 'B25__Resource_Type__c', 'B25__Parent__c'])
-
-export default class Resource {
-  public id: string
+export default class Resource extends SObject {
   public name: string
   public resourceType: ResourceType
   public parentId: string
   public parent: Resource | null = null
   public children: Resource[] = []
-  private readonly customProperties: Map<string, any>
 
   constructor (parsedResource: any) {
-    this.id = parsedResource.Id
+    super(parsedResource, new Set(['Id', 'Name', 'B25__Resource_Type__r', 'B25__Resource_Type__c', 'B25__Parent__c']))
     this.name = parsedResource.Name
     this.parentId = parsedResource.B25__Parent__c
     this.resourceType = new ResourceType(parsedResource.B25__Resource_Type__r)
-    this.customProperties = new Map()
-    Object.entries(parsedResource).forEach(([fieldName, fieldValue]) => {
-      if (standardProperies.has(fieldName)) {
-        return
-      }
-      this.customProperties.set(fieldName, fieldValue)
-    })
-  }
-
-  public getCustomProperty (propertyName: string): any {
-    return this.customProperties.get(propertyName)
   }
 }

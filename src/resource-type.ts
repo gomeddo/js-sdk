@@ -1,9 +1,10 @@
-export default class ResourceType {
-  public readonly id: string
+import SObject from './s-object'
+
+export default class ResourceType extends SObject {
   public readonly name: string
 
   constructor (parsedResourceType: any) {
-    this.id = parsedResourceType.Id
+    super(parsedResourceType)
     this.name = parsedResourceType.Name
   }
 }
