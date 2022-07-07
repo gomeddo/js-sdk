@@ -10,12 +10,18 @@ export default class ResourceRequest {
   ])
 
   private readonly additionalFields: Set<string> = new Set()
+  private readonly parents: Set<string> = new Set()
   private startOfRange: Date | null = null
   private endOfRange: Date | null = null
   private fetchServices: boolean = false
 
   constructor (api: Booker25API) {
     this.api = api
+  }
+
+  public includeAllResourcesAt (parentId: string): ResourceRequest {
+    this.parents.add(parentId)
+    return this
   }
 
   public withAdditionalField (fieldName: string): ResourceRequest {
@@ -40,7 +46,7 @@ export default class ResourceRequest {
   }
 
   public async getResults (): Promise<ResourceResult> {
-    const resources = await this.api.getAllResources(undefined, this.getRequestedFields())
+    const resources = await this.getStartingResourceScope()
     const resourceResult = new ResourceResult(resources)
     if (this.startOfRange !== null && this.endOfRange !== null) {
       const availabilityData = await this.api.getAvailability(new AvailabilityTimeSlotRequest(
@@ -55,6 +61,15 @@ export default class ResourceRequest {
       resourceResult.addServiceSlotData(serviceData)
     }
     return resourceResult.computeTreeStructure()
+  }
+
+  private async getStartingResourceScope (): Promise<any[]> {
+    if (this.parents.size === 0) {
+      return await this.api.getAllResources(undefined, this.getRequestedFields())
+    }
+    return (await Promise.all([...this.parents].map(async (parent) => {
+      return await this.api.getAllChildResources(parent, undefined, this.getRequestedFields())
+    }))).flat()
   }
 
   private getRequestedFields (): Set<string> {

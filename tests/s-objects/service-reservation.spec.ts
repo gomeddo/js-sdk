@@ -1,5 +1,5 @@
-import Service from '../src/s-objects/service'
-import ServiceReservation from '../src/s-objects/service-reservation'
+import Service from '../../src/s-objects/service'
+import ServiceReservation from '../../src/s-objects/service-reservation'
 
 test('Sets the id an quantity based on what was passed in the constructor', () => {
   const service = new Service({ Id: 'Service Id 1' }, [])

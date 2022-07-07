@@ -1,5 +1,5 @@
-import ResourceType from '../src/s-objects/resource-type'
-import { ResourceGenerator } from './__utils__/resource-responses'
+import ResourceType from '../../src/s-objects/resource-type'
+import { ResourceGenerator } from '../__utils__/resource-responses'
 
 test('The basic values are loaded from the parsed json', () => {
   const resourceGenerator = new ResourceGenerator('Id', 'Name')

@@ -1,5 +1,5 @@
-import Service from '../src/s-objects/service'
-import { ServiceTimeSlot } from '../src/time-slots/service-time-slot'
+import Service from '../../src/s-objects/service'
+import { ServiceTimeSlot } from '../../src/time-slots/service-time-slot'
 
 test('It is unavailable with no time slots', () => {
   const service = new Service({}, [])
