@@ -1,5 +1,5 @@
 import ReservationPriceCalculationRequest from '../api/reservation-price-calculation-request'
-import { ContactConfig, LeadConfig, ReservationSaveRequest } from '../api/reservation-save-request'
+import { ReservationSaveRequest } from '../api/reservation-save-request'
 import Contact from './contact'
 import Lead from './lead'
 import Resource from './resource'
@@ -46,13 +46,11 @@ export default class Reservation extends SObject {
     return serviceReservation
   }
 
-  // TODO any structure or property names here are subject to change
-  // The endpoint has not yet been written and will have to be designed later when all requirements are more clear
   public getReservationSaveRequest (): ReservationSaveRequest {
     return new ReservationSaveRequest(
       this.getSFSObject(),
-      this.getLeadConfig(),
-      this.getContactConfig(),
+      this.lead?.getSFSObject() ?? null,
+      this.contact?.getSFSObject() ?? null,
       this.getServiceReservationRestData()
     )
   }
@@ -81,24 +79,6 @@ export default class Reservation extends SObject {
       reservationData.B25__End__c = this.getEnddatetimeString()
     }
     return reservationData
-  }
-
-  // TODO this is a more complex object because it is anticipated that it will include info
-  // On how to link the lead and potential duplicate rule use.
-  private getLeadConfig (): LeadConfig | null {
-    if (this.lead === null) {
-      return null
-    }
-    return new LeadConfig(this.lead.getSFSObject())
-  }
-
-  // TODO this is a more complex object because it is anticipated that it will include info
-  // On how to link the contact and potential duplicate rule use.
-  private getContactConfig (): ContactConfig | null {
-    if (this.contact === null) {
-      return null
-    }
-    return new ContactConfig(this.contact.getSFSObject())
   }
 
   private getServiceReservationRestData (): Array<Partial<SFServiceReservation>> {
