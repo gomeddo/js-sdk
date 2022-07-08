@@ -2,6 +2,7 @@ import AvailabilityTimeSlotRequest from './api/availability-request'
 import Booker25API from './api/booker25-api-requests'
 import ServiceTimeSlotRequest from './api/service-availability-request'
 import ResourceResult from './resource-result'
+import { cartesianProductOf } from './utils/array-utils'
 
 export default class ResourceRequest {
   private readonly api: Booker25API
@@ -11,6 +12,7 @@ export default class ResourceRequest {
 
   private readonly additionalFields: Set<string> = new Set()
   private readonly parents: Set<string> = new Set()
+  private readonly types: Set<string> = new Set()
   private startOfRange: Date | null = null
   private endOfRange: Date | null = null
   private fetchServices: boolean = false
@@ -19,8 +21,13 @@ export default class ResourceRequest {
     this.api = api
   }
 
-  public includeAllResourcesAt (parentId: string): ResourceRequest {
-    this.parents.add(parentId)
+  public includeAllResourcesAt (...parentIds: string[]): ResourceRequest {
+    parentIds.forEach(parentid => this.parents.add(parentid))
+    return this
+  }
+
+  public withType (...typeIds: string[]): ResourceRequest {
+    typeIds.forEach(typeId => this.types.add(typeId))
     return this
   }
 
@@ -64,11 +71,21 @@ export default class ResourceRequest {
   }
 
   private async getStartingResourceScope (): Promise<any[]> {
-    if (this.parents.size === 0) {
+    if (this.parents.size === 0 && this.types.size === 0) {
       return await this.api.getAllResources(undefined, this.getRequestedFields())
     }
-    return (await Promise.all([...this.parents].map(async (parent) => {
-      return await this.api.getAllChildResources(parent, undefined, this.getRequestedFields())
+    if (this.parents.size === 0) {
+      return (await Promise.all([...this.types].map(async (type) => {
+        return await this.api.getAllResources(type, this.getRequestedFields())
+      }))).flat()
+    }
+    if (this.types.size === 0) {
+      return (await Promise.all([...this.parents].map(async (parent) => {
+        return await this.api.getAllChildResources(parent, undefined, this.getRequestedFields())
+      }))).flat()
+    }
+    return (await Promise.all(cartesianProductOf([...this.parents], [...this.types]).map(async ([parent, type]) => {
+      return await this.api.getAllChildResources(parent, type, this.getRequestedFields())
     }))).flat()
   }
 
