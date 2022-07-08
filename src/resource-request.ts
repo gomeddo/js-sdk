@@ -2,7 +2,7 @@ import AvailabilityTimeSlotRequest from './api/availability-request'
 import Booker25API from './api/booker25-api-requests'
 import ServiceTimeSlotRequest from './api/service-availability-request'
 import ResourceResult from './resource-result'
-import { Condition } from './s-objects/s-object'
+import { AndCondition, ConditionElement, OrCondition } from './s-objects/s-object'
 import { cartesianProductOf } from './utils/array-utils'
 
 export default class ResourceRequest {
@@ -14,7 +14,7 @@ export default class ResourceRequest {
   private readonly additionalFields: Set<string> = new Set()
   private readonly parents: Set<string> = new Set()
   private readonly types: Set<string> = new Set()
-  private readonly conditions: Condition[][] = []
+  private readonly condition: OrCondition = new OrCondition([])
   private startOfRange: Date | null = null
   private endOfRange: Date | null = null
   private fetchServices: boolean = false
@@ -33,8 +33,8 @@ export default class ResourceRequest {
     return this
   }
 
-  public withCondition (...conditions: Condition[]): ResourceRequest {
-    this.conditions.push(conditions)
+  public withCondition (...conditions: ConditionElement[]): ResourceRequest {
+    this.condition.conditions.push(new AndCondition(conditions))
     return this
   }
 
@@ -74,7 +74,7 @@ export default class ResourceRequest {
       ))
       resourceResult.addServiceSlotData(serviceData)
     }
-    resourceResult.filterOnConditions(this.conditions)
+    resourceResult.filterOnCondition(this.condition)
     return resourceResult.computeTreeStructure()
   }
 

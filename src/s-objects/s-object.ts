@@ -41,7 +41,38 @@ enum Operator {
   GREATER_THAN
 }
 
-class Condition {
+interface ConditionElement {
+  matches: (resource: SObject) => boolean
+}
+
+class AndCondition implements ConditionElement {
+  conditions: ConditionElement[] = []
+
+  constructor (conditions: ConditionElement[]) {
+    this.conditions = conditions
+  }
+
+  matches (resource: SObject): boolean {
+    return this.conditions.every(condition => condition.matches(resource))
+  }
+}
+
+class OrCondition implements ConditionElement {
+  conditions: ConditionElement[] = []
+
+  constructor (conditions: ConditionElement[]) {
+    this.conditions = conditions
+  }
+
+  matches (resource: SObject): boolean {
+    if (this.conditions.length === 0) {
+      return true
+    }
+    return this.conditions.some(condition => condition.matches(resource))
+  }
+}
+
+class Condition implements ConditionElement {
   field: string
   opperator: Operator
   value: any
@@ -68,5 +99,8 @@ class Condition {
 
 export {
   Condition,
+  ConditionElement,
+  AndCondition,
+  OrCondition,
   Operator
 }
