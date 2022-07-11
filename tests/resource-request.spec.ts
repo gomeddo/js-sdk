@@ -7,6 +7,7 @@ import AvailabilityTimeSlotRequest from '../src/api/availability-request'
 import { AvailabilitySlotType } from '../src/time-slots/availability-time-slot'
 import ServiceTimeSlotRequest from '../src/api/service-availability-request'
 import { dummyId0, dummyId1, dummyId2, dummyId3 } from './__utils__/salesforce-dummy-ids'
+import { Condition, Operator } from '../src/s-objects/s-object'
 
 const baseResourceRequestUrl = 'https://api.booker25.com/api/v3/proxy/resources'
 const availabilityRequestUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/availability'
@@ -227,4 +228,56 @@ test('It generates combined requests when both parent resources and types are re
   expect(resourceFetchMock).toBeCalledWith(`${childResourceUrl(dummyId1)}?resourceType=${dummyId3}&fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`)
   expect(resourceFetchMock).toBeCalledWith(`${childResourceUrl(dummyId0)}?resourceType=${dummyId3}&fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`)
   expect(resourceFetchMock).toBeCalledWith(`${childResourceUrl(dummyId1)}?resourceType=${dummyId2}&fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`)
+})
+
+test('It filters the results based on a simple condition', async () => {
+  const resourceGenerator = new ResourceGenerator('Id', 'Name')
+  const resources = resourceGenerator.getResourceArray(2)
+  resources[0].B25__Api_Visible__c = true
+  resources[1].B25__Api_Visible__c = false
+  fetchMock.doMock(JSON.stringify(resources))
+
+  const result = await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+    .withCondition(new Condition('B25__Api_Visible__c', Operator.EQUAL, true))
+    .getResults()
+
+  expect(result.numberOfresources()).toBe(1)
+  expect(result.getResource('Name 1')).toBeDefined()
+})
+
+test('It filters the results based on a combined condition', async () => {
+  const resourceGenerator = new ResourceGenerator('Id', 'Name')
+  const resources = resourceGenerator.getResourceArray(2)
+  resources[0].B25__Api_Visible__c = true
+  resources[0].B25__Capacity__c = 20
+  resources[1].B25__Api_Visible__c = true
+  resources[1].B25__Capacity__c = 30
+  fetchMock.doMock(JSON.stringify(resources))
+
+  const result = await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+    .withCondition(
+      new Condition('B25__Api_Visible__c', Operator.EQUAL, true),
+      new Condition('B25__Capacity__c', Operator.LESS_THAN, 25)
+    )
+    .getResults()
+
+  expect(result.numberOfresources()).toBe(1)
+  expect(result.getResource('Name 1')).toBeDefined()
+})
+
+test('It filters the results based on multiple conditions', async () => {
+  const resourceGenerator = new ResourceGenerator('Id', 'Name')
+  const resources = resourceGenerator.getResourceArray(2)
+  resources[0].B25__Api_Visible__c = true
+  resources[0].B25__Capacity__c = 20
+  resources[1].B25__Api_Visible__c = false
+  resources[1].B25__Capacity__c = 30
+  fetchMock.doMock(JSON.stringify(resources))
+
+  const result = await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+    .withCondition(new Condition('B25__Api_Visible__c', Operator.EQUAL, true))
+    .withCondition(new Condition('B25__Capacity__c', Operator.GREATER_THAN, 25))
+    .getResults()
+
+  expect(result.numberOfresources()).toBe(2)
 })

@@ -1,4 +1,4 @@
-import SObject from '../../src/s-objects/s-object'
+import SObject, { Condition, Operator } from '../../src/s-objects/s-object'
 
 test('You can set/get custom properties', () => {
   const sObject = new SObject()
@@ -22,4 +22,22 @@ test('It converts custom properties back into a simple sObject format', () => {
   const sObject = new SObject(data)
   const restData = sObject.getRestData()
   expect(restData).toStrictEqual(data)
+})
+
+test('It can match a condition equal and not equal', () => {
+  const data = { B25__Resource__c: 'test' }
+  const sObject = new SObject(data)
+  expect(new Condition('B25__Resource__c', Operator.EQUAL, 'test').matches(sObject)).toBe(true)
+  expect(new Condition('B25__Resource__c', Operator.NOT_EQUAL, 'test').matches(sObject)).toBe(false)
+  expect(new Condition('B25__Resource__c', Operator.EQUAL, 'test2').matches(sObject)).toBe(false)
+  expect(new Condition('B25__Resource__c', Operator.NOT_EQUAL, 'test2').matches(sObject)).toBe(true)
+})
+
+test('It can match a condition greater and less than', () => {
+  const data = { B25__Capacity__c: 10 }
+  const sObject = new SObject(data)
+  expect(new Condition('B25__Capacity__c', Operator.GREATER_THAN, 5).matches(sObject)).toBe(true)
+  expect(new Condition('B25__Capacity__c', Operator.LESS_THAN, 5).matches(sObject)).toBe(false)
+  expect(new Condition('B25__Capacity__c', Operator.GREATER_THAN, 15).matches(sObject)).toBe(false)
+  expect(new Condition('B25__Capacity__c', Operator.LESS_THAN, 15).matches(sObject)).toBe(true)
 })
