@@ -79,8 +79,8 @@ test('Set lead adds a lead to the reservation', () => {
 })
 
 test('Add service reservations to the reservation', () => {
-  const service = new Service({ Id: 'Service Id 1' }, [])
-  const service2 = new Service({ Id: 'Service Id 2' }, [])
+  const service = new Service({ Id: 'Service Id 1', B25__Price__c: 10 }, [])
+  const service2 = new Service({ Id: 'Service Id 2', B25__Price__c: 18 }, [])
   const reservation = new Reservation()
   reservation.addService(service, 2)
   reservation.addService(service2, 12)
@@ -88,10 +88,12 @@ test('Add service reservations to the reservation', () => {
   const expectedRestData = getBlankReservationRestData()
   expectedRestData.serviceReservations = [{
     B25__Service__c: 'Service Id 1',
-    B25__Quantity__c: 2
+    B25__Quantity__c: 2,
+    B25__Unit_Price__c: 10
   }, {
     B25__Service__c: 'Service Id 2',
-    B25__Quantity__c: 12
+    B25__Quantity__c: 12,
+    B25__Unit_Price__c: 18
   }]
   expect(restData).toStrictEqual(expectedRestData)
 })

@@ -11,7 +11,7 @@ export default class Reservation extends SObject {
   private resource: Resource | null = null
   private contact: Contact | null = null
   private lead: Lead | null = null
-  private readonly serviceReservations: ServiceReservation[] = []
+  public readonly serviceReservations: ServiceReservation[] = []
 
   public setResource (resource: Resource): Reservation {
     this.resource = resource
@@ -52,6 +52,18 @@ export default class Reservation extends SObject {
     requestData.leadConfig = this.getLeadConfig()
     requestData.contactConfig = this.getContactConfig()
     requestData.serviceReservations = this.getServiceReservationRestData()
+    return requestData
+  }
+
+  public getPriceCalculationData (): { [key: string]: any } {
+    const requestData: { [key: string]: any } = {}
+    requestData.reservation = this.getReservationRestData()
+    requestData.serviceReservations = this.getServiceReservationRestData()
+    requestData.serviceCosts = this.serviceReservations.reduce((serviceCosts, serviceReservation) => {
+      const quantity = serviceReservation.quantity ?? 0
+      const unitPrice = serviceReservation.unitPrice ?? 0
+      return serviceCosts + (quantity * unitPrice)
+    }, 0)
     return requestData
   }
 
