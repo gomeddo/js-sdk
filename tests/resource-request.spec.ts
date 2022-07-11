@@ -7,10 +7,10 @@ import AvailabilityTimeSlotRequest from '../src/api/availability-request'
 import { AvailabilitySlotType } from '../src/time-slots/availability-time-slot'
 import ServiceTimeSlotRequest from '../src/api/service-availability-request'
 import { dummyId0, dummyId1, dummyId2, dummyId3 } from './__utils__/salesforce-dummy-ids'
-import { Condition, Opperator } from '../src/s-objects/s-object'
+import { Condition, Operator } from '../src/s-objects/s-object'
 
 const baseResourceRequestUrl = 'https://api.booker25.com/api/v3/proxy/resources'
-const availabilityRequestUrl = 'https://api.booker25.com/api/v3/proxy/availability'
+const availabilityRequestUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/availability'
 const serviceRequestUrl = 'https://api.booker25.com/api/v3/proxy/serviceAvailability'
 const childResourceUrl = (parentId: string): string => `https://api.booker25.com/api/v3/proxy/resources/${parentId}/children`
 
@@ -238,7 +238,7 @@ test('It filters the results based on a simple condition', async () => {
   fetchMock.doMock(JSON.stringify(resources))
 
   const result = await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
-    .withCondition(new Condition('B25__Api_Visible__c', Opperator.EQUAL, true))
+    .withCondition(new Condition('B25__Api_Visible__c', Operator.EQUAL, true))
     .getResults()
 
   expect(result.numberOfresources()).toBe(1)
@@ -256,8 +256,8 @@ test('It filters the results based on a combined condition', async () => {
 
   const result = await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
     .withCondition(
-      new Condition('B25__Api_Visible__c', Opperator.EQUAL, true),
-      new Condition('B25__Capacity__c', Opperator.LESS_THAN, 25)
+      new Condition('B25__Api_Visible__c', Operator.EQUAL, true),
+      new Condition('B25__Capacity__c', Operator.LESS_THAN, 25)
     )
     .getResults()
 
@@ -275,8 +275,8 @@ test('It filters the results based on multiple conditions', async () => {
   fetchMock.doMock(JSON.stringify(resources))
 
   const result = await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
-    .withCondition(new Condition('B25__Api_Visible__c', Opperator.EQUAL, true))
-    .withCondition(new Condition('B25__Capacity__c', Opperator.GREATER_THAN, 25))
+    .withCondition(new Condition('B25__Api_Visible__c', Operator.EQUAL, true))
+    .withCondition(new Condition('B25__Capacity__c', Operator.GREATER_THAN, 25))
     .getResults()
 
   expect(result.numberOfresources()).toBe(2)

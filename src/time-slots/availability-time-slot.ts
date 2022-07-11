@@ -20,29 +20,25 @@ class AvailabilityTimeSlot extends TimeSlot {
 }
 
 class AvailabilityBuilder extends Builder {
-  currentSlotData: Map<AvailabilitySlotType, number> = new Map([
-    [AvailabilitySlotType.OPEN, 0],
-    [AvailabilitySlotType.CLOSED, 0],
-    [AvailabilitySlotType.RESERVATION, 0]
-  ])
+  currentSlotData: Record<AvailabilitySlotType, number> = {
+    [AvailabilitySlotType.OPEN]: 0,
+    [AvailabilitySlotType.CLOSED]: 0,
+    [AvailabilitySlotType.RESERVATION]: 0
+  }
 
   addDataFromElement (element: AvailabilityBuilderElement): void {
-    // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
-    this.currentSlotData.set(element.slotType, this.currentSlotData.get(element.slotType)! + 1)
+    this.currentSlotData[element.slotType] = this.currentSlotData[element.slotType] + 1
   }
 
   removeDataFromElement (element: AvailabilityBuilderElement): void {
-    // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
-    this.currentSlotData.set(element.slotType, this.currentSlotData.get(element.slotType)! - 1)
+    this.currentSlotData[element.slotType] = this.currentSlotData[element.slotType] - 1
   }
 
   getTimeSlot (startOfSlot: Date, endOfSlot: Date): TimeSlot {
-    // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
-    if (this.currentSlotData.get(AvailabilitySlotType.CLOSED)! > 0) {
+    if (this.currentSlotData[AvailabilitySlotType.CLOSED] > 0) {
       return new AvailabilityTimeSlot(AvailabilitySlotType.CLOSED, startOfSlot, endOfSlot)
     }
-    // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
-    if (this.currentSlotData.get(AvailabilitySlotType.RESERVATION)! > 0) {
+    if (this.currentSlotData[AvailabilitySlotType.RESERVATION] > 0) {
       return new AvailabilityTimeSlot(AvailabilitySlotType.RESERVATION, startOfSlot, endOfSlot)
     }
     return new AvailabilityTimeSlot(AvailabilitySlotType.OPEN, startOfSlot, endOfSlot)
