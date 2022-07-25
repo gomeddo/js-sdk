@@ -133,13 +133,16 @@ test('It adds service timelines if requested', async () => {
     getAvailabilitySlot(1, 0, 2, 0, 'Open')
   ])))
   const serviceAvailabilityFetchMock = fetchMock.once(JSON.stringify(
-    [
-      getServiceResponse(['1'], ['1', '2'], [
-        getServiceSlot(1, 0, 2, 0, 'Availability', 10),
-        getServiceSlot(1, 10, 1, 16, 'Reservation', 5)
-      ])[0],
-      getServiceResponse(['2'], ['1'], [])[0]
-    ]
+    {
+      resources: {
+        1: getServiceResponse(['1'], ['1', '2'], [
+          getServiceSlot(1, 0, 1, 10, 10),
+          getServiceSlot(1, 10, 1, 16, 5),
+          getServiceSlot(1, 16, 2, 0, 10)
+        ]).resources['1'],
+        2: getServiceResponse(['2'], ['1'], []).resources['2']
+      }
+    }
   ))
 
   const result = await getResourceRequest()

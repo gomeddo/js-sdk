@@ -5,36 +5,18 @@ import { SFServiceReservation } from '../s-objects/service-reservation'
 // Property names have to be exact to the endpoint
 class ReservationSaveRequest {
   reservation: Partial<SFReservation>
-  leadConfig: LeadConfig | null
-  contactConfig: ContactConfig | null
+  lead: Partial<StandardSFSObject> | null
+  contact: Partial<StandardSFSObject> | null
   serviceReservations: Array<Partial<SFServiceReservation>>
 
-  constructor (reservation: Partial<SFReservation>, leadConfig: LeadConfig | null, contactConfig: ContactConfig | null, serviceReservations: Array<Partial<SFServiceReservation>>) {
+  constructor (reservation: Partial<SFReservation>, lead: Partial<StandardSFSObject> | null, contact: Partial<StandardSFSObject> | null, serviceReservations: Array<Partial<SFServiceReservation>>) {
     this.reservation = reservation
-    this.leadConfig = leadConfig
-    this.contactConfig = contactConfig
+    this.lead = lead
+    this.contact = contact
     this.serviceReservations = serviceReservations
   }
 }
 
-class LeadConfig {
-  lead: Partial<StandardSFSObject>
-
-  constructor (lead: Partial<StandardSFSObject>) {
-    this.lead = lead
-  }
-}
-
-class ContactConfig {
-  contact: Partial<StandardSFSObject>
-
-  constructor (contact: Partial<StandardSFSObject>) {
-    this.contact = contact
-  }
-}
-
 export {
-  ReservationSaveRequest,
-  LeadConfig,
-  ContactConfig
+  ReservationSaveRequest
 }

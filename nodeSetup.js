@@ -15,6 +15,9 @@ repl.context.Booker25 = require('./dist/index.js').default
 repl.context.Enviroment = require('./dist/index.js').Enviroment
 repl.context.Opperator = require('./dist/s-objects/s-object.js').Opperator
 repl.context.Condition = require('./dist/s-objects/s-object.js').Condition
+repl.context.Reservation = require('./dist/s-objects/reservation.js').default
+repl.context.Contact = require('./dist/s-objects/contact.js').default
+repl.context.Lead = require('./dist/s-objects/lead.js').default
 const apiKey = process.env.B25_JS_SDK_KEY
 if (!apiKey) {
   throw new Error('Set your booker25 proxy api key in the enviroment variable B25_JS_SDK_KEY')

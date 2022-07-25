@@ -2,7 +2,7 @@ import SObject, { CustomSFSObject } from './s-object'
 import Service from './service'
 
 export default class ServiceReservation extends SObject {
-  private readonly service: Service
+  public readonly service: Service
   public quantity: number
   public unitPrice: number
 

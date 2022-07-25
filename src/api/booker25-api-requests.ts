@@ -109,8 +109,8 @@ export default class Booker25API {
       headers: this.getHeaders()
     })
     await this.checkResponse(response)
-    const data = (await response.json()) as any[]
-    return data.map(data => new ServiceTimeSlotResponse(data))
+    const data = await response.json()
+    return Object.keys(data.resources).map(dimensionId => new ServiceTimeSlotResponse(data.resources[dimensionId]))
   }
 
   private getHeaders (): Record<string, string> {

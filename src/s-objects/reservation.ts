@@ -1,9 +1,9 @@
 import ReservationPriceCalculationRequest from '../api/reservation-price-calculation-request'
-import { ContactConfig, LeadConfig, ReservationSaveRequest } from '../api/reservation-save-request'
+import { ReservationSaveRequest } from '../api/reservation-save-request'
 import Contact from './contact'
 import Lead from './lead'
 import Resource from './resource'
-import SObject, { CustomSFSObject } from './s-object'
+import SObject, { CustomSFSObject, StandardSFSObject } from './s-object'
 import Service from './service'
 import ServiceReservation, { SFServiceReservation } from './service-reservation'
 
@@ -13,11 +13,15 @@ export default class Reservation extends SObject {
   private resource: Resource | null = null
   private contact: Contact | null = null
   private lead: Lead | null = null
-  public readonly serviceReservations: ServiceReservation[] = []
+  public serviceReservations: ServiceReservation[] = []
 
   public setResource (resource: Resource): Reservation {
     this.resource = resource
     return this
+  }
+
+  public getResource (): Resource | null {
+    return this.resource
   }
 
   public setStartDatetime (datetime: Date): Reservation {
@@ -46,13 +50,11 @@ export default class Reservation extends SObject {
     return serviceReservation
   }
 
-  // TODO any structure or property names here are subject to change
-  // The endpoint has not yet been written and will have to be designed later when all requirements are more clear
   public getReservationSaveRequest (): ReservationSaveRequest {
     return new ReservationSaveRequest(
       this.getSFSObject(),
-      this.getLeadConfig(),
-      this.getContactConfig(),
+      this.getLead(),
+      this.getContact(),
       this.getServiceReservationRestData()
     )
   }
@@ -83,22 +85,18 @@ export default class Reservation extends SObject {
     return reservationData
   }
 
-  // TODO this is a more complex object because it is anticipated that it will include info
-  // On how to link the lead and potential duplicate rule use.
-  private getLeadConfig (): LeadConfig | null {
+  private getLead (): Partial<StandardSFSObject> | null {
     if (this.lead === null) {
       return null
     }
-    return new LeadConfig(this.lead.getSFSObject())
+    return this.lead.getSFSObject()
   }
 
-  // TODO this is a more complex object because it is anticipated that it will include info
-  // On how to link the contact and potential duplicate rule use.
-  private getContactConfig (): ContactConfig | null {
+  private getContact (): Partial<StandardSFSObject> | null {
     if (this.contact === null) {
       return null
     }
-    return new ContactConfig(this.contact.getSFSObject())
+    return this.contact.getSFSObject()
   }
 
   private getServiceReservationRestData (): Array<Partial<SFServiceReservation>> {

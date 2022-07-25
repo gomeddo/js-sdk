@@ -1,4 +1,4 @@
-import { ContactConfig, LeadConfig, ReservationSaveRequest } from '../../src/api/reservation-save-request'
+import { ReservationSaveRequest } from '../../src/api/reservation-save-request'
 import Contact from '../../src/s-objects/contact'
 import Lead from '../../src/s-objects/lead'
 import Reservation from '../../src/s-objects/reservation'
@@ -50,24 +50,24 @@ test('Set end datetime sets the end datetime of the reservation', () => {
 test('Set contact adds a contact to the reservation', () => {
   const reservation = new Reservation().setContact(new Contact('firstname', 'lastname', 'email'))
   const restData = reservation.getReservationSaveRequest()
-  const contactConfig = new ContactConfig({
+  const contact = {
     FirstName: 'firstname',
     LastName: 'lastname',
     Email: 'email'
-  })
-  const expectedRestData = new ReservationSaveRequest({}, null, contactConfig, [])
+  }
+  const expectedRestData = new ReservationSaveRequest({}, null, contact, [])
   expect(restData).toStrictEqual(expectedRestData)
 })
 
 test('Set lead adds a lead to the reservation', () => {
   const reservation = new Reservation().setLead(new Lead('firstname', 'lastname', 'email'))
   const restData = reservation.getReservationSaveRequest()
-  const leadConfig = new LeadConfig({
+  const lead = {
     FirstName: 'firstname',
     LastName: 'lastname',
     Email: 'email'
-  })
-  const expectedRestData = new ReservationSaveRequest({}, leadConfig, null, [])
+  }
+  const expectedRestData = new ReservationSaveRequest({}, lead, null, [])
   expect(restData).toStrictEqual(expectedRestData)
 })
 
