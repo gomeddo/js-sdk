@@ -16,13 +16,22 @@ test('You can save a reservations through it', async () => {
   const mock = fetchMock.once(JSON.stringify({
     reservation: {
       B25__Resource__c: 'test'
-    }
+    },
+    lead: null,
+    contact: null,
+    serviceReservations: []
   }))
   const reservation = new Reservation()
   reservation.setCustomProperty('B25__Api_Visible__c', true)
   const result = await (new Booker25('key', Enviroment.PRODUCTION)).saveReservation(reservation)
   const expectedResult = new Reservation()
+  const dummyDate = new Date()
+  expectedResult.id = undefined as any
+  expectedResult.setStartDatetime(dummyDate)
+  expectedResult.setEndDatetime(dummyDate)
   expectedResult.setCustomProperty('B25__Resource__c', 'test')
+  result.setStartDatetime(dummyDate)
+  result.setEndDatetime(dummyDate)
   expect(result).toStrictEqual(expectedResult)
   expect(mock).toHaveBeenCalled()
   const expectedBodyData = new ReservationSaveRequest({ B25__Api_Visible__c: true }, null, null, [])
@@ -55,6 +64,6 @@ test('You can recalculate the price of the reservation through it', async () => 
   const result = await (new Booker25('key', Enviroment.PRODUCTION)).calculatePrice(reservation)
   expect(result.getCustomProperty('B25__Subtotal__c')).toStrictEqual(150)
   expect(result.getCustomProperty('B25__Service_Costs__c')).toStrictEqual(276)
-  expect(result.getCustomProperty('Total_Price__c')).toStrictEqual(150 + 276)
+  expect(result.getCustomProperty('B25__Total_Price__c')).toStrictEqual(150 + 276)
   expect(result.serviceReservations[0].getCustomProperty('B25__Subtotal__c')).toStrictEqual(276)
 })
