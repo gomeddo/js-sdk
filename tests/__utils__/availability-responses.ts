@@ -1,3 +1,5 @@
+import { getSObject } from './s-object-data'
+
 const getAvailabilityResponse = (dimensionIds: string[], slots: any[]): any[] => {
   return dimensionIds.map((dimensionId) => {
     return {
@@ -26,7 +28,7 @@ const getServiceResponse = (dimensionIds: string[], serviceIds: string[], slots:
       endDateTime: '2022-01-10T00:00:00.000Z',
       dimensionId: `Id ${dimensionId}`,
       services: serviceIds.map(serviceId => ({
-        service: { Id: `Service Id ${serviceId}`, Name: `Service Name ${serviceId}` },
+        service: getSObject(`Service Id ${serviceId}`, `Service Name ${serviceId}`),
         timeSlots: slots
       }))
     }

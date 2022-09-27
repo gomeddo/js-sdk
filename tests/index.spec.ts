@@ -1,7 +1,8 @@
+import { ReservationSaveRequest } from '../src/api/reservation-save-request'
 import Booker25, { Enviroment } from '../src/index'
 import Reservation from '../src/s-objects/reservation'
 import Service from '../src/s-objects/service'
-import { getBlankReservationRestData } from './__utils__/reservation-rest-data'
+import { getSObject } from './__utils__/s-object-data'
 
 beforeEach(() => {
   fetchMock.resetMocks()
@@ -24,8 +25,7 @@ test('You can save a reservations through it', async () => {
   expectedResult.setCustomProperty('B25__Resource__c', 'test')
   expect(result).toStrictEqual(expectedResult)
   expect(mock).toHaveBeenCalled()
-  const expectedBodyData = getBlankReservationRestData()
-  expectedBodyData.reservation.B25__Api_Visible__c = true
+  const expectedBodyData = new ReservationSaveRequest({ B25__Api_Visible__c: true }, null, null, [])
   expect(mock).toHaveBeenCalledWith(
     'https://api.booker25.com/api/v3/proxy/reservations',
     {
@@ -49,9 +49,7 @@ test('You can recalculate the price of the reservation through it', async () => 
   const reservation = new Reservation()
   reservation.setCustomProperty('B25__Quantity__c', 10)
   reservation.setCustomProperty('B25__Base_Price__c', 15)
-  const service = new Service({
-    B25__Price__c: 23
-  }, [])
+  const service = new Service({ ...getSObject(), B25__Price__c: 23 }, [])
   reservation.addService(service, 12)
   const result = await (new Booker25(Enviroment.PRODUCTION)).calculatePrice(reservation)
   expect(result.getCustomProperty('B25__Subtotal__c')).toStrictEqual(150)
@@ -80,9 +78,9 @@ test('You can recalculate the price of the reservation through it with VAT rates
   const reservation = new Reservation()
   reservation.setCustomProperty('B25__Quantity__c', 10)
   reservation.setCustomProperty('B25__Base_Price__c', 15)
-  const service = new Service({
-    B25__Price__c: 23
-  }, [])
+  const serviceSobject = getSObject()
+  serviceSobject.B25__Price__c = 23
+  const service = new Service(serviceSobject, [])
   reservation.addService(service, 12)
   const result = await (new Booker25(Enviroment.PRODUCTION)).calculatePrice(reservation)
   expect(result.getCustomProperty('B25__Subtotal__c')).toStrictEqual(150)
