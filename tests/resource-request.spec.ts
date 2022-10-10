@@ -9,49 +9,62 @@ import ServiceTimeSlotRequest from '../src/api/service-availability-request'
 import { dummyId0, dummyId1, dummyId2, dummyId3 } from './__utils__/salesforce-dummy-ids'
 import { Condition, Operator } from '../src/s-objects/s-object'
 
-const baseResourceRequestUrl = 'https://api.booker25.com/api/v3/proxy/resources'
+const baseResourceRequestUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/resources'
 const availabilityRequestUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/availability'
-const serviceRequestUrl = 'https://api.booker25.com/api/v3/proxy/serviceAvailability'
-const childResourceUrl = (parentId: string): string => `https://api.booker25.com/api/v3/proxy/resources/${parentId}/children`
+const serviceRequestUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/services/availability'
+const childResourceUrl = (parentId: string): string => `https://api.booker25.com/api/v3/proxy/B25/v1/resources/${parentId}/children`
+const getResourceRequest = (): ResourceRequest => new ResourceRequest(new Booker25API('key', Enviroment.PRODUCTION))
 
 beforeEach(() => {
   fetchMock.resetMocks()
 })
 
 test('It calls the booker25 resurces endpoint when provided with no additional info', async () => {
-  const resourceRequest = new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  const resourceRequest = getResourceRequest()
   const mock = fetchMock.once('[]')
   const result = await resourceRequest.getResults()
-  expect(mock).toBeCalledWith(`${baseResourceRequestUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`)
+  expect(mock).toBeCalledWith(
+    `${baseResourceRequestUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`,
+    { headers: { Authorization: 'Bearer key' } }
+  )
   expect(result.numberOfresources()).toBe(0)
 })
 
 test('It adds the field if added to the request', async () => {
-  const resourceRequest = new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  const resourceRequest = getResourceRequest()
   resourceRequest.withAdditionalField('B25__Api_Visible__c')
   const mock = fetchMock.once('[]')
   const result = await resourceRequest.getResults()
-  expect(mock).toBeCalledWith(`${baseResourceRequestUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c%2CB25__Api_Visible__c`)
+  expect(mock).toBeCalledWith(
+    `${baseResourceRequestUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c%2CB25__Api_Visible__c`,
+    { headers: { Authorization: 'Bearer key' } }
+  )
   expect(result.numberOfresources()).toBe(0)
 })
 
 test('It adds the fields if added to the request', async () => {
-  const resourceRequest = new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  const resourceRequest = getResourceRequest()
   resourceRequest.withAdditionalFields(new Set(['B25__Api_Visible__c', 'B25__Booker25_Id__c']))
   const mock = fetchMock.once('[]')
   const result = await resourceRequest.getResults()
-  expect(mock).toBeCalledWith(`${baseResourceRequestUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c%2CB25__Api_Visible__c%2CB25__Booker25_Id__c`)
+  expect(mock).toBeCalledWith(
+    `${baseResourceRequestUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c%2CB25__Api_Visible__c%2CB25__Booker25_Id__c`,
+    { headers: { Authorization: 'Bearer key' } }
+  )
   expect(result.numberOfresources()).toBe(0)
 })
 
 test('It parses the result into resources', async () => {
   const resourceGenerator = new ResourceGenerator('Id', 'Name')
-  const resourceRequest = new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  const resourceRequest = getResourceRequest()
   const mock = fetchMock.once(JSON.stringify(
     resourceGenerator.getResourceArray(2)
   ))
   const result = await resourceRequest.getResults()
-  expect(mock).toBeCalledWith(`${baseResourceRequestUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`)
+  expect(mock).toBeCalledWith(
+    `${baseResourceRequestUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`,
+    { headers: { Authorization: 'Bearer key' } }
+  )
   expect(result.numberOfresources()).toBe(2)
   expect(result.getResource('Name 1')).not.toBeUndefined()
   expect(result.getResource('Name 2')).not.toBeUndefined()
@@ -75,10 +88,13 @@ test('It adds timelines if requested', async () => {
       ])[0]
     ]
   ))
-  const result = await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  const result = await getResourceRequest()
     .withAvailableSlotsBetween(new Date(Date.UTC(2022, 0, 1)), new Date(Date.UTC(2022, 0, 2)))
     .getResults()
-  expect(resourceFetchMock).toBeCalledWith(`${baseResourceRequestUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`)
+  expect(resourceFetchMock).toBeCalledWith(
+    `${baseResourceRequestUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`,
+    { headers: { Authorization: 'Bearer key' } }
+  )
   const requestBody = new AvailabilityTimeSlotRequest(
     new Date(Date.UTC(2022, 0, 1)),
     new Date(Date.UTC(2022, 0, 2)),
@@ -86,7 +102,8 @@ test('It adds timelines if requested', async () => {
   )
   expect(availabilityFetchMock).toBeCalledWith(availabilityRequestUrl, {
     method: 'POST',
-    body: JSON.stringify(requestBody)
+    body: JSON.stringify(requestBody),
+    headers: { Authorization: 'Bearer key' }
   })
   expect(result.numberOfresources()).toBe(1)
   const resourceOne = result.getResource('Name 1')
@@ -117,16 +134,19 @@ test('It adds service timelines if requested', async () => {
     getAvailabilitySlot(1, 0, 2, 0, 'Open')
   ])))
   const serviceAvailabilityFetchMock = fetchMock.once(JSON.stringify(
-    [
-      getServiceResponse(['1'], ['1', '2'], [
-        getServiceSlot(1, 0, 2, 0, 'Availability', 10),
-        getServiceSlot(1, 10, 1, 16, 'Reservation', 5)
-      ])[0],
-      getServiceResponse(['2'], ['1'], [])[0]
-    ]
+    {
+      resources: {
+        1: getServiceResponse(['1'], ['1', '2'], [
+          getServiceSlot(1, 0, 1, 10, 10),
+          getServiceSlot(1, 10, 1, 16, 5),
+          getServiceSlot(1, 16, 2, 0, 10)
+        ]).resources['1'],
+        2: getServiceResponse(['2'], ['1'], []).resources['2']
+      }
+    }
   ))
 
-  const result = await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  const result = await getResourceRequest()
     .withAvailableSlotsBetween(new Date(Date.UTC(2022, 0, 1)), new Date(Date.UTC(2022, 0, 2)))
     .includeServices(true)
     .getResults()
@@ -138,7 +158,8 @@ test('It adds service timelines if requested', async () => {
 
   expect(serviceAvailabilityFetchMock).toBeCalledWith(serviceRequestUrl, {
     method: 'POST',
-    body: JSON.stringify(requestBody)
+    body: JSON.stringify(requestBody),
+    headers: { Authorization: 'Bearer key' }
   })
   expect(result.numberOfresources()).toBe(2)
   const resourceOne = result.getResource('Name 1')
@@ -168,22 +189,31 @@ test('It requests parent scope if requested', async () => {
   const resourceGenerator = new ResourceGenerator('Id', 'Name')
   const resourceFetchMock = fetchMock.once(JSON.stringify(resourceGenerator.getResourceArray(2)))
 
-  await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  await getResourceRequest()
     .includeAllResourcesAt(dummyId0)
     .getResults()
-  expect(resourceFetchMock).toBeCalledWith(`${childResourceUrl(dummyId0)}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`)
+  expect(resourceFetchMock).toBeCalledWith(
+    `${childResourceUrl(dummyId0)}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`,
+    { headers: { Authorization: 'Bearer key' } }
+  )
 })
 
 test('It requests parent scope multiple times once for each parent', async () => {
   const resourceGenerator = new ResourceGenerator('Id', 'Name')
   const resourceFetchMock = fetchMock.doMock(JSON.stringify(resourceGenerator.getResourceArray(2)))
 
-  await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  await getResourceRequest()
     .includeAllResourcesAt(dummyId0, dummyId1)
     .getResults()
   expect(resourceFetchMock).toBeCalledTimes(2)
-  expect(resourceFetchMock).toBeCalledWith(`${childResourceUrl(dummyId0)}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`)
-  expect(resourceFetchMock).toBeCalledWith(`${childResourceUrl(dummyId1)}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`)
+  expect(resourceFetchMock).toBeCalledWith(
+    `${childResourceUrl(dummyId0)}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`,
+    { headers: { Authorization: 'Bearer key' } }
+  )
+  expect(resourceFetchMock).toBeCalledWith(
+    `${childResourceUrl(dummyId1)}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`,
+    { headers: { Authorization: 'Bearer key' } }
+  )
 })
 
 test('Duplicate results are filtered out', async () => {
@@ -191,13 +221,19 @@ test('Duplicate results are filtered out', async () => {
   // Both requests get the same result of two resources
   const resourceFetchMock = fetchMock.doMock(JSON.stringify(resourceGenerator.getResourceArray(2)))
 
-  const result = await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  const result = await getResourceRequest()
     .includeAllResourcesAt(dummyId0, dummyId1)
     .getResults()
   // Call was ran twice
   expect(resourceFetchMock).toBeCalledTimes(2)
-  expect(resourceFetchMock).toBeCalledWith(`${childResourceUrl(dummyId0)}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`)
-  expect(resourceFetchMock).toBeCalledWith(`${childResourceUrl(dummyId1)}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`)
+  expect(resourceFetchMock).toBeCalledWith(
+    `${childResourceUrl(dummyId0)}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`,
+    { headers: { Authorization: 'Bearer key' } }
+  )
+  expect(resourceFetchMock).toBeCalledWith(
+    `${childResourceUrl(dummyId1)}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`,
+    { headers: { Authorization: 'Bearer key' } }
+  )
 
   // Only two unique resources are returned
   expect(result.numberOfresources()).toBe(2)
@@ -207,27 +243,45 @@ test('It adds a type id to the request if a type is requested', async () => {
   const resourceGenerator = new ResourceGenerator('Id', 'Name')
   const resourceFetchMock = fetchMock.doMock(JSON.stringify(resourceGenerator.getResourceArray(2)))
 
-  await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  await getResourceRequest()
     .withType(dummyId0, dummyId1)
     .getResults()
   expect(resourceFetchMock).toBeCalledTimes(2)
-  expect(resourceFetchMock).toBeCalledWith(`${baseResourceRequestUrl}?resourceType=${dummyId0}&fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`)
-  expect(resourceFetchMock).toBeCalledWith(`${baseResourceRequestUrl}?resourceType=${dummyId1}&fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`)
+  expect(resourceFetchMock).toBeCalledWith(
+    `${baseResourceRequestUrl}?resourceType=${dummyId0}&fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`,
+    { headers: { Authorization: 'Bearer key' } }
+  )
+  expect(resourceFetchMock).toBeCalledWith(
+    `${baseResourceRequestUrl}?resourceType=${dummyId1}&fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`,
+    { headers: { Authorization: 'Bearer key' } }
+  )
 })
 
 test('It generates combined requests when both parent resources and types are requested', async () => {
   const resourceGenerator = new ResourceGenerator('Id', 'Name')
   const resourceFetchMock = fetchMock.doMock(JSON.stringify(resourceGenerator.getResourceArray(2)))
 
-  await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  await getResourceRequest()
     .includeAllResourcesAt(dummyId0, dummyId1)
     .withType(dummyId2, dummyId3)
     .getResults()
   expect(resourceFetchMock).toBeCalledTimes(4)
-  expect(resourceFetchMock).toBeCalledWith(`${childResourceUrl(dummyId0)}?resourceType=${dummyId2}&fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`)
-  expect(resourceFetchMock).toBeCalledWith(`${childResourceUrl(dummyId1)}?resourceType=${dummyId3}&fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`)
-  expect(resourceFetchMock).toBeCalledWith(`${childResourceUrl(dummyId0)}?resourceType=${dummyId3}&fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`)
-  expect(resourceFetchMock).toBeCalledWith(`${childResourceUrl(dummyId1)}?resourceType=${dummyId2}&fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`)
+  expect(resourceFetchMock).toBeCalledWith(
+    `${childResourceUrl(dummyId0)}?resourceType=${dummyId2}&fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`,
+    { headers: { Authorization: 'Bearer key' } }
+  )
+  expect(resourceFetchMock).toBeCalledWith(
+    `${childResourceUrl(dummyId1)}?resourceType=${dummyId3}&fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`,
+    { headers: { Authorization: 'Bearer key' } }
+  )
+  expect(resourceFetchMock).toBeCalledWith(
+    `${childResourceUrl(dummyId0)}?resourceType=${dummyId3}&fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`,
+    { headers: { Authorization: 'Bearer key' } }
+  )
+  expect(resourceFetchMock).toBeCalledWith(
+    `${childResourceUrl(dummyId1)}?resourceType=${dummyId2}&fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`,
+    { headers: { Authorization: 'Bearer key' } }
+  )
 })
 
 test('It filters the results based on a simple condition', async () => {
@@ -237,7 +291,7 @@ test('It filters the results based on a simple condition', async () => {
   resources[1].B25__Api_Visible__c = false
   fetchMock.doMock(JSON.stringify(resources))
 
-  const result = await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  const result = await getResourceRequest()
     .withCondition(new Condition('B25__Api_Visible__c', Operator.EQUAL, true))
     .getResults()
 
@@ -254,7 +308,7 @@ test('It filters the results based on a combined condition', async () => {
   resources[1].B25__Capacity__c = 30
   fetchMock.doMock(JSON.stringify(resources))
 
-  const result = await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  const result = await getResourceRequest()
     .withCondition(
       new Condition('B25__Api_Visible__c', Operator.EQUAL, true),
       new Condition('B25__Capacity__c', Operator.LESS_THAN, 25)
@@ -274,7 +328,7 @@ test('It filters the results based on multiple conditions', async () => {
   resources[1].B25__Capacity__c = 30
   fetchMock.doMock(JSON.stringify(resources))
 
-  const result = await new ResourceRequest(new Booker25API(Enviroment.PRODUCTION))
+  const result = await getResourceRequest()
     .withCondition(new Condition('B25__Api_Visible__c', Operator.EQUAL, true))
     .withCondition(new Condition('B25__Capacity__c', Operator.GREATER_THAN, 25))
     .getResults()

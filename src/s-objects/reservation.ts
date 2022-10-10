@@ -3,7 +3,7 @@ import { ReservationSaveRequest } from '../api/reservation-save-request'
 import Contact from './contact'
 import Lead from './lead'
 import Resource from './resource'
-import SObject, { CustomSFSObject } from './s-object'
+import SObject, { CustomSFSObject, StandardSFSObject } from './s-object'
 import Service from './service'
 import ServiceReservation, { SFServiceReservation } from './service-reservation'
 
@@ -13,11 +13,15 @@ export default class Reservation extends SObject {
   private resource: Resource | null = null
   private contact: Contact | null = null
   private lead: Lead | null = null
-  public readonly serviceReservations: ServiceReservation[] = []
+  public serviceReservations: ServiceReservation[] = []
 
   public setResource (resource: Resource): Reservation {
     this.resource = resource
     return this
+  }
+
+  public getResource (): Resource | null {
+    return this.resource
   }
 
   public setStartDatetime (datetime: Date): Reservation {
@@ -49,8 +53,8 @@ export default class Reservation extends SObject {
   public getReservationSaveRequest (): ReservationSaveRequest {
     return new ReservationSaveRequest(
       this.getSFSObject(),
-      this.lead?.getSFSObject() ?? null,
-      this.contact?.getSFSObject() ?? null,
+      this.getLead(),
+      this.getContact(),
       this.getServiceReservationRestData()
     )
   }
@@ -79,6 +83,20 @@ export default class Reservation extends SObject {
       reservationData.B25__End__c = this.getEndDatetimeString()
     }
     return reservationData
+  }
+
+  private getLead (): Partial<StandardSFSObject> | null {
+    if (this.lead === null) {
+      return null
+    }
+    return this.lead.getSFSObject()
+  }
+
+  private getContact (): Partial<StandardSFSObject> | null {
+    if (this.contact === null) {
+      return null
+    }
+    return this.contact.getSFSObject()
   }
 
   private getServiceReservationRestData (): Array<Partial<SFServiceReservation>> {

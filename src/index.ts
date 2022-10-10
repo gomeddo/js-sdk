@@ -1,7 +1,9 @@
 import Booker25API from './api/booker25-api-requests'
 import ResourceRequest from './resource-request'
+import Contact from './s-objects/contact'
+import Lead from './s-objects/lead'
 import Reservation from './s-objects/reservation'
-import { SFServiceReservation } from './s-objects/service-reservation'
+import ServiceReservation, { SFServiceReservation } from './s-objects/service-reservation'
 
 enum Enviroment {
   DEVELOP,
@@ -13,9 +15,9 @@ class Booker25 {
   static version: string = '0.0.1'
   private readonly enviroment: Enviroment
   private readonly api: Booker25API
-  constructor (enviroment: Enviroment = Enviroment.PRODUCTION) {
+  constructor (apiKey: string, enviroment: Enviroment = Enviroment.PRODUCTION) {
     this.enviroment = enviroment
-    this.api = new Booker25API(enviroment)
+    this.api = new Booker25API(apiKey, enviroment)
   }
 
   public buildResourceRequest (): ResourceRequest {
@@ -25,9 +27,48 @@ class Booker25 {
   public async saveReservation (reservation: Reservation): Promise<Reservation> {
     const result = await this.api.saveReservation(reservation.getReservationSaveRequest()) as any
     const outputReservation = new Reservation()
+    outputReservation.id = result.reservation.Id
+    outputReservation.setStartDatetime(new Date(result.reservation.B25__Start__c))
+    outputReservation.setEndDatetime(new Date(result.reservation.B25__End__c))
+    const resource = reservation.getResource()
+    if (resource !== null) {
+      outputReservation.setResource(resource)
+    }
     Object.entries(result.reservation).forEach(([fieldName, fieldValue]) => {
       outputReservation.setCustomProperty(fieldName, fieldValue)
     })
+    if (result.contact !== null) {
+      const contact = new Contact('', '', '') // Note these values are custom properties and will be overriden
+      Object.entries(result.contact).forEach(([fieldName, fieldValue]) => {
+        contact.setCustomProperty(fieldName, fieldValue)
+      })
+      outputReservation.setContact(contact)
+    }
+    if (result.lead !== null) {
+      const lead = new Lead('', '', '') // Note these values are custom properties and will be overriden
+      Object.entries(result.lead).forEach(([fieldName, fieldValue]) => {
+        lead.setCustomProperty(fieldName, fieldValue)
+      })
+      outputReservation.setLead(lead)
+    }
+    if (result.serviceReservations !== null) {
+      const serviceReservations = result.serviceReservations.map((serviceReservation: SFServiceReservation) => {
+        const matchingService = reservation.serviceReservations.find(
+          (originalServiceReservation) => {
+            return originalServiceReservation.service.id === serviceReservation.B25__Service__c
+          }
+        )
+        if (matchingService !== undefined) {
+          const newServiceReservation = new ServiceReservation(matchingService.service, serviceReservation.B25__Quantity__c ?? 0)
+          Object.entries(serviceReservation).forEach(([fieldName, fieldValue]) => {
+            newServiceReservation.setCustomProperty(fieldName, fieldValue)
+          })
+          return newServiceReservation
+        }
+        return null
+      }).filter((serviceReservation: any) => serviceReservation !== null)
+      outputReservation.serviceReservations = serviceReservations
+    }
     return outputReservation
   }
 

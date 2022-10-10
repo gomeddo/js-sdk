@@ -61,6 +61,7 @@ enum Operator {
 
 interface ConditionElement {
   matches: (resource: SObject) => boolean
+  getFields: () => string[]
 }
 
 class AndCondition implements ConditionElement {
@@ -72,6 +73,10 @@ class AndCondition implements ConditionElement {
 
   matches (resource: SObject): boolean {
     return this.conditions.every(condition => condition.matches(resource))
+  }
+
+  getFields (): string[] {
+    return this.conditions.flatMap((condition) => condition.getFields())
   }
 }
 
@@ -87,6 +92,10 @@ class OrCondition implements ConditionElement {
       return true
     }
     return this.conditions.some(condition => condition.matches(resource))
+  }
+
+  getFields (): string[] {
+    return this.conditions.flatMap((condition) => condition.getFields())
   }
 }
 
@@ -112,6 +121,10 @@ class Condition implements ConditionElement {
       return value > this.value
     }
     return value !== this.value
+  }
+
+  getFields (): string[] {
+    return [this.field]
   }
 }
 

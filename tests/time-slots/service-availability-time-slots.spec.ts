@@ -4,11 +4,14 @@ import { getServiceResponse, getServiceSlot } from '../__utils__/availability-re
 test('It parses the slots into timelines', async () => {
   const result = new ServiceTimeSlotResponse(
     getServiceResponse(['1'], ['1'], [
-      getServiceSlot(1, 0, 2, 0, 'Availability', 10),
-      getServiceSlot(1, 8, 1, 12, 'Reservation', 5),
-      getServiceSlot(1, 10, 1, 14, 'Reservation', 5),
-      getServiceSlot(1, 13, 1, 16, 'Reservation', 5)
-    ])[0]
+      getServiceSlot(1, 0, 1, 8, 10),
+      getServiceSlot(1, 8, 1, 10, 5),
+      getServiceSlot(1, 10, 1, 12, 0),
+      getServiceSlot(1, 12, 1, 13, 5),
+      getServiceSlot(1, 13, 1, 14, 0),
+      getServiceSlot(1, 14, 1, 16, 5),
+      getServiceSlot(1, 16, 2, 0, 10)
+    ]).resources['1']
   )
   expect(result.services.length).toBe(1)
   expect(result.services[0].timeSlots.length).toBe(7)
