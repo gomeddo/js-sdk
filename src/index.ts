@@ -32,7 +32,6 @@ class Booker25 {
     outputReservation.setEndDatetime(new Date(result.reservation.B25__End__c))
     const resource = reservation.getResource()
     if (resource !== null) {
-      // TODO is this ok. It is wrong if the trigger changed the resource somehow but i can't create a proper resource object with just and id
       outputReservation.setResource(resource)
     }
     Object.entries(result.reservation).forEach(([fieldName, fieldValue]) => {
