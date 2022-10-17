@@ -15,41 +15,85 @@ export default class Reservation extends SObject {
   private lead: Lead | null = null
   public serviceReservations: ServiceReservation[] = []
 
+  /**
+   * Attatch this reservation to the given resource.
+   *
+   * @param resource The resource to attatch this reservation to.
+   * @returns This reservation
+   */
   public setResource (resource: Resource): Reservation {
     this.resource = resource
     return this
   }
 
+  /**
+   * Get the resource this reservation is currently attatched to.
+   *
+   * @returns The resource this reservation is attached to.
+   */
   public getResource (): Resource | null {
     return this.resource
   }
 
+  /**
+   * @param datetime The start datetime to set on the reservation (GMT)
+   * @returns This reservation
+   */
   public setStartDatetime (datetime: Date): Reservation {
     this.startDatetime = datetime
     return this
   }
 
+  /**
+   * @param datetime The end datetime to set on the reservation (GMT)
+   * @returns This reservation
+   */
   public setEndDatetime (datetime: Date): Reservation {
     this.endDatetime = datetime
     return this
   }
 
+  /**
+   * Sets a contact to be attached to this reservation. This contact will either be linked through reservation contact or through the contact lookup.
+   * This can be configured in salesforce. The contact will be duplicate checked and the existing contact will be linked instead if already found.
+   *
+   * @param contact The contact to attach to the reservation
+   * @returns This reservation
+   */
   public setContact (contact: Contact): Reservation {
     this.contact = contact
     return this
   }
 
+  /**
+   * Sets a lead to be attached to this reservation. This lead will be linked through the lead lookup.
+   * The lead will be duplicate checked and the existing lead will be linked instead if already found.
+   *
+   * @param lead The lead to attach to the reservation
+   * @returns This reservation
+   */
   public setLead (lead: Lead): Reservation {
     this.lead = lead
     return this
   }
 
+  /**
+   * Creates a service reservation and attaches it to the reservation.
+   *
+   * @param service The service to reserve
+   * @param quantity The quantity to reserve
+   * @returns The service reservation created.
+   */
   public addService (service: Service, quantity: number): ServiceReservation {
     const serviceReservation = new ServiceReservation(service, quantity)
     this.serviceReservations.push(serviceReservation)
     return serviceReservation
   }
 
+  /**
+   * @internal
+   * @returns Save request data for this reservation
+   */
   public getReservationSaveRequest (): ReservationSaveRequest {
     return new ReservationSaveRequest(
       this.getSFSObject(),
@@ -59,6 +103,10 @@ export default class Reservation extends SObject {
     )
   }
 
+  /**
+   * @internal
+   * @returns Price calucaltion request data for this reservation
+   */
   public getPriceCalculationData (): ReservationPriceCalculationRequest {
     return new ReservationPriceCalculationRequest(
       this.getSFSObject(),
@@ -71,6 +119,10 @@ export default class Reservation extends SObject {
     )
   }
 
+  /**
+   * @internal
+   * @returns The Salesforce formated data for the reservation
+   */
   public override getSFSObject (): Partial<SFReservation> {
     const reservationData = super.getSFSObject() as Partial<SFReservation>
     if (this.resource !== null) {
@@ -85,6 +137,10 @@ export default class Reservation extends SObject {
     return reservationData
   }
 
+  /**
+   * @internal
+   * @returns The Salesforce formated data for the lead
+   */
   private getLead (): Partial<StandardSFSObject> | null {
     if (this.lead === null) {
       return null
@@ -92,6 +148,10 @@ export default class Reservation extends SObject {
     return this.lead.getSFSObject()
   }
 
+  /**
+   * @internal
+   * @returns The Salesforce formated data for the contact
+   */
   private getContact (): Partial<StandardSFSObject> | null {
     if (this.contact === null) {
       return null
@@ -99,10 +159,18 @@ export default class Reservation extends SObject {
     return this.contact.getSFSObject()
   }
 
+  /**
+   * @internal
+   * @returns The Salesforce formated data for the servuce reservations
+   */
   private getServiceReservationRestData (): Array<Partial<SFServiceReservation>> {
     return this.serviceReservations.map(serviceReservation => serviceReservation.getSFSObject())
   }
 
+  /**
+   * @internal
+   * @returns A string representing the startdatetime
+   */
   private getStartDatetimeString (): string | null {
     if (this.startDatetime === null) {
       return null
@@ -110,6 +178,10 @@ export default class Reservation extends SObject {
     return this.startDatetime.toISOString()
   }
 
+  /**
+   * @internal
+   * @returns A string representing the enddatetime
+   */
   private getEndDatetimeString (): string | null {
     if (this.endDatetime === null) {
       return null

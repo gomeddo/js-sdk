@@ -11,19 +11,40 @@ enum Enviroment {
   STAGING,
   PRODUCTION,
 }
+
+/**
+ * Booker25 object allows for interaction with booker25
+ */
 class Booker25 {
   static version: string = '0.0.1'
   private readonly enviroment: Enviroment
   private readonly api: Booker25API
+
+  /**
+   * @param apiKey - The api key generated from the booker25 general settings page.
+   * @param enviroment - What enviroment to connect to. Default: Enviroment.PRODUCTION
+   */
   constructor (apiKey: string, enviroment: Enviroment = Enviroment.PRODUCTION) {
     this.enviroment = enviroment
     this.api = new Booker25API(apiKey, enviroment)
   }
 
+  /**
+   * Creates a new request for resources. The request can then be specified using methods on the resource request.
+   *
+   * @returns new resource request using the authentication from this Booker25 instance
+   */
   public buildResourceRequest (): ResourceRequest {
     return new ResourceRequest(this.api)
   }
 
+  /**
+   * Saves a reservation object to salesforce. With the contact, lead, and service reservations added to it.
+   * Behaviour and allowed opperations can be changed through settings on the salesforce org.
+   *
+   * @param reservation The reservation object to save
+   * @returns The saved reservation object with any new values populated by the save in salesforce.
+   */
   public async saveReservation (reservation: Reservation): Promise<Reservation> {
     const result = await this.api.saveReservation(reservation.getReservationSaveRequest()) as any
     const outputReservation = new Reservation()
@@ -72,6 +93,13 @@ class Booker25 {
     return outputReservation
   }
 
+  /**
+   * Sends the reservation object to salesforce to have the price calculations run.
+   * The calculated price is then populated on the reservation returned.
+   *
+   * @param reservation The reservation to calculate the price for.
+   * @returns The reservation with updated price fields.
+   */
   public async calculatePrice (reservation: Reservation): Promise<Reservation> {
     const updatedPriceCalculationData = await this.api.calculatePrice(reservation.getPriceCalculationData())
     Object.entries(updatedPriceCalculationData.reservation).forEach(([fieldName, value]) => reservation.setCustomProperty(fieldName, value))

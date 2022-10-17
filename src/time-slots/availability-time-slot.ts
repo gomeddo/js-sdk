@@ -6,7 +6,11 @@ enum AvailabilitySlotType {
   RESERVATION
 }
 
+/**
+ * A timeslot of resource availability
+ */
 class AvailabilityTimeSlot extends TimeSlot {
+  // The type of slot either OPEN CLOSED or RESERVATION
   type: AvailabilitySlotType
 
   constructor (type: AvailabilitySlotType, startOfSlot: Date, endOfSlot: Date) {

@@ -4,6 +4,9 @@ import Resource, { SFResource } from './s-objects/resource'
 import { ConditionElement } from './s-objects/s-object'
 import { isSalesforceId } from './utils/salesforce-utils'
 
+/**
+ * Result object of a resource request. Contains methods to extract resources.
+ */
 export default class ResourceResult {
   private readonly resourcesById: Map<string, Resource>
 
@@ -66,14 +69,24 @@ export default class ResourceResult {
     })
   }
 
+  /**
+   * @returns the number of resources matching the request
+   */
   public numberOfresources (): number {
     return this.resourcesById.size
   }
 
+  /**
+   * @returns a list of all the resource ids matching the requests
+   */
   public getResourceIds (): string[] {
     return [...this.resourcesById.keys()]
   }
 
+  /**
+   * @param idOrName the Id or the Name of the resource to retrieve.
+   * @returns The matching resource. Or null if not found.
+   */
   public getResource (idOrName: string): Resource | undefined {
     if (isSalesforceId(idOrName)) {
       return this.resourcesById.get(idOrName)
