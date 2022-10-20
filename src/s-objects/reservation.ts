@@ -105,7 +105,7 @@ export default class Reservation extends SObject {
 
   /**
    * @internal
-   * @returns Price calucaltion request data for this reservation
+   * @returns Price calculation request data for this reservation
    */
   public getPriceCalculationData (): ReservationPriceCalculationRequest {
     return new ReservationPriceCalculationRequest(
@@ -121,7 +121,7 @@ export default class Reservation extends SObject {
 
   /**
    * @internal
-   * @returns The Salesforce formated data for the reservation
+   * @returns The Salesforce formatted data for the reservation
    */
   public override getSFSObject (): Partial<SFReservation> {
     const reservationData = super.getSFSObject() as Partial<SFReservation>
@@ -139,7 +139,7 @@ export default class Reservation extends SObject {
 
   /**
    * @internal
-   * @returns The Salesforce formated data for the lead
+   * @returns The Salesforce formatted data for the lead
    */
   private getLead (): Partial<StandardSFSObject> | null {
     if (this.lead === null) {
@@ -150,7 +150,7 @@ export default class Reservation extends SObject {
 
   /**
    * @internal
-   * @returns The Salesforce formated data for the contact
+   * @returns The Salesforce formatted data for the contact
    */
   private getContact (): Partial<StandardSFSObject> | null {
     if (this.contact === null) {
@@ -161,7 +161,7 @@ export default class Reservation extends SObject {
 
   /**
    * @internal
-   * @returns The Salesforce formated data for the servuce reservations
+   * @returns The Salesforce formatted data for the servuce reservations
    */
   private getServiceReservationRestData (): Array<Partial<SFServiceReservation>> {
     return this.serviceReservations.map(serviceReservation => serviceReservation.getSFSObject())
