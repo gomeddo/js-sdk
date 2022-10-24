@@ -4,12 +4,14 @@
   "description": "Package allowing for the easy use of Booker25 APIs.",
   "keywords": ["Booker25"],
   "license": "MIT",
+  "module": "dist/esm/index.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": "Booker25 <b25@gen25.com>",
   "scripts": {
-    "prepare": "yarn build",
+    "prepare": "yarn build && yarn build:esm",
     "build": "tsc --project tsconfig.build.json",
+    "build:esm": "tsc --project tsconfig.esm.json",
     "interactive": "yarn build && node nodeSetup.js"
   },
   "devDependencies": {
