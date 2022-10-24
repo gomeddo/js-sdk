@@ -1,13 +1,14 @@
 {
-  "name": "booker25-js-sdk",
+  "name": "@booker25/sdk",
   "version": "0.0.1",
   "description": "Package allowing for the easy use of Booker25 APIs.",
+  "keywords": ["Booker25"],
+  "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "repository": "git@bitbucket.org:gen25-development-team/booker25-js-sdk.git",
   "author": "Booker25 <b25@gen25.com>",
-  "license": "MIT",
   "scripts": {
+    "prepare": "yarn build",
     "build": "tsc --project tsconfig.build.json",
     "interactive": "yarn build && node nodeSetup.js"
   },
