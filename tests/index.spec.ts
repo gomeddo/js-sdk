@@ -1,5 +1,5 @@
 import { ReservationSaveRequest } from '../src/api/reservation-save-request'
-import Booker25, { Enviroment } from '../src/index'
+import Booker25, { Environment } from '../src/index'
 import Reservation from '../src/s-objects/reservation'
 import Service from '../src/s-objects/service'
 import { getSObject } from './__utils__/s-object-data'
@@ -23,7 +23,7 @@ test('You can save a reservations through it', async () => {
   }))
   const reservation = new Reservation()
   reservation.setCustomProperty('B25__Api_Visible__c', true)
-  const result = await (new Booker25('key', Enviroment.PRODUCTION)).saveReservation(reservation)
+  const result = await (new Booker25('key', Environment.PRODUCTION)).saveReservation(reservation)
   const expectedResult = new Reservation()
   const dummyDate = new Date()
   expectedResult.id = undefined as any
@@ -61,7 +61,7 @@ test('You can recalculate the price of the reservation through it', async () => 
   reservation.setCustomProperty('B25__Base_Price__c', 15)
   const service = new Service({ ...getSObject(), B25__Price__c: 23 }, [])
   reservation.addService(service, 12)
-  const result = await (new Booker25('key', Enviroment.PRODUCTION)).calculatePrice(reservation)
+  const result = await (new Booker25('key', Environment.PRODUCTION)).calculatePrice(reservation)
   expect(result.getCustomProperty('B25__Subtotal__c')).toStrictEqual(150)
   expect(result.getCustomProperty('B25LP__Subtotal_Incl__c')).toStrictEqual(150)
   expect(result.getCustomProperty('B25__Service_Costs__c')).toStrictEqual(276)
@@ -92,7 +92,7 @@ test('You can recalculate the price of the reservation through it with VAT rates
   serviceSobject.B25__Price__c = 23
   const service = new Service(serviceSobject, [])
   reservation.addService(service, 12)
-  const result = await (new Booker25('dummyKey', Enviroment.PRODUCTION)).calculatePrice(reservation)
+  const result = await (new Booker25('dummyKey', Environment.PRODUCTION)).calculatePrice(reservation)
   expect(result.getCustomProperty('B25__Subtotal__c')).toStrictEqual(150)
   expect(result.getCustomProperty('B25LP__Subtotal_Incl__c')).toStrictEqual(150 + (150 * 0.2))
   expect(result.getCustomProperty('B25__Service_Costs__c')).toStrictEqual(276)

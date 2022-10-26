@@ -1,4 +1,4 @@
-const { default: Booker25, Enviroment } = require('./dist/index.js')
+const { default: Booker25, Environment } = require('./dist/index.js')
 const { default: Contact } = require('./dist/s-objects/contact.js')
 const { default: Lead } = require('./dist/s-objects/lead.js')
 const { default: Reservation } = require('./dist/s-objects/reservation.js')
@@ -18,7 +18,7 @@ requestLogger(require('http'))
 requestLogger(require('https'))
 const repl = require('repl').start({ useGlobal: true })
 repl.context.Booker25 = Booker25
-repl.context.Enviroment = Enviroment
+repl.context.Environment = Environment
 repl.context.Opperator = Operator
 repl.context.Condition = Condition
 repl.context.Reservation = Reservation
@@ -26,7 +26,7 @@ repl.context.Contact = Contact
 repl.context.Lead = Lead
 const apiKey = process.env.B25_JS_SDK_KEY
 if (!apiKey) {
-  throw new Error('Set your booker25 proxy api key in the enviroment variable B25_JS_SDK_KEY')
+  throw new Error('Set your booker25 proxy api key in the environment variable B25_JS_SDK_KEY')
 }
-const booker25 = new Booker25(apiKey, Enviroment.ACCEPTANCE)
+const booker25 = new Booker25(apiKey, Environment.ACCEPTANCE)
 repl.context.b25 = booker25
