@@ -1,4 +1,4 @@
-import { Enviroment } from '../src/index'
+import { Environment } from '../src/index'
 import Booker25API from '../src/api/booker25-api-requests'
 import ResourceRequest from '../src/resource-request'
 import { ResourceGenerator } from './__utils__/resource-responses'
@@ -13,7 +13,7 @@ const baseResourceRequestUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/res
 const availabilityRequestUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/availability'
 const serviceRequestUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/services/availability'
 const childResourceUrl = (parentId: string): string => `https://api.booker25.com/api/v3/proxy/B25/v1/resources/${parentId}/children`
-const getResourceRequest = (): ResourceRequest => new ResourceRequest(new Booker25API('key', Enviroment.PRODUCTION))
+const getResourceRequest = (): ResourceRequest => new ResourceRequest(new Booker25API('key', Environment.PRODUCTION))
 
 beforeEach(() => {
   fetchMock.resetMocks()

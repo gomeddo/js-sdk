@@ -5,7 +5,7 @@ import Lead from './s-objects/lead'
 import Reservation from './s-objects/reservation'
 import ServiceReservation, { SFServiceReservation } from './s-objects/service-reservation'
 
-enum Enviroment {
+enum Environment {
   DEVELOP,
   ACCEPTANCE,
   STAGING,
@@ -16,17 +16,17 @@ enum Enviroment {
  * Booker25 object allows for interaction with booker25
  */
 class Booker25 {
-  static version: string = '0.0.1'
-  private readonly enviroment: Enviroment
+  static version: string = '0.0.4'
+  private readonly environment: Environment
   private readonly api: Booker25API
 
   /**
    * @param apiKey - The api key generated from the booker25 general settings page.
-   * @param enviroment - What enviroment to connect to. Default: Enviroment.PRODUCTION
+   * @param environment - What environment to connect to. Default: Environment.PRODUCTION
    */
-  constructor (apiKey: string, enviroment: Enviroment = Enviroment.PRODUCTION) {
-    this.enviroment = enviroment
-    this.api = new Booker25API(apiKey, enviroment)
+  constructor (apiKey: string, environment: Environment = Environment.PRODUCTION) {
+    this.environment = environment
+    this.api = new Booker25API(apiKey, environment)
   }
 
   /**
@@ -133,6 +133,6 @@ class Booker25 {
   }
 }
 export {
-  Enviroment
+  Environment
 }
 export default Booker25

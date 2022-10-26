@@ -1,4 +1,4 @@
-import { Enviroment } from '..'
+import { Environment } from '../index'
 import { SFResource } from '../s-objects/resource'
 import { isSalesforceId } from '../utils/salesforce-utils'
 import AvailabilityTimeSlotResponse from './availability-reponse'
@@ -11,19 +11,19 @@ import ServiceTimeSlotResponse from './service-availability-response'
 export default class Booker25API {
   private readonly baseUrl: string
   private readonly apiKey: string
-  constructor (apiKey: string, enviroment: Enviroment) {
+  constructor (apiKey: string, environment: Environment) {
     this.apiKey = apiKey
-    switch (enviroment) {
-      case Enviroment.DEVELOP:
+    switch (environment) {
+      case Environment.DEVELOP:
         this.baseUrl = 'https://dev.api.booker25.com/api/v3/proxy/'
         break
-      case Enviroment.ACCEPTANCE:
+      case Environment.ACCEPTANCE:
         this.baseUrl = 'https://acc.api.booker25.com/api/v3/proxy/'
         break
-      case Enviroment.STAGING:
+      case Environment.STAGING:
         this.baseUrl = 'https://staging.api.booker25.com/api/v3/proxy/'
         break
-      case Enviroment.PRODUCTION:
+      case Environment.PRODUCTION:
         this.baseUrl = 'https://api.booker25.com/api/v3/proxy/'
         break
     }
