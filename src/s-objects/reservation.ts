@@ -45,12 +45,30 @@ export default class Reservation extends SObject {
   }
 
   /**
+   * Get the reservation start date time.
+   *
+   * @returns This reservation startDatetime
+   */
+  public getStartDatetime (): Date | null {
+    return this.startDatetime
+  }
+
+  /**
    * @param datetime The end datetime to set on the reservation (GMT)
    * @returns This reservation
    */
   public setEndDatetime (datetime: Date): Reservation {
     this.endDatetime = datetime
     return this
+  }
+
+  /**
+   * Get the reservation end date time.
+   *
+   * @returns This reservation endDatetime
+   */
+  public getEndDatetime (): Date | null {
+    return this.endDatetime
   }
 
   /**
