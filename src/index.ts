@@ -16,7 +16,7 @@ enum Environment {
  * Booker25 object allows for interaction with booker25
  */
 class Booker25 {
-  static version: string = '0.0.4'
+  static version: string = '0.0.5'
   private readonly environment: Environment
   private readonly api: Booker25API
 

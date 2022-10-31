@@ -1,6 +1,6 @@
 {
   "name": "@booker25/sdk",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Package allowing for the easy use of Booker25 APIs.",
   "keywords": ["Booker25"],
   "license": "MIT",
