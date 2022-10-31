@@ -1,6 +1,6 @@
 # Booker25 Javascript SDK
 
-A library to interact with Booker25 from the browser.
+A Javascript library to interact with Booker25 from the browser. More information can be found in our [wiki](https://github.com/booker25/js-sdk/wiki).
 
 ## Development
 
@@ -8,7 +8,6 @@ A library to interact with Booker25 from the browser.
 2. Run `pre-commit install`
 3. Run `yarn install`
 
-
 ## Testing
 
-to run the ts-jest unit tests run `yarn jest`
+To run the ts-jest unit tests run `yarn jest`
