@@ -1,4 +1,4 @@
-import Resource from '../../src/s-objects/resource'
+import { Resource } from '../../src/index'
 import { ResourceGenerator } from '../__utils__/resource-responses'
 
 test('The basic values are loaded from the parsed json', () => {

@@ -1,8 +1,9 @@
 import { Environment } from '../index'
 import { SFResource } from '../s-objects/resource'
-import { isSalesforceId } from '../utils/salesforce-utils'
+import { APIConditionElement } from './api-condition'
 import AvailabilityTimeSlotResponse from './availability-reponse'
 import AvailabilityTimeSlotRequest from './availability-request'
+import DimensionSearchBody from './dimension-search-body'
 import ReservationPriceCalculationRequest from './reservation-price-calculation-request'
 import { ReservationSaveRequest } from './reservation-save-request'
 import ServiceTimeSlotRequest from './service-availability-request'
@@ -29,38 +30,13 @@ export default class Booker25API {
     }
   }
 
-  public async getAllResources (type: string | undefined, fields: Set<string>): Promise<SFResource[]> {
-    const url = new URL('B25/v1/resources', this.baseUrl)
-
-    if (type !== undefined) {
-      if (!isSalesforceId(type)) {
-        throw new Error('Only 18 character salesforce ids are supported for type')
-      }
-      url.searchParams.append('resourceType', type)
-    }
+  public async searchResources (parentIds: string[], parentNames: string[], apiCondition: APIConditionElement | undefined, fields: Set<string>): Promise<SFResource[]> {
+    const url = new URL('B25/v1/dimensionRecords/search', this.baseUrl)
     this.addFieldsToUrl(url, fields)
+    const dimensionSearchBody = new DimensionSearchBody('B25__Resource__c', parentIds, parentNames, apiCondition, true)
     const response = await fetch(url.href, {
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
-    const responseJSON = await response.json()
-    return responseJSON
-  }
-
-  public async getAllChildResources (parentId: string, type: string | undefined, fields: Set<string>): Promise<SFResource[]> {
-    if (!isSalesforceId(parentId)) {
-      throw new Error('Only 18 character salesforce ids are supported for parent')
-    }
-    const url = new URL(`B25/v1/resources/${parentId}/children`, this.baseUrl)
-    if (type !== undefined) {
-      if (!isSalesforceId(type)) {
-        throw new Error('Only 18 character salesforce ids are supported for type')
-      }
-      url.searchParams.append('resourceType', type)
-    }
-    this.addFieldsToUrl(url, fields)
-    url.searchParams.append('recursive', 'true')
-    const response = await fetch(url.href, {
+      method: 'POST',
+      body: JSON.stringify(dimensionSearchBody),
       headers: this.getHeaders()
     })
     await this.checkResponse(response)

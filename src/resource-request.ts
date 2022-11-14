@@ -3,8 +3,8 @@ import Booker25API from './api/booker25-api-requests'
 import ServiceTimeSlotRequest from './api/service-availability-request'
 import ResourceResult from './resource-result'
 import { SFResource } from './s-objects/resource'
-import { AndCondition, ConditionElement, OrCondition } from './s-objects/s-object'
-import { cartesianProductOf } from './utils/array-utils'
+import { AndCondition, OrCondition, ConditionElement, Condition, Operator } from './filters/conditions'
+import { isSalesforceId } from './utils/salesforce-utils'
 
 /**
  * Resource request by default will request all resources in an org.
@@ -19,7 +19,7 @@ export default class ResourceRequest {
   private readonly additionalFields: Set<string> = new Set()
   private readonly parents: Set<string> = new Set()
   private readonly types: Set<string> = new Set()
-  private readonly condition: OrCondition = new OrCondition([])
+  private condition: OrCondition | undefined
   private startOfRange: Date | null = null
   private endOfRange: Date | null = null
   private fetchServices: boolean = false
@@ -58,7 +58,14 @@ export default class ResourceRequest {
    * @returns The updated resource request.
    */
   public withCondition (...conditions: ConditionElement[]): ResourceRequest {
-    this.condition.conditions.push(new AndCondition(conditions))
+    if (this.condition == null) {
+      this.condition = new OrCondition([])
+    }
+    if (conditions.length === 1) {
+      this.condition.conditions.push(conditions[0])
+    } else {
+      this.condition.conditions.push(new AndCondition(conditions))
+    }
     return this
   }
 
@@ -131,30 +138,26 @@ export default class ResourceRequest {
       ))
       resourceResult.addServiceSlotData(serviceData)
     }
-    resourceResult.filterOnCondition(this.condition)
     return resourceResult.computeTreeStructure()
   }
 
   private async getStartingResourceScope (): Promise<SFResource[]> {
-    if (this.parents.size === 0 && this.types.size === 0) {
-      return await this.api.getAllResources(undefined, this.getRequestedFields())
+    const parentIds: string[] = []
+    const parentNames: string[] = []
+    for (const parent of this.parents) {
+      isSalesforceId(parent) ? parentIds.push(parent) : parentNames.push(parent)
     }
-    if (this.parents.size === 0) {
-      return (await Promise.all([...this.types].map(async (type) => {
-        return await this.api.getAllResources(type, this.getRequestedFields())
-      }))).flat()
+    let condition = this.condition
+    if (this.types.size !== 0) {
+      condition = new AndCondition([...this.types].map(type => new Condition('B25__Resource_Type__r.Name', Operator.EQUAL, type)))
+      if (this.condition !== undefined) {
+        condition.conditions.push(this.condition)
+      }
     }
-    if (this.types.size === 0) {
-      return (await Promise.all([...this.parents].map(async (parent) => {
-        return await this.api.getAllChildResources(parent, undefined, this.getRequestedFields())
-      }))).flat()
-    }
-    return (await Promise.all(cartesianProductOf([...this.parents], [...this.types]).map(async ([parent, type]) => {
-      return await this.api.getAllChildResources(parent, type, this.getRequestedFields())
-    }))).flat()
+    return await this.api.searchResources(parentIds, parentNames, condition?.getAPICondition(), this.getRequestedFields())
   }
 
   private getRequestedFields (): Set<string> {
-    return new Set([...this.standardFields, ...this.additionalFields, ...this.condition.getFields()])
+    return new Set([...this.standardFields, ...this.additionalFields])
   }
 }

@@ -1,9 +1,5 @@
 import { ReservationSaveRequest } from '../../src/api/reservation-save-request'
-import Contact from '../../src/s-objects/contact'
-import Lead from '../../src/s-objects/lead'
-import Reservation from '../../src/s-objects/reservation'
-import Resource from '../../src/s-objects/resource'
-import Service from '../../src/s-objects/service'
+import { Contact, Lead, Reservation, Resource, Service } from '../../src/index'
 import { ResourceGenerator } from '../__utils__/resource-responses'
 import { getSObject } from '../__utils__/s-object-data'
 

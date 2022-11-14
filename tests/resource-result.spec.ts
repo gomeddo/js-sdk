@@ -1,4 +1,4 @@
-import ResourceResult from '../src/resource-result'
+import { ResourceResult } from '../src/index'
 import { ResourceGenerator } from './__utils__/resource-responses'
 
 test('It generates a resource object for each resource passed', () => {

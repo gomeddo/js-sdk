@@ -1,19 +1,20 @@
-import { Environment } from '../src/index'
+import { Environment, Condition, Operator, ResourceRequest, AvailabilitySlotType } from '../src/index'
 import Booker25API from '../src/api/booker25-api-requests'
-import ResourceRequest from '../src/resource-request'
-import { ResourceGenerator } from './__utils__/resource-responses'
-import { getAvailabilityResponse, getAvailabilitySlot, getServiceResponse, getServiceSlot } from './__utils__/availability-responses'
 import AvailabilityTimeSlotRequest from '../src/api/availability-request'
-import { AvailabilitySlotType } from '../src/time-slots/availability-time-slot'
 import ServiceTimeSlotRequest from '../src/api/service-availability-request'
-import { dummyId0, dummyId1, dummyId2, dummyId3 } from './__utils__/salesforce-dummy-ids'
-import { Condition, Operator } from '../src/s-objects/s-object'
+import { ResourceGenerator } from './__utils__/resource-responses'
+import { dummyId0, dummyId1 } from './__utils__/salesforce-dummy-ids'
+import { getAvailabilityResponse, getAvailabilitySlot, getServiceResponse, getServiceSlot } from './__utils__/availability-responses'
+import DimensionSearchBody from '../src/api/dimension-search-body'
+import { APICondition, APIConditionElement, APIConditionGroup } from '../src/api/api-condition'
 
-const baseResourceRequestUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/resources'
+const baseResourceSearchUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/dimensionRecords/search'
 const availabilityRequestUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/availability'
 const serviceRequestUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/services/availability'
-const childResourceUrl = (parentId: string): string => `https://api.booker25.com/api/v3/proxy/B25/v1/resources/${parentId}/children`
 const getResourceRequest = (): ResourceRequest => new ResourceRequest(new Booker25API('key', Environment.PRODUCTION))
+const getExpectedBody = (ids: string[], names: string[], condition: APIConditionElement | undefined): String => {
+  return JSON.stringify(new DimensionSearchBody('B25__Resource__c', ids, names, condition, true))
+}
 
 beforeEach(() => {
   fetchMock.resetMocks()
@@ -24,8 +25,12 @@ test('It calls the booker25 resurces endpoint when provided with no additional i
   const mock = fetchMock.once('[]')
   const result = await resourceRequest.getResults()
   expect(mock).toBeCalledWith(
-    `${baseResourceRequestUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`,
-    { headers: { Authorization: 'Bearer key' } }
+    `${baseResourceSearchUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`,
+    {
+      method: 'POST',
+      body: getExpectedBody([], [], undefined),
+      headers: { Authorization: 'Bearer key' }
+    }
   )
   expect(result.numberOfresources()).toBe(0)
 })
@@ -36,8 +41,12 @@ test('It adds the field if added to the request', async () => {
   const mock = fetchMock.once('[]')
   const result = await resourceRequest.getResults()
   expect(mock).toBeCalledWith(
-    `${baseResourceRequestUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c%2CB25__Api_Visible__c`,
-    { headers: { Authorization: 'Bearer key' } }
+    `${baseResourceSearchUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c%2CB25__Api_Visible__c`,
+    {
+      method: 'POST',
+      body: getExpectedBody([], [], undefined),
+      headers: { Authorization: 'Bearer key' }
+    }
   )
   expect(result.numberOfresources()).toBe(0)
 })
@@ -48,8 +57,12 @@ test('It adds the fields if added to the request', async () => {
   const mock = fetchMock.once('[]')
   const result = await resourceRequest.getResults()
   expect(mock).toBeCalledWith(
-    `${baseResourceRequestUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c%2CB25__Api_Visible__c%2CB25__Booker25_Id__c`,
-    { headers: { Authorization: 'Bearer key' } }
+    `${baseResourceSearchUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c%2CB25__Api_Visible__c%2CB25__Booker25_Id__c`,
+    {
+      method: 'POST',
+      body: getExpectedBody([], [], undefined),
+      headers: { Authorization: 'Bearer key' }
+    }
   )
   expect(result.numberOfresources()).toBe(0)
 })
@@ -62,8 +75,12 @@ test('It parses the result into resources', async () => {
   ))
   const result = await resourceRequest.getResults()
   expect(mock).toBeCalledWith(
-    `${baseResourceRequestUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`,
-    { headers: { Authorization: 'Bearer key' } }
+    `${baseResourceSearchUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`,
+    {
+      method: 'POST',
+      body: getExpectedBody([], [], undefined),
+      headers: { Authorization: 'Bearer key' }
+    }
   )
   expect(result.numberOfresources()).toBe(2)
   expect(result.getResource('Name 1')).not.toBeUndefined()
@@ -92,8 +109,12 @@ test('It adds timelines if requested', async () => {
     .withAvailableSlotsBetween(new Date(Date.UTC(2022, 0, 1)), new Date(Date.UTC(2022, 0, 2)))
     .getResults()
   expect(resourceFetchMock).toBeCalledWith(
-    `${baseResourceRequestUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`,
-    { headers: { Authorization: 'Bearer key' } }
+    `${baseResourceSearchUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`,
+    {
+      method: 'POST',
+      body: getExpectedBody([], [], undefined),
+      headers: { Authorization: 'Bearer key' }
+    }
   )
   const requestBody = new AvailabilityTimeSlotRequest(
     new Date(Date.UTC(2022, 0, 1)),
@@ -193,50 +214,30 @@ test('It requests parent scope if requested', async () => {
     .includeAllResourcesAt(dummyId0)
     .getResults()
   expect(resourceFetchMock).toBeCalledWith(
-    `${childResourceUrl(dummyId0)}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`,
-    { headers: { Authorization: 'Bearer key' } }
+    `${baseResourceSearchUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`,
+    {
+      method: 'POST',
+      body: getExpectedBody([dummyId0], [], undefined),
+      headers: { Authorization: 'Bearer key' }
+    }
   )
 })
 
-test('It requests parent scope multiple times once for each parent', async () => {
+test('It combines multiple parents into a single request', async () => {
   const resourceGenerator = new ResourceGenerator('Id', 'Name')
   const resourceFetchMock = fetchMock.doMock(JSON.stringify(resourceGenerator.getResourceArray(2)))
 
   await getResourceRequest()
     .includeAllResourcesAt(dummyId0, dummyId1)
     .getResults()
-  expect(resourceFetchMock).toBeCalledTimes(2)
   expect(resourceFetchMock).toBeCalledWith(
-    `${childResourceUrl(dummyId0)}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`,
-    { headers: { Authorization: 'Bearer key' } }
+    `${baseResourceSearchUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`,
+    {
+      method: 'POST',
+      body: getExpectedBody([dummyId0, dummyId1], [], undefined),
+      headers: { Authorization: 'Bearer key' }
+    }
   )
-  expect(resourceFetchMock).toBeCalledWith(
-    `${childResourceUrl(dummyId1)}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`,
-    { headers: { Authorization: 'Bearer key' } }
-  )
-})
-
-test('Duplicate results are filtered out', async () => {
-  const resourceGenerator = new ResourceGenerator('Id', 'Name')
-  // Both requests get the same result of two resources
-  const resourceFetchMock = fetchMock.doMock(JSON.stringify(resourceGenerator.getResourceArray(2)))
-
-  const result = await getResourceRequest()
-    .includeAllResourcesAt(dummyId0, dummyId1)
-    .getResults()
-  // Call was ran twice
-  expect(resourceFetchMock).toBeCalledTimes(2)
-  expect(resourceFetchMock).toBeCalledWith(
-    `${childResourceUrl(dummyId0)}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`,
-    { headers: { Authorization: 'Bearer key' } }
-  )
-  expect(resourceFetchMock).toBeCalledWith(
-    `${childResourceUrl(dummyId1)}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`,
-    { headers: { Authorization: 'Bearer key' } }
-  )
-
-  // Only two unique resources are returned
-  expect(result.numberOfresources()).toBe(2)
 })
 
 test('It adds a type id to the request if a type is requested', async () => {
@@ -246,77 +247,93 @@ test('It adds a type id to the request if a type is requested', async () => {
   await getResourceRequest()
     .withType(dummyId0, dummyId1)
     .getResults()
-  expect(resourceFetchMock).toBeCalledTimes(2)
+  const expectedCondition = new APIConditionGroup('AND', [
+    new APICondition('B25__Resource_Type__r.Name', '=', [dummyId0]),
+    new APICondition('B25__Resource_Type__r.Name', '=', [dummyId1])
+  ])
+  expect(resourceFetchMock).toBeCalledTimes(1)
   expect(resourceFetchMock).toBeCalledWith(
-    `${baseResourceRequestUrl}?resourceType=${dummyId0}&fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`,
-    { headers: { Authorization: 'Bearer key' } }
-  )
-  expect(resourceFetchMock).toBeCalledWith(
-    `${baseResourceRequestUrl}?resourceType=${dummyId1}&fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`,
-    { headers: { Authorization: 'Bearer key' } }
+    `${baseResourceSearchUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`,
+    {
+      method: 'POST',
+      body: getExpectedBody([], [], expectedCondition),
+      headers: { Authorization: 'Bearer key' }
+    }
   )
 })
 
-test('It generates combined requests when both parent resources and types are requested', async () => {
+test('It passes the condition to the search endpoint', async () => {
   const resourceGenerator = new ResourceGenerator('Id', 'Name')
   const resourceFetchMock = fetchMock.doMock(JSON.stringify(resourceGenerator.getResourceArray(2)))
 
   await getResourceRequest()
-    .includeAllResourcesAt(dummyId0, dummyId1)
-    .withType(dummyId2, dummyId3)
-    .getResults()
-  expect(resourceFetchMock).toBeCalledTimes(4)
-  expect(resourceFetchMock).toBeCalledWith(
-    `${childResourceUrl(dummyId0)}?resourceType=${dummyId2}&fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`,
-    { headers: { Authorization: 'Bearer key' } }
-  )
-  expect(resourceFetchMock).toBeCalledWith(
-    `${childResourceUrl(dummyId1)}?resourceType=${dummyId3}&fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`,
-    { headers: { Authorization: 'Bearer key' } }
-  )
-  expect(resourceFetchMock).toBeCalledWith(
-    `${childResourceUrl(dummyId0)}?resourceType=${dummyId3}&fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`,
-    { headers: { Authorization: 'Bearer key' } }
-  )
-  expect(resourceFetchMock).toBeCalledWith(
-    `${childResourceUrl(dummyId1)}?resourceType=${dummyId2}&fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c&recursive=true`,
-    { headers: { Authorization: 'Bearer key' } }
-  )
-})
-
-test('It filters the results based on a simple condition', async () => {
-  const resourceGenerator = new ResourceGenerator('Id', 'Name')
-  const resources = resourceGenerator.getResourceArray(2)
-  resources[0].B25__Api_Visible__c = true
-  resources[1].B25__Api_Visible__c = false
-  fetchMock.doMock(JSON.stringify(resources))
-
-  const result = await getResourceRequest()
     .withCondition(new Condition('B25__Api_Visible__c', Operator.EQUAL, true))
     .getResults()
-
-  expect(result.numberOfresources()).toBe(1)
-  expect(result.getResource('Name 1')).toBeDefined()
+  const expectedCondition = new APIConditionGroup('OR', [
+    new APICondition('B25__Api_Visible__c', '=', ['true'])
+  ])
+  expect(resourceFetchMock).toBeCalledTimes(1)
+  expect(resourceFetchMock).toBeCalledWith(
+    `${baseResourceSearchUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`,
+    {
+      method: 'POST',
+      body: getExpectedBody([], [], expectedCondition),
+      headers: { Authorization: 'Bearer key' }
+    }
+  )
 })
 
-test('It filters the results based on a combined condition', async () => {
+test('It conbines conditions with an and grouping', async () => {
   const resourceGenerator = new ResourceGenerator('Id', 'Name')
-  const resources = resourceGenerator.getResourceArray(2)
-  resources[0].B25__Api_Visible__c = true
-  resources[0].B25__Capacity__c = 20
-  resources[1].B25__Api_Visible__c = true
-  resources[1].B25__Capacity__c = 30
-  fetchMock.doMock(JSON.stringify(resources))
+  const resourceFetchMock = fetchMock.doMock(JSON.stringify(resourceGenerator.getResourceArray(2)))
 
-  const result = await getResourceRequest()
+  await getResourceRequest()
     .withCondition(
       new Condition('B25__Api_Visible__c', Operator.EQUAL, true),
       new Condition('B25__Capacity__c', Operator.LESS_THAN, 25)
     )
     .getResults()
 
-  expect(result.numberOfresources()).toBe(1)
-  expect(result.getResource('Name 1')).toBeDefined()
+  const expectedCondition = new APIConditionGroup('OR', [new APIConditionGroup('AND', [
+    new APICondition('B25__Api_Visible__c', '=', ['true']),
+    new APICondition('B25__Capacity__c', '<', ['25'])
+  ])])
+  expect(resourceFetchMock).toBeCalledTimes(1)
+  expect(resourceFetchMock).toBeCalledWith(
+    `${baseResourceSearchUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`,
+    {
+      method: 'POST',
+      body: getExpectedBody([], [], expectedCondition),
+      headers: { Authorization: 'Bearer key' }
+    }
+  )
+})
+
+test('It combines types and conditions with an and grouping', async () => {
+  const resourceGenerator = new ResourceGenerator('Id', 'Name')
+  const resourceFetchMock = fetchMock.doMock(JSON.stringify(resourceGenerator.getResourceArray(2)))
+
+  await getResourceRequest()
+    .withCondition(new Condition('B25__Api_Visible__c', Operator.EQUAL, true))
+    .withType(dummyId0, dummyId1)
+    .getResults()
+
+  const expectedCondition = new APIConditionGroup('AND', [
+    new APICondition('B25__Resource_Type__r.Name', '=', [dummyId0]),
+    new APICondition('B25__Resource_Type__r.Name', '=', [dummyId1]),
+    new APIConditionGroup('OR', [
+      new APICondition('B25__Api_Visible__c', '=', ['true'])
+    ])
+  ])
+  expect(resourceFetchMock).toBeCalledTimes(1)
+  expect(resourceFetchMock).toBeCalledWith(
+    `${baseResourceSearchUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c`,
+    {
+      method: 'POST',
+      body: getExpectedBody([], [], expectedCondition),
+      headers: { Authorization: 'Bearer key' }
+    }
+  )
 })
 
 test('It filters the results based on multiple conditions', async () => {

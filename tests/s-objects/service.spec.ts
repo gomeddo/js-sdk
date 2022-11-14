@@ -1,5 +1,4 @@
-import Service from '../../src/s-objects/service'
-import { ServiceTimeSlot } from '../../src/time-slots/service-time-slot'
+import { Service, ServiceTimeSlot } from '../../src/index'
 import { getSObject } from '../__utils__/s-object-data'
 
 test('It is unavailable with no time slots', () => {
