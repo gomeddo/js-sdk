@@ -1,8 +1,8 @@
 import { Environment } from '../../src/index'
 import Booker25API from '../../src/api/booker25-api-requests'
-import AvailabilityTimeSlotRequest from '../../src/api/availability-request'
-import ReservationPriceCalculationRequest from '../../src/api/reservation-price-calculation-request'
-import { ReservationSaveRequest } from '../../src/api/reservation-save-request'
+import AvailabilityTimeSlotRequest from '../../src/api/request-bodies/availability-request'
+import ReservationPriceCalculationRequest from '../../src/api/request-bodies/reservation-price-calculation-request'
+import { ReservationSaveRequest } from '../../src/api/request-bodies/reservation-save-request'
 import { getAvailabilityResponse, getAvailabilitySlot } from '../__utils__/availability-responses'
 
 beforeEach(() => {

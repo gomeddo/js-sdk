@@ -73,7 +73,7 @@ export default class ResourceResult {
 
   /**
    * @param idOrName the Id or the Name of the resource to retrieve.
-   * @returns The matching resource. Or null if not found.
+   * @returns The matching resource. Or undefined if not found.
    */
   public getResource (idOrName: string): Resource | undefined {
     if (isSalesforceId(idOrName)) {

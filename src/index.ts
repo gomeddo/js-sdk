@@ -1,6 +1,8 @@
 import Booker25API from './api/booker25-api-requests'
 import ResourceRequest from './resource-request'
+import ReservationRequest from './reservation-request'
 import ResourceResult from './resource-result'
+import ReservationResult from './reservation-result'
 import Contact from './s-objects/contact'
 import Lead from './s-objects/lead'
 import Reservation from './s-objects/reservation'
@@ -44,6 +46,15 @@ class Booker25 {
    */
   public buildResourceRequest (): ResourceRequest {
     return new ResourceRequest(this.api)
+  }
+
+  /**
+   * Creates a new request for reservations. The request can then be specified using methods on the reservation request.
+   *
+   * @returns new reservation request using the authentication from this Booker25 instance
+   */
+  public buildReservationRequest (): ReservationRequest {
+    return new ReservationRequest(this.api)
   }
 
   /**
@@ -143,7 +154,9 @@ class Booker25 {
 export {
   Environment,
   ResourceRequest,
+  ReservationRequest,
   ResourceResult,
+  ReservationResult,
   SObject,
   Reservation,
   Resource,

@@ -39,6 +39,10 @@ export default class SObject {
     return this.customProperties.get(propertyName)
   }
 
+  public getCustomProperties (): Map<string, any> {
+    return this.customProperties
+  }
+
   public getSFSObject (): Partial<CustomSFSObject> {
     const sObjectData: Partial<CustomSFSObject> = {}
     this.customProperties.forEach((value, fieldName) => {
@@ -51,7 +55,14 @@ export default class SObject {
   }
 }
 
+const getRelationshiptNameFromFieldName = (fieldName: CustomFieldName): CustomRelationshipName => {
+  return `${fieldName.substring(0, fieldName.length - 3)}__r`
+}
+
 export {
+  CustomFieldName,
+  CustomRelationshipName,
   CustomSFSObject,
-  StandardSFSObject
+  StandardSFSObject,
+  getRelationshiptNameFromFieldName
 }

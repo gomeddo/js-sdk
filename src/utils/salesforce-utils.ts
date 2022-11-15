@@ -37,6 +37,22 @@ const isSalesforceId = (id: string): boolean => {
   }
 }
 
+const splitIntoIdsAndNames = (iter: Iterable<string>): {ids: string[], names: string[]} => {
+  const ids: string[] = []
+  const names: string[] = []
+  for (const candidate of iter) {
+    if (isSalesforceId(candidate)) {
+      ids.push(candidate)
+    } else {
+      names.push(candidate)
+    }
+  }
+  return {
+    ids,
+    names
+  }
+}
+
 class IdError extends Error {
   constructor (message: string) {
     super(message)
@@ -46,5 +62,6 @@ class IdError extends Error {
 
 export {
   validateSalesforceId,
-  isSalesforceId
+  isSalesforceId,
+  splitIntoIdsAndNames
 }

@@ -1,6 +1,6 @@
-import AvailabilityTimeSlotRequest from './api/availability-request'
+import AvailabilityTimeSlotRequest from './api/request-bodies/availability-request'
 import Booker25API from './api/booker25-api-requests'
-import ServiceTimeSlotRequest from './api/service-availability-request'
+import ServiceTimeSlotRequest from './api/request-bodies/service-availability-request'
 import ResourceResult from './resource-result'
 import { SFResource } from './s-objects/resource'
 import { AndCondition, OrCondition, ConditionElement, Condition, Operator } from './filters/conditions'
@@ -58,7 +58,7 @@ export default class ResourceRequest {
    * @returns The updated resource request.
    */
   public withCondition (...conditions: ConditionElement[]): ResourceRequest {
-    if (this.condition == null) {
+    if (this.condition === undefined) {
       this.condition = new OrCondition([])
     }
     if (conditions.length === 1) {

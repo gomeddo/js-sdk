@@ -1,4 +1,4 @@
-import { ReservationSaveRequest } from '../../src/api/reservation-save-request'
+import { ReservationSaveRequest } from '../../src/api/request-bodies/reservation-save-request'
 import { Contact, Lead, Reservation, Resource, Service } from '../../src/index'
 import { ResourceGenerator } from '../__utils__/resource-responses'
 import { getSObject } from '../__utils__/s-object-data'

@@ -1,5 +1,5 @@
-import { SFReservation } from '../s-objects/reservation'
-import { SFServiceReservation } from '../s-objects/service-reservation'
+import { SFReservation } from '../../s-objects/reservation'
+import { SFServiceReservation } from '../../s-objects/service-reservation'
 
 // Property names have to be exact to the endpoint
 export default class ReservationPriceCalculationRequest {
