@@ -1,6 +1,6 @@
 import Booker25API from './api/booker25-api-requests'
 import { APIConditionGroup } from './api/request-bodies/api-condition'
-import { AndCondition, Condition, ConditionElement, Operator, OrCondition } from './filters/conditions'
+import { AndCondition, Condition, ConditionElement, JoinCondition, Operator, OrCondition } from './filters/conditions'
 import ReservationResult from './reservation-result'
 import Contact from './s-objects/contact'
 import Lead from './s-objects/lead'
@@ -23,6 +23,7 @@ export default class ReservationRequest {
   private readonly types: Set<string> = new Set()
   private readonly statuses: Set<string> = new Set()
   private contact: Contact | undefined
+  private reservationContactRequest: ReservationContactRequest | undefined
   private lead: Lead | undefined
   private resource: Resource | undefined
   private condition: OrCondition | undefined
@@ -105,6 +106,11 @@ export default class ReservationRequest {
     return this
   }
 
+  public linkedToReservationContacts (): ReservationContactRequest {
+    this.reservationContactRequest = new ReservationContactRequest()
+    return this.reservationContactRequest
+  }
+
   /**
    * Only return reservations linked to this resource.
    * @param resource The resource to search for.
@@ -181,6 +187,7 @@ export default class ReservationRequest {
     const resourceCondition = this.generateRelatedObjectCondition('B25__Resource__c', this.resource)
     resourceCondition !== undefined && condition.conditions.push(resourceCondition)
     this.condition !== undefined && condition.conditions.push(this.condition)
+    this.reservationContactRequest !== undefined && condition.conditions.push(this.reservationContactRequest.generateCondition())
     if (condition.conditions.length === 0) {
       return undefined
     }
@@ -228,4 +235,77 @@ export default class ReservationRequest {
   private getRequestedFields (): Set<string> {
     return new Set([...this.standardFields, ...this.additionalFields])
   }
+}
+class ReservationContactRequest {
+  private contact: Contact | undefined
+  private condition: OrCondition | undefined
+
+  /**
+   * Only return reservations linked to this contact through reservation contacts.
+   * @param contact The contact to search for.
+   * @returns The updated reservation request.
+   */
+  public linkedToContact (contact: Contact): ReservationContactRequest {
+    this.contact = contact
+    return this
+  }
+
+  /**
+   * Filter the reservation contacts used to match reservations on field values using conditions.
+   *
+   * @param conditions The conditions to filter on. Multiple conditions wil be combined using AND.
+   * @returns The updated Reservation Contact Request.
+   */
+  public withCondition (...conditions: ConditionElement[]): ReservationContactRequest {
+    if (this.condition === undefined) {
+      this.condition = new OrCondition([])
+    }
+    if (conditions.length === 1) {
+      this.condition.conditions.push(conditions[0])
+    } else {
+      this.condition.conditions.push(new AndCondition(conditions))
+    }
+    return this
+  }
+
+  public generateCondition (): JoinCondition {
+    return new JoinCondition('Id', Operator.IN, 'B25__ReservationContact__c', 'B25__Reservation_Lookup__c', this.generateJoinSubCondition())
+  }
+
+  private generateJoinSubCondition (): ConditionElement | undefined {
+    const condition = new AndCondition([])
+    const contactCondition = this.generateRelatedObjectCondition('B25__Contact_Lookup__c', this.contact)
+    contactCondition !== undefined && condition.conditions.push(contactCondition)
+    this.condition !== undefined && condition.conditions.push(this.condition)
+    if (condition.conditions.length === 0) {
+      return undefined
+    }
+    return condition
+  }
+
+  private generateRelatedObjectCondition (lookupFieldName: CustomFieldName, sObject: SObject | undefined): ConditionElement | undefined {
+    if (sObject === undefined) {
+      return undefined
+    }
+    const id = sObject.id ?? sObject.getCustomProperty('Id') ?? ''
+    if (isSalesforceId(id)) {
+      return new Condition(lookupFieldName, Operator.EQUAL, id)
+    }
+    const relationshipName = getRelationshiptNameFromFieldName(lookupFieldName)
+    const condition = new AndCondition([])
+    for (const [fieldName, value] of sObject.getCustomProperties().entries()) {
+      if ((fieldName ?? '') === '' || (value ?? '') === '') {
+        continue
+      }
+      condition.conditions.push(new Condition(`${relationshipName}.${fieldName}`, Operator.EQUAL, value))
+    }
+    if (condition.conditions.length === 0) {
+      return undefined
+    }
+    return condition
+  }
+}
+
+export {
+  ReservationContactRequest
 }

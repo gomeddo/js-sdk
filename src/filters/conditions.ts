@@ -1,4 +1,4 @@
-import { APICondition, APIConditionElement, APIConditionGroup, APIOperator } from '../api/request-bodies/api-condition'
+import { APICondition, APIConditionElement, APIConditionGroup, APIJoinCondition, APIOperator, JoinQuery } from '../api/request-bodies/api-condition'
 
 enum Operator {
   EQUAL,
@@ -39,31 +39,19 @@ class OrCondition implements ConditionElement {
   }
 }
 
-class Condition implements ConditionElement {
+class BaseCondition {
   field: string
   operator: Operator
-  value: string | number | boolean | string[]
-  constructor (field: string, operator: Operator, value: string | number | boolean | string[]) {
+  constructor (field: string, operator: Operator) {
     this.field = field
     this.operator = operator
-    this.value = value
   }
 
-  public getAPICondition (): APICondition {
-    if (!this.isListType()) {
-      return new APICondition(this.field, this.translateOperator(this.operator), [this.value.toString()])
-    }
-    if (!Array.isArray(this.value)) {
-      throw new Error('IN and NOT IN are only allowed to be used with the string[] type')
-    }
-    return new APICondition(this.field, this.translateOperator(this.operator), this.value)
-  }
-
-  private isListType (): boolean {
+  protected isListType (): boolean {
     return this.operator === Operator.IN || this.operator === Operator.NOT_IN
   }
 
-  private translateOperator (operator: Operator): APIOperator {
+  protected translateOperator (operator: Operator): APIOperator {
     switch (operator) {
       case Operator.EQUAL:
         return '='
@@ -81,8 +69,51 @@ class Condition implements ConditionElement {
   }
 }
 
+class Condition extends BaseCondition implements ConditionElement {
+  value: string | number | boolean | string[]
+  constructor (field: string, operator: Operator, value: string | number | boolean | string[]) {
+    super(field, operator)
+    this.value = value
+  }
+
+  public getAPICondition (): APICondition {
+    if (!this.isListType()) {
+      return new APICondition(this.field, this.translateOperator(this.operator), [this.value.toString()])
+    }
+    if (!Array.isArray(this.value)) {
+      throw new Error('IN and NOT IN are only allowed to be used with the string[] type')
+    }
+    return new APICondition(this.field, this.translateOperator(this.operator), this.value)
+  }
+}
+
+class JoinCondition extends BaseCondition implements ConditionElement {
+  sObjectType: string
+  referenceField: string
+  condition: ConditionElement | undefined
+
+  constructor (field: string, operator: Operator, sObjectType: string, referenceField: string, condition: ConditionElement | undefined) {
+    super(field, operator)
+    this.sObjectType = sObjectType
+    this.referenceField = referenceField
+    this.condition = condition
+  }
+
+  public getAPICondition (): APIJoinCondition {
+    if (!this.isListType()) {
+      throw new Error('Join Conditions have to be IN or NOT IN')
+    }
+    return new APIJoinCondition(
+      this.field, this.translateOperator(this.operator), new JoinQuery(
+        this.sObjectType, this.referenceField, this.condition?.getAPICondition()
+      )
+    )
+  }
+}
+
 export {
   Condition,
+  JoinCondition,
   ConditionElement,
   AndCondition,
   OrCondition,

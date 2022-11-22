@@ -3,6 +3,7 @@ import { AndCondition, Condition, Contact, Environment, Lead, Operator, OrCondit
 import Booker25API from '../src/api/booker25-api-requests'
 import { APIConditionElement } from '../src/api/request-bodies/api-condition'
 import ReservationSearchBody from '../src/api/request-bodies/reservation-search-body'
+import { JoinCondition } from '../src/filters/conditions'
 import { dummyId0, dummyId1 } from './__utils__/salesforce-dummy-ids'
 
 const baseResourceSearchUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/reservations/search'
@@ -216,6 +217,31 @@ test('It sends the correct request if status names and ids are mixed', async () 
   innerOr.conditions.push(new Condition('B25__Status__c', Operator.IN, [dummyId0, dummyId1]))
   innerOr.conditions.push(new Condition('B25__Status__r.Name', Operator.IN, ['Completed', 'Canceled']))
   const expectedCondition = new AndCondition([innerOr])
+  expectMockSearchMockToHaveBeenCalledWith(mock, [], null, null, expectedCondition.getAPICondition(), [])
+})
+
+test('It sends the correct request if reservation contacts condition is added', async () => {
+  const reservationRequest = getReservationRequest()
+  const contact = new Contact('test', 'booker25', 'example@example.com')
+  reservationRequest.linkedToReservationContacts().linkedToContact(contact)
+  await reservationRequest.getResults()
+  const contactCondition = new AndCondition([])
+  contactCondition.conditions.push(new Condition('B25__Contact_Lookup__r.FirstName', Operator.EQUAL, 'test'))
+  contactCondition.conditions.push(new Condition('B25__Contact_Lookup__r.LastName', Operator.EQUAL, 'booker25'))
+  contactCondition.conditions.push(new Condition('B25__Contact_Lookup__r.Email', Operator.EQUAL, 'example@example.com'))
+  const expectedCondition = new AndCondition([new JoinCondition('Id', Operator.IN, 'B25__ReservationContact__c', 'B25__Reservation_Lookup__c', new AndCondition([contactCondition]))])
+  expectMockSearchMockToHaveBeenCalledWith(mock, [], null, null, expectedCondition.getAPICondition(), [])
+})
+
+test('It sends the correct request if reservation contacts condition with Id is added', async () => {
+  const reservationRequest = getReservationRequest()
+  const contact = new Contact('test', 'booker25', 'example@example.com')
+  contact.id = dummyId0
+  reservationRequest.linkedToReservationContacts().linkedToContact(contact)
+  await reservationRequest.getResults()
+  const contactCondition = new AndCondition([])
+  contactCondition.conditions.push(new Condition('B25__Contact_Lookup__c', Operator.EQUAL, dummyId0))
+  const expectedCondition = new AndCondition([new JoinCondition('Id', Operator.IN, 'B25__ReservationContact__c', 'B25__Reservation_Lookup__c', contactCondition)])
   expectMockSearchMockToHaveBeenCalledWith(mock, [], null, null, expectedCondition.getAPICondition(), [])
 })
 
