@@ -8,6 +8,7 @@ test('It generates a reservation object for each reservation passed', () => {
   expect(reservationResult.numberOfReservations()).toBe(2)
   expect(reservationResult.getReservation('Name 1')).not.toBeUndefined()
   expect(reservationResult.getReservation('Name 2')).not.toBeUndefined()
+  expect(reservationResult.getReservation('Name 3')).toBeUndefined()
 })
 
 test('getReservation returns the correct reservation by id', () => {

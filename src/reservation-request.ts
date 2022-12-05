@@ -64,23 +64,23 @@ export default class ReservationRequest {
   }
 
   /**
-   * Filter reservations to only include reservations that end after the gived date (GMT)
+   * Filter reservations to only include reservations that end after the given date (GMT)
    *
    * @param rangeStart The date
    * @returns The updated reservation request.
    */
-  public onlyReservationsAfter (rangeStart: Date): ReservationRequest {
+  public withEndDatetimeAfter (rangeStart: Date): ReservationRequest {
     this.rangeStart = rangeStart
     return this
   }
 
   /**
-   * Filter reservations to only include reservations that start before the gived date (GMT)
+   * Filter reservations to only include reservations that start before the given date (GMT)
    *
    * @param rangeEnd The date
    * @returns The updated reservation request.
    */
-  public onlyReservationsBefore (rangeEnd: Date): ReservationRequest {
+  public withStartDatetimeBefore (rangeEnd: Date): ReservationRequest {
     this.rangeEnd = rangeEnd
     return this
   }
@@ -90,7 +90,7 @@ export default class ReservationRequest {
    * @param lead The lead to search for.
    * @returns The updated reservation request.
    */
-  public linkedToLead (lead: Lead): ReservationRequest {
+  public withLead (lead: Lead): ReservationRequest {
     this.lead = lead
     return this
   }
@@ -100,7 +100,7 @@ export default class ReservationRequest {
    * @param contact The contact to search for.
    * @returns The updated reservation request.
    */
-  public linkedToContact (contact: Contact): ReservationRequest {
+  public withContact (contact: Contact): ReservationRequest {
     this.contact = contact
     return this
   }
@@ -110,7 +110,7 @@ export default class ReservationRequest {
    * @param resource The resource to search for.
    * @returns The updated reservation request.
    */
-  public linkedToResource (resource: Resource): ReservationRequest {
+  public withResource (resource: Resource): ReservationRequest {
     this.resource = resource
     return this
   }
@@ -139,7 +139,7 @@ export default class ReservationRequest {
    * @param fieldName The api name of the field to request
    * @returns The updated reservation request.
    */
-  public withAdditionalField (fieldName: string): ReservationRequest {
+  public includeAdditionalField (fieldName: string): ReservationRequest {
     this.additionalFields.add(fieldName)
     return this
   }
@@ -150,8 +150,8 @@ export default class ReservationRequest {
    * @param fieldName The api names of the fields to request
    * @returns The updated reservation request.
    */
-  public withAdditionalFields (fieldNames: Set<string> | string[]): ReservationRequest {
-    fieldNames.forEach(fieldName => this.withAdditionalField(fieldName))
+  public includeAdditionalFields (fieldNames: Set<string> | string[]): ReservationRequest {
+    fieldNames.forEach(fieldName => this.includeAdditionalField(fieldName))
     return this
   }
 

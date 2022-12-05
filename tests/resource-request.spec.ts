@@ -25,25 +25,25 @@ test('It calls the booker25 resurces endpoint when provided with no additional i
   const resourceRequest = getResourceRequest()
   const mock = fetchMock.once('[]')
   const result = await resourceRequest.getResults()
-  expectMockSearchMockToHaveBeenCalledWith(mock, [], [], undefined, [])
+  expectSearchMockToHaveBeenCalledWith(mock, [], [], undefined, [])
   expect(result.numberOfresources()).toBe(0)
 })
 
 test('It adds the field if added to the request', async () => {
   const resourceRequest = getResourceRequest()
-  resourceRequest.withAdditionalField('B25__Api_Visible__c')
+  resourceRequest.includeAdditionalField('B25__Api_Visible__c')
   const mock = fetchMock.once('[]')
   const result = await resourceRequest.getResults()
-  expectMockSearchMockToHaveBeenCalledWith(mock, [], [], undefined, ['B25__Api_Visible__c'])
+  expectSearchMockToHaveBeenCalledWith(mock, [], [], undefined, ['B25__Api_Visible__c'])
   expect(result.numberOfresources()).toBe(0)
 })
 
 test('It adds the fields if added to the request', async () => {
   const resourceRequest = getResourceRequest()
-  resourceRequest.withAdditionalFields(new Set(['B25__Api_Visible__c', 'B25__Booker25_Id__c']))
+  resourceRequest.includeAdditionalFields(new Set(['B25__Api_Visible__c', 'B25__Booker25_Id__c']))
   const mock = fetchMock.once('[]')
   const result = await resourceRequest.getResults()
-  expectMockSearchMockToHaveBeenCalledWith(mock, [], [], undefined, ['B25__Api_Visible__c', 'B25__Booker25_Id__c'])
+  expectSearchMockToHaveBeenCalledWith(mock, [], [], undefined, ['B25__Api_Visible__c', 'B25__Booker25_Id__c'])
   expect(result.numberOfresources()).toBe(0)
 })
 
@@ -54,7 +54,7 @@ test('It parses the result into resources', async () => {
     resourceGenerator.getResourceArray(2)
   ))
   const result = await resourceRequest.getResults()
-  expectMockSearchMockToHaveBeenCalledWith(mock, [], [], undefined, [])
+  expectSearchMockToHaveBeenCalledWith(mock, [], [], undefined, [])
   expect(result.numberOfresources()).toBe(2)
   expect(result.getResource('Name 1')).not.toBeUndefined()
   expect(result.getResource('Name 2')).not.toBeUndefined()
@@ -81,7 +81,7 @@ test('It adds timelines if requested', async () => {
   const result = await getResourceRequest()
     .withAvailableSlotsBetween(new Date(Date.UTC(2022, 0, 1)), new Date(Date.UTC(2022, 0, 2)))
     .getResults()
-  expectMockSearchMockToHaveBeenCalledWith(resourceFetchMock, [], [], undefined, [])
+  expectSearchMockToHaveBeenCalledWith(resourceFetchMock, [], [], undefined, [])
 
   const requestBody = new AvailabilityTimeSlotRequest(
     new Date(Date.UTC(2022, 0, 1)),
@@ -180,7 +180,7 @@ test('It requests parent scope if requested', async () => {
   await getResourceRequest()
     .includeAllResourcesAt(dummyId0)
     .getResults()
-  expectMockSearchMockToHaveBeenCalledWith(resourceFetchMock, [dummyId0], [], undefined, [])
+  expectSearchMockToHaveBeenCalledWith(resourceFetchMock, [dummyId0], [], undefined, [])
 })
 
 test('It combines multiple parents into a single request', async () => {
@@ -190,7 +190,7 @@ test('It combines multiple parents into a single request', async () => {
   await getResourceRequest()
     .includeAllResourcesAt(dummyId0, dummyId1)
     .getResults()
-  expectMockSearchMockToHaveBeenCalledWith(resourceFetchMock, [dummyId0, dummyId1], [], undefined, [])
+  expectSearchMockToHaveBeenCalledWith(resourceFetchMock, [dummyId0, dummyId1], [], undefined, [])
 })
 
 test('It adds a type id to the request if a type is requested', async () => {
@@ -205,7 +205,7 @@ test('It adds a type id to the request if a type is requested', async () => {
     new APICondition('B25__Resource_Type__r.Name', '=', [dummyId1])
   ])
   expect(resourceFetchMock).toBeCalledTimes(1)
-  expectMockSearchMockToHaveBeenCalledWith(resourceFetchMock, [], [], expectedCondition, [])
+  expectSearchMockToHaveBeenCalledWith(resourceFetchMock, [], [], expectedCondition, [])
 })
 
 test('It passes the condition to the search endpoint', async () => {
@@ -219,7 +219,7 @@ test('It passes the condition to the search endpoint', async () => {
     new APICondition('B25__Api_Visible__c', '=', ['true'])
   ])
   expect(resourceFetchMock).toBeCalledTimes(1)
-  expectMockSearchMockToHaveBeenCalledWith(resourceFetchMock, [], [], expectedCondition, [])
+  expectSearchMockToHaveBeenCalledWith(resourceFetchMock, [], [], expectedCondition, [])
 })
 
 test('It conbines conditions with an and grouping', async () => {
@@ -238,7 +238,7 @@ test('It conbines conditions with an and grouping', async () => {
     new APICondition('B25__Capacity__c', '<', ['25'])
   ])])
   expect(resourceFetchMock).toBeCalledTimes(1)
-  expectMockSearchMockToHaveBeenCalledWith(resourceFetchMock, [], [], expectedCondition, [])
+  expectSearchMockToHaveBeenCalledWith(resourceFetchMock, [], [], expectedCondition, [])
 })
 
 test('It combines types and conditions with an and grouping', async () => {
@@ -258,7 +258,7 @@ test('It combines types and conditions with an and grouping', async () => {
     ])
   ])
   expect(resourceFetchMock).toBeCalledTimes(1)
-  expectMockSearchMockToHaveBeenCalledWith(resourceFetchMock, [], [], expectedCondition, [])
+  expectSearchMockToHaveBeenCalledWith(resourceFetchMock, [], [], expectedCondition, [])
 })
 
 test('It filters the results based on multiple conditions', async () => {
@@ -278,7 +278,7 @@ test('It filters the results based on multiple conditions', async () => {
   expect(result.numberOfresources()).toBe(2)
 })
 
-const expectMockSearchMockToHaveBeenCalledWith = (mock: FetchMock, ids: string[], names: string[], condition: APIConditionElement | undefined, fields: string[]): void => {
+const expectSearchMockToHaveBeenCalledWith = (mock: FetchMock, ids: string[], names: string[], condition: APIConditionElement | undefined, fields: string[]): void => {
   const expectedUrl = `${baseResourceSearchUrl}?fields=Id%2CName%2CB25__Resource_Type__c%2CB25__Parent__c${fields.length !== 0 ? '%2C' : ''}${fields.join('%2C')}`
   expect(mock).toBeCalledWith(expectedUrl,
     {

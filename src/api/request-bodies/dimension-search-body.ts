@@ -5,13 +5,13 @@ export default class DimensionSearchBody {
   private readonly ids: string[]
   private readonly names: string[]
   private readonly condition: APIConditionElement | undefined
-  private readonly includeSubtrees: boolean
+  private readonly includeDescendants: boolean
 
-  constructor (dimensionName: string, ids: string[], names: string[], condition: APIConditionElement | undefined, includeSubtrees: boolean) {
+  constructor (dimensionName: string, ids: string[], names: string[], condition: APIConditionElement | undefined, includeDescendants: boolean) {
     this.dimensionName = dimensionName
     this.ids = ids
     this.names = names
     this.condition = condition
-    this.includeSubtrees = includeSubtrees
+    this.includeDescendants = includeDescendants
   }
 }

@@ -75,7 +75,7 @@ export default class ResourceRequest {
    * @param fieldName The api name of the field to request
    * @returns The updated resource request.
    */
-  public withAdditionalField (fieldName: string): ResourceRequest {
+  public includeAdditionalField (fieldName: string): ResourceRequest {
     this.additionalFields.add(fieldName)
     return this
   }
@@ -86,8 +86,8 @@ export default class ResourceRequest {
    * @param fieldName The api names of the fields to request
    * @returns The updated resource request.
    */
-  public withAdditionalFields (fieldNames: Set<string> | string[]): ResourceRequest {
-    fieldNames.forEach(fieldName => this.withAdditionalField(fieldName))
+  public includeAdditionalFields (fieldNames: Set<string> | string[]): ResourceRequest {
+    fieldNames.forEach(fieldName => this.includeAdditionalField(fieldName))
     return this
   }
 

@@ -31,27 +31,27 @@ test('It sends the correct request if reservation Ids are provided.', async () =
 test('It sends the correct request if rangeStart is provided.', async () => {
   const reservationRequest = getReservationRequest()
   const datetime = new Date()
-  await reservationRequest.onlyReservationsAfter(datetime).getResults()
+  await reservationRequest.withEndDatetimeAfter(datetime).getResults()
   expectMockSearchMockToHaveBeenCalledWith(mock, [], datetime, null, undefined, [])
 })
 
 test('It sends the correct request if rangeEnd is provided.', async () => {
   const reservationRequest = getReservationRequest()
   const datetime = new Date()
-  await reservationRequest.onlyReservationsBefore(datetime).getResults()
+  await reservationRequest.withStartDatetimeBefore(datetime).getResults()
   expectMockSearchMockToHaveBeenCalledWith(mock, [], null, datetime, undefined, [])
 })
 
 test('It adds a field to the url', async () => {
   const reservationRequest = getReservationRequest()
-  await reservationRequest.withIds(dummyId0).withAdditionalField('B25__Notes__c').getResults()
+  await reservationRequest.withIds(dummyId0).includeAdditionalField('B25__Notes__c').getResults()
   expectMockSearchMockToHaveBeenCalledWith(mock, [dummyId0], null, null, undefined, ['B25__Notes__c'])
 })
 
 test('It adds a fields to the url', async () => {
   const reservationRequest = getReservationRequest()
   const mock = fetchMock.once('[]')
-  await reservationRequest.withIds(dummyId0).withAdditionalFields(new Set(['B25__Notes__c', 'B25__Start__c'])).getResults()
+  await reservationRequest.withIds(dummyId0).includeAdditionalFields(new Set(['B25__Notes__c', 'B25__Start__c'])).getResults()
   expectMockSearchMockToHaveBeenCalledWith(mock, [dummyId0], null, null, undefined, ['B25__Notes__c', 'B25__Start__c'])
 })
 
@@ -59,7 +59,7 @@ test('It sends the correct request if liked to contact with an id is provided.',
   const reservationRequest = getReservationRequest()
   const contact = new Contact('test', 'booker25', 'example@example.com')
   contact.id = dummyId0
-  await reservationRequest.linkedToContact(contact).getResults()
+  await reservationRequest.withContact(contact).getResults()
   const expectedCondition = new AndCondition([])
   expectedCondition.conditions.push(new Condition('B25__Contact__c', Operator.EQUAL, dummyId0))
   expectMockSearchMockToHaveBeenCalledWith(mock, [], null, null, expectedCondition.getAPICondition(), [])
@@ -68,7 +68,7 @@ test('It sends the correct request if liked to contact with an id is provided.',
 test('It sends the correct request if liked to contact without an id is provided.', async () => {
   const reservationRequest = getReservationRequest()
   const contact = new Contact('test', 'booker25', 'example@example.com')
-  await reservationRequest.linkedToContact(contact).getResults()
+  await reservationRequest.withContact(contact).getResults()
   const contactCondition = new AndCondition([])
   contactCondition.conditions.push(new Condition('B25__Contact__r.FirstName', Operator.EQUAL, 'test'))
   contactCondition.conditions.push(new Condition('B25__Contact__r.LastName', Operator.EQUAL, 'booker25'))
@@ -81,7 +81,7 @@ test('It sends the correct request if liked to lead with an id is provided.', as
   const reservationRequest = getReservationRequest()
   const lead = new Lead('test', 'booker25', 'example@example.com')
   lead.id = dummyId0
-  await reservationRequest.linkedToLead(lead).getResults()
+  await reservationRequest.withLead(lead).getResults()
   const expectedCondition = new AndCondition([])
   expectedCondition.conditions.push(new Condition('B25__Lead__c', Operator.EQUAL, dummyId0))
   expectMockSearchMockToHaveBeenCalledWith(mock, [], null, null, expectedCondition.getAPICondition(), [])
@@ -90,7 +90,7 @@ test('It sends the correct request if liked to lead with an id is provided.', as
 test('It sends the correct request if liked to lead without an id is provided.', async () => {
   const reservationRequest = getReservationRequest()
   const lead = new Lead('test', 'booker25', 'example@example.com')
-  await reservationRequest.linkedToLead(lead).getResults()
+  await reservationRequest.withLead(lead).getResults()
   const leadCondition = new AndCondition([])
   leadCondition.conditions.push(new Condition('B25__Lead__r.FirstName', Operator.EQUAL, 'test'))
   leadCondition.conditions.push(new Condition('B25__Lead__r.LastName', Operator.EQUAL, 'booker25'))
@@ -106,7 +106,7 @@ test('It sends the correct request if liked to resource with an id is provided.'
     Id: dummyId0,
     Name: 'Test Resource'
   })
-  await reservationRequest.linkedToResource(resource).getResults()
+  await reservationRequest.withResource(resource).getResults()
   const expectedCondition = new AndCondition([])
   expectedCondition.conditions.push(new Condition('B25__Resource__c', Operator.EQUAL, dummyId0))
   expectMockSearchMockToHaveBeenCalledWith(mock, [], null, null, expectedCondition.getAPICondition(), [])
@@ -120,7 +120,7 @@ test('It sends the correct request if liked to resource without an id is provide
   })
   resource.id = ''
   resource.setCustomProperty('Id', undefined)
-  await reservationRequest.linkedToResource(resource).getResults()
+  await reservationRequest.withResource(resource).getResults()
   const resourceCondition = new AndCondition([])
   resourceCondition.conditions.push(new Condition('B25__Resource__r.Name', Operator.EQUAL, 'Test Resource'))
   const expectedCondition = new AndCondition([resourceCondition])
