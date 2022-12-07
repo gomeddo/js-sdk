@@ -1,5 +1,4 @@
-import Service from '../../src/s-objects/service'
-import ServiceReservation from '../../src/s-objects/service-reservation'
+import { Service, ServiceReservation } from '../../src/index'
 import { getSObject } from '../__utils__/s-object-data'
 
 test('Sets the id an quantity based on what was passed in the constructor', () => {

@@ -1,9 +1,19 @@
 import Booker25API from './api/booker25-api-requests'
 import ResourceRequest from './resource-request'
+import ReservationRequest from './reservation-request'
+import ResourceResult from './resource-result'
+import ReservationResult from './reservation-result'
 import Contact from './s-objects/contact'
 import Lead from './s-objects/lead'
 import Reservation from './s-objects/reservation'
+import SObject from './s-objects/s-object'
+import Resource from './s-objects/resource'
+import Service from './s-objects/service'
 import ServiceReservation, { SFServiceReservation } from './s-objects/service-reservation'
+import { TimeSlot } from './time-slots/time-slot'
+import { AvailabilityTimeSlot, AvailabilitySlotType } from './time-slots/availability-time-slot'
+import { ServiceTimeSlot } from './time-slots/service-time-slot'
+import { Condition, AndCondition, OrCondition, Operator } from './filters/conditions'
 
 enum Environment {
   DEVELOP,
@@ -36,6 +46,15 @@ class Booker25 {
    */
   public buildResourceRequest (): ResourceRequest {
     return new ResourceRequest(this.api)
+  }
+
+  /**
+   * Creates a new request for reservations. The request can then be specified using methods on the reservation request.
+   *
+   * @returns new reservation request using the authentication from this Booker25 instance
+   */
+  public buildReservationRequest (): ReservationRequest {
+    return new ReservationRequest(this.api)
   }
 
   /**
@@ -133,6 +152,25 @@ class Booker25 {
   }
 }
 export {
-  Environment
+  Environment,
+  ResourceRequest,
+  ReservationRequest,
+  ResourceResult,
+  ReservationResult,
+  SObject,
+  Reservation,
+  Resource,
+  Contact,
+  Lead,
+  Service,
+  ServiceReservation,
+  TimeSlot,
+  AvailabilitySlotType,
+  AvailabilityTimeSlot,
+  ServiceTimeSlot,
+  Condition,
+  AndCondition,
+  OrCondition,
+  Operator
 }
 export default Booker25

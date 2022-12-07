@@ -1,6 +1,6 @@
-import { SFReservation } from '../s-objects/reservation'
-import { StandardSFSObject } from '../s-objects/s-object'
-import { SFServiceReservation } from '../s-objects/service-reservation'
+import { SFReservation } from '../../s-objects/reservation'
+import { StandardSFSObject } from '../../s-objects/s-object'
+import { SFServiceReservation } from '../../s-objects/service-reservation'
 
 // Property names have to be exact to the endpoint
 class ReservationSaveRequest {

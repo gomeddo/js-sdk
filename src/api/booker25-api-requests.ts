@@ -1,12 +1,15 @@
 import { Environment } from '../index'
 import { SFResource } from '../s-objects/resource'
-import { isSalesforceId } from '../utils/salesforce-utils'
+import { APIConditionElement } from './request-bodies/api-condition'
 import AvailabilityTimeSlotResponse from './availability-reponse'
-import AvailabilityTimeSlotRequest from './availability-request'
-import ReservationPriceCalculationRequest from './reservation-price-calculation-request'
-import { ReservationSaveRequest } from './reservation-save-request'
-import ServiceTimeSlotRequest from './service-availability-request'
+import AvailabilityTimeSlotRequest from './request-bodies/availability-request'
+import DimensionSearchBody from './request-bodies/dimension-search-body'
+import ReservationPriceCalculationRequest from './request-bodies/reservation-price-calculation-request'
+import { ReservationSaveRequest } from './request-bodies/reservation-save-request'
+import ServiceTimeSlotRequest from './request-bodies/service-availability-request'
 import ServiceTimeSlotResponse from './service-availability-response'
+import ReservationSearchBody from './request-bodies/reservation-search-body'
+import { SFReservation } from '../s-objects/reservation'
 
 export default class Booker25API {
   private readonly baseUrl: string
@@ -29,41 +32,28 @@ export default class Booker25API {
     }
   }
 
-  public async getAllResources (type: string | undefined, fields: Set<string>): Promise<SFResource[]> {
-    const url = new URL('B25/v1/resources', this.baseUrl)
-
-    if (type !== undefined) {
-      if (!isSalesforceId(type)) {
-        throw new Error('Only 18 character salesforce ids are supported for type')
-      }
-      url.searchParams.append('resourceType', type)
-    }
+  public async searchResources (parentIds: string[], parentNames: string[], apiCondition: APIConditionElement | undefined, fields: Set<string>): Promise<SFResource[]> {
+    const url = new URL('B25/v1/dimensionRecords/search', this.baseUrl)
     this.addFieldsToUrl(url, fields)
+    const dimensionSearchBody = new DimensionSearchBody('B25__Resource__c', parentIds, parentNames, apiCondition, true)
     const response = await fetch(url.href, {
+      method: 'POST',
+      body: JSON.stringify(dimensionSearchBody),
       headers: this.getHeaders()
     })
     await this.checkResponse(response)
-    const responseJSON = await response.json()
-    return responseJSON
+    return await response.json()
   }
 
-  public async getAllChildResources (parentId: string, type: string | undefined, fields: Set<string>): Promise<SFResource[]> {
-    if (!isSalesforceId(parentId)) {
-      throw new Error('Only 18 character salesforce ids are supported for parent')
-    }
-    const url = new URL(`B25/v1/resources/${parentId}/children`, this.baseUrl)
-    if (type !== undefined) {
-      if (!isSalesforceId(type)) {
-        throw new Error('Only 18 character salesforce ids are supported for type')
-      }
-      url.searchParams.append('resourceType', type)
-    }
+  public async searchReservations (reservationIds: Set<string>, rangeStart: Date | null, rangeEnd: Date | null, apiCondition: APIConditionElement | undefined, fields: Set<string>): Promise<SFReservation[]> {
+    const url = new URL('B25/v1/reservations/search', this.baseUrl)
     this.addFieldsToUrl(url, fields)
-    url.searchParams.append('recursive', 'true')
+    const reservatinSearchBody = new ReservationSearchBody([...reservationIds], rangeStart, rangeEnd, apiCondition)
     const response = await fetch(url.href, {
+      method: 'POST',
+      body: JSON.stringify(reservatinSearchBody),
       headers: this.getHeaders()
     })
-    await this.checkResponse(response)
     return await response.json()
   }
 

@@ -1,4 +1,4 @@
-import { SFReservation } from '../s-objects/reservation'
+import { SFReservation } from '../../s-objects/reservation'
 
 // Property names have to be exact to the endpoint
 export default class AvailabilityTimeSlotRequest {

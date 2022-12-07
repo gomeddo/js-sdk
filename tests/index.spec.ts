@@ -1,7 +1,5 @@
-import { ReservationSaveRequest } from '../src/api/reservation-save-request'
-import Booker25, { Environment } from '../src/index'
-import Reservation from '../src/s-objects/reservation'
-import Service from '../src/s-objects/service'
+import Booker25, { Environment, Reservation, Service } from '../src/index'
+import { ReservationSaveRequest } from '../src/api/request-bodies/reservation-save-request'
 import { getSObject } from './__utils__/s-object-data'
 
 beforeEach(() => {

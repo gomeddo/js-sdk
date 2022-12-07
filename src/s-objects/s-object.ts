@@ -1,4 +1,3 @@
-
 type CustomFieldName = `${string}__c`
 type CustomRelationshipName = `${string}__r`
 interface CustomSFSObject {
@@ -40,6 +39,10 @@ export default class SObject {
     return this.customProperties.get(propertyName)
   }
 
+  public getCustomProperties (): Map<string, any> {
+    return this.customProperties
+  }
+
   public getSFSObject (): Partial<CustomSFSObject> {
     const sObjectData: Partial<CustomSFSObject> = {}
     this.customProperties.forEach((value, fieldName) => {
@@ -52,88 +55,14 @@ export default class SObject {
   }
 }
 
-enum Operator {
-  EQUAL,
-  NOT_EQUAL,
-  LESS_THAN,
-  GREATER_THAN
-}
-
-interface ConditionElement {
-  matches: (resource: SObject) => boolean
-  getFields: () => string[]
-}
-
-class AndCondition implements ConditionElement {
-  conditions: ConditionElement[] = []
-
-  constructor (conditions: ConditionElement[]) {
-    this.conditions = conditions
-  }
-
-  matches (resource: SObject): boolean {
-    return this.conditions.every(condition => condition.matches(resource))
-  }
-
-  getFields (): string[] {
-    return this.conditions.flatMap((condition) => condition.getFields())
-  }
-}
-
-class OrCondition implements ConditionElement {
-  conditions: ConditionElement[] = []
-
-  constructor (conditions: ConditionElement[]) {
-    this.conditions = conditions
-  }
-
-  matches (resource: SObject): boolean {
-    if (this.conditions.length === 0) {
-      return true
-    }
-    return this.conditions.some(condition => condition.matches(resource))
-  }
-
-  getFields (): string[] {
-    return this.conditions.flatMap((condition) => condition.getFields())
-  }
-}
-
-class Condition implements ConditionElement {
-  field: string
-  operator: Operator
-  value: string | number | boolean
-  constructor (field: string, operator: Operator, value: string | number | boolean) {
-    this.field = field
-    this.operator = operator
-    this.value = value
-  }
-
-  matches (resource: SObject): boolean {
-    const value = resource.getCustomProperty(this.field)
-    if (this.operator === Operator.EQUAL) {
-      return value === this.value
-    }
-    if (this.operator === Operator.LESS_THAN) {
-      return value < this.value
-    }
-    if (this.operator === Operator.GREATER_THAN) {
-      return value > this.value
-    }
-    return value !== this.value
-  }
-
-  getFields (): string[] {
-    return [this.field]
-  }
+const getRelationshiptNameFromFieldName = (fieldName: CustomFieldName): CustomRelationshipName => {
+  return `${fieldName.substring(0, fieldName.length - 3)}__r`
 }
 
 export {
-  Condition,
-  ConditionElement,
-  AndCondition,
-  OrCondition,
-  Operator,
+  CustomFieldName,
+  CustomRelationshipName,
   CustomSFSObject,
-  StandardSFSObject
+  StandardSFSObject,
+  getRelationshiptNameFromFieldName
 }

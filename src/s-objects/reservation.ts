@@ -1,5 +1,5 @@
-import ReservationPriceCalculationRequest from '../api/reservation-price-calculation-request'
-import { ReservationSaveRequest } from '../api/reservation-save-request'
+import ReservationPriceCalculationRequest from '../api/request-bodies/reservation-price-calculation-request'
+import { ReservationSaveRequest } from '../api/request-bodies/reservation-save-request'
 import Contact from './contact'
 import Lead from './lead'
 import Resource from './resource'

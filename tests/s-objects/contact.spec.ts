@@ -1,4 +1,4 @@
-import Contact from '../../src/s-objects/contact'
+import { Contact } from '../../src/index'
 
 test('properties are set based on the constructor', () => {
   const contact = new Contact('firstname', 'lastname', 'email')

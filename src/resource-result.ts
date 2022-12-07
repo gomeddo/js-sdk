@@ -1,7 +1,6 @@
 import AvailabilityTimeSlotResponse from './api/availability-reponse'
 import ServiceTimeSlotResponse from './api/service-availability-response'
 import Resource, { SFResource } from './s-objects/resource'
-import { ConditionElement } from './s-objects/s-object'
 import { isSalesforceId } from './utils/salesforce-utils'
 
 /**
@@ -58,17 +57,6 @@ export default class ResourceResult {
     })
   }
 
-  public filterOnCondition (condition: ConditionElement): void {
-    if (condition === null) {
-      return
-    }
-    this.resourcesById.forEach((resource) => {
-      if (!condition.matches(resource)) {
-        this.resourcesById.delete(resource.id)
-      }
-    })
-  }
-
   /**
    * @returns the number of resources matching the request
    */
@@ -85,7 +73,7 @@ export default class ResourceResult {
 
   /**
    * @param idOrName the Id or the Name of the resource to retrieve.
-   * @returns The matching resource. Or null if not found.
+   * @returns The matching resource. Or undefined if not found.
    */
   public getResource (idOrName: string): Resource | undefined {
     if (isSalesforceId(idOrName)) {
