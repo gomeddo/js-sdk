@@ -1,5 +1,7 @@
+import ReservationCollection from '../api/request-bodies/reservation-collection'
 import ReservationPriceCalculationRequest from '../api/request-bodies/reservation-price-calculation-request'
 import { ReservationSaveRequest } from '../api/request-bodies/reservation-save-request'
+import { isSalesforceId } from '../utils/salesforce-utils'
 import Contact from './contact'
 import Lead from './lead'
 import Resource from './resource'
@@ -14,6 +16,8 @@ export default class Reservation extends SObject {
   private contact: Contact | null = null
   private lead: Lead | null = null
   public serviceReservations: ServiceReservation[] = []
+  public relatedRecords: Map<string, Array<Partial<CustomSFSObject>>> = new Map()
+  public removedRelatedRecords: Map<string, Array<Partial<CustomSFSObject>>> = new Map()
 
   /**
    * Attatch this reservation to the given resource.
@@ -105,7 +109,65 @@ export default class Reservation extends SObject {
   public addService (service: Service, quantity: number): ServiceReservation {
     const serviceReservation = new ServiceReservation(service, quantity)
     this.serviceReservations.push(serviceReservation)
+    this.addRelatedRecord('B25__Service_Reservation__c', serviceReservation.getSFSObject())
     return serviceReservation
+  }
+
+  /**
+   * Add a reservation contact record to the reservation.
+   * Is only persisted through the update/delete reservation methods does not work with saveReservation
+   *
+   * @param reservationContactSObject the reservation contact to add to the reservation
+   */
+  public addReservationContact (reservationContactSObject: Partial<CustomSFSObject>): void {
+    this.addRelatedRecord('B25__ReservationContact__c', reservationContactSObject)
+  }
+
+  /**
+   * Add a related record to the reservation.
+   * Has to be a configured junction in booker25.
+   * Is only persisted through the update/delete reservation methods does not work with saveReservation
+   *
+   * @param relatedRecordApiName
+   * @param relatedRecord
+   */
+  public addRelatedRecord (relatedRecordApiName: string, relatedRecord: Partial<CustomSFSObject>): void {
+    let relatedRecordsList = this.relatedRecords.get(relatedRecordApiName)
+    if (relatedRecordsList === undefined) {
+      relatedRecordsList = []
+      this.relatedRecords.set(relatedRecordApiName, relatedRecordsList)
+    }
+    relatedRecordsList.push(relatedRecord)
+  }
+
+  /**
+   * Remove a related record from the reservation.
+   * Is only persisted through the update reservation methods does not work with saveReservation or deleteReservation
+   *
+   * @param reservationContactSObject the reservation contact to remove
+   */
+  public removeReservationContact (reservationContactSObject: Partial<CustomSFSObject>): void {
+    this.removeRelatedRecord('B25__ReservationContact__c', reservationContactSObject)
+  }
+
+  /**
+   * Remove a related record form the reservation.
+   * Has to be a configured junction in booker25.
+   * Is only persisted through the update reservation methods does not work with saveReservation or deleteReservation
+   *
+   * @param relatedRecordApiName
+   * @param relatedRecord
+   */
+  public removeRelatedRecord (relatedRecordApiName: string, relatedRecord: Partial<CustomSFSObject>): void {
+    if (relatedRecord.Id === undefined || !isSalesforceId(relatedRecord.Id)) {
+      throw new Error('Related records can\t be deleted if they don\'t have a salesforce Id')
+    }
+    let relatedRecordsList = this.removedRelatedRecords.get(relatedRecordApiName)
+    if (relatedRecordsList === undefined) {
+      relatedRecordsList = []
+      this.removedRelatedRecords.set(relatedRecordApiName, relatedRecordsList)
+    }
+    relatedRecordsList.push(relatedRecord)
   }
 
   /**
@@ -119,6 +181,22 @@ export default class Reservation extends SObject {
       this.getContact(),
       this.getServiceReservationRestData()
     )
+  }
+
+  /**
+   * @internal
+   * @returns Reservation Collection for this reservation
+   */
+  public getReservationCollection (): ReservationCollection {
+    const reservation = this.getSFSObject()
+    if (isReservation(reservation)) {
+      return new ReservationCollection(
+        reservation,
+        this.relatedRecords,
+        this.removedRelatedRecords
+      )
+    }
+    throw Error('Updating or deleting the reservation requires the reservation to have an Id.')
   }
 
   /**
@@ -273,6 +351,10 @@ interface SFReservation extends CustomSFSObject {
   B25__What_Is_This__c?: string | null
 }
 
+const isReservation = (reservation: Partial<SFReservation>): reservation is SFReservation => {
+  return reservation.Id !== undefined && reservation.Id !== null
+}
 export {
-  SFReservation
+  SFReservation,
+  isReservation
 }

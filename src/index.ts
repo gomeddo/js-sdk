@@ -113,6 +113,46 @@ class Booker25 {
   }
 
   /**
+   * Updates a reservation including related sObjects.
+   * Will not create contacts or leads only junction records and service reservatios.
+   *
+   * @param reservation The reservation to update
+   */
+  public async updateReservation (reservation: Reservation): Promise<void> {
+    await this.updateReservations([reservation])
+  }
+
+  /**
+   * Updates a list of reservations including related sObjects.
+   * Will not create contacts or leads only junction records and service reservatios.
+   *
+   * @param reservations The reservations to update
+   */
+  public async updateReservations (reservations: Reservation[]): Promise<void> {
+    const reservationCollections = reservations.map(reservation => reservation.getReservationCollection())
+    await this.api.updateReservationCollection(reservationCollections)
+  }
+
+  /**
+   * Deletes a reservation including junction sObjects and service reservations.
+   *
+   * @param reservation The reservation to delete
+   */
+  public async deleteReservation (reservation: Reservation): Promise<void> {
+    await this.deleteReservations([reservation])
+  }
+
+  /**
+   * Deletes a list of reservations including junction sObjects and service reservations.
+   *
+   * @param reservations The reservations to delete
+   */
+  public async deleteReservations (reservations: Reservation[]): Promise<void> {
+    const reservationCollections = reservations.map(reservation => reservation.getReservationCollection())
+    await this.api.deleteReservationCollection(reservationCollections)
+  }
+
+  /**
    * Sends the reservation object to salesforce to have the price calculations run.
    * The calculated price is then populated on the reservation returned.
    *
