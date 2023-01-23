@@ -10,6 +10,7 @@ import ServiceTimeSlotRequest from './request-bodies/service-availability-reques
 import ServiceTimeSlotResponse from './service-availability-response'
 import ReservationSearchBody from './request-bodies/reservation-search-body'
 import { SFReservation } from '../s-objects/reservation'
+import ReservationCollection from './request-bodies/reservation-collection'
 
 export default class Booker25API {
   private readonly baseUrl: string
@@ -66,6 +67,26 @@ export default class Booker25API {
     })
     await this.checkResponse(response)
     return await response.json()
+  }
+
+  public async updateReservationCollection (reservationCollections: ReservationCollection[]): Promise<void> {
+    const url = new URL('B25/v1/reservation-collection', this.baseUrl)
+    const response = await fetch(url.href, {
+      method: 'PATCH',
+      body: JSON.stringify(reservationCollections),
+      headers: this.getHeaders()
+    })
+    await this.checkResponse(response)
+  }
+
+  public async deleteReservationCollection (reservationCollections: ReservationCollection[]): Promise<void> {
+    const url = new URL('B25/v1/reservation-collection', this.baseUrl)
+    const response = await fetch(url.href, {
+      method: 'DELETE',
+      body: JSON.stringify(reservationCollections),
+      headers: this.getHeaders()
+    })
+    await this.checkResponse(response)
   }
 
   public async calculatePrice (calculationRequest: ReservationPriceCalculationRequest): Promise<ReservationPriceCalculationRequest> {
