@@ -1,5 +1,5 @@
 import AvailabilityTimeSlotRequest from './api/request-bodies/availability-request'
-import Booker25API from './api/booker25-api-requests'
+import GoMeddoAPI from './api/gomeddo-api-requests'
 import ServiceTimeSlotRequest from './api/request-bodies/service-availability-request'
 import ResourceResult from './resource-result'
 import { SFResource } from './s-objects/resource'
@@ -11,7 +11,7 @@ import { isSalesforceId } from './utils/salesforce-utils'
  * Methods can be used to filter and narow down the resources being requested.
  */
 export default class ResourceRequest {
-  private readonly api: Booker25API
+  private readonly api: GoMeddoAPI
   private readonly standardFields: Set<string> = new Set([
     'Id', 'Name', 'B25__Resource_Type__c', 'B25__Parent__c'
   ])
@@ -24,7 +24,7 @@ export default class ResourceRequest {
   private endOfRange: Date | null = null
   private fetchServices: boolean = false
 
-  constructor (api: Booker25API) {
+  constructor (api: GoMeddoAPI) {
     this.api = api
   }
 
@@ -119,7 +119,7 @@ export default class ResourceRequest {
   }
 
   /**
-   * Calls the booker25 APIs to construct the requested resources.
+   * Calls the GoMeddo APIs to construct the requested resources.
    *
    * @returns A ResourceResult object containing the requested resources.
    */

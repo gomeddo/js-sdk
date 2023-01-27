@@ -1,5 +1,5 @@
 import { Environment } from '../../src/index'
-import Booker25API from '../../src/api/booker25-api-requests'
+import GoMeddoAPI from '../../src/api/gomeddo-api-requests'
 import AvailabilityTimeSlotRequest from '../../src/api/request-bodies/availability-request'
 import ReservationPriceCalculationRequest from '../../src/api/request-bodies/reservation-price-calculation-request'
 import { ReservationSaveRequest } from '../../src/api/request-bodies/reservation-save-request'
@@ -10,7 +10,7 @@ beforeEach(() => {
 })
 
 test('url and body are constructed correctly for saveReservation', async () => {
-  const api = new Booker25API('key', Environment.PRODUCTION)
+  const api = new GoMeddoAPI('key', Environment.PRODUCTION)
   const mock = fetchMock.once('{}')
   const saveRequest = new ReservationSaveRequest({}, null, null, [])
   const result = await api.saveReservation(saveRequest)
@@ -27,7 +27,7 @@ test('url and body are constructed correctly for saveReservation', async () => {
 })
 
 test('the get availabilities makes the correct request', async () => {
-  const api = new Booker25API('key', Environment.PRODUCTION)
+  const api = new GoMeddoAPI('key', Environment.PRODUCTION)
   const mock = fetchMock.once(
     JSON.stringify(
       getAvailabilityResponse(['1', '2'], [getAvailabilitySlot(1, 1, 10, 12, 'Open')])
@@ -56,7 +56,7 @@ test('price calculation makes the correct request', async () => {
     serviceReservations: [],
     serviceCosts: 0
   }))
-  const api = new Booker25API('key', Environment.PRODUCTION)
+  const api = new GoMeddoAPI('key', Environment.PRODUCTION)
   const body = new ReservationPriceCalculationRequest({}, [], 0)
   await api.calculatePrice(body)
   expect(mock).toHaveBeenCalledWith(

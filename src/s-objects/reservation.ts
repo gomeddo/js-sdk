@@ -125,7 +125,7 @@ export default class Reservation extends SObject {
 
   /**
    * Add a related record to the reservation.
-   * Has to be a configured junction in booker25.
+   * Has to be a configured junction in GoMeddo.
    * Is only persisted through the update/delete reservation methods does not work with saveReservation
    *
    * @param relatedRecordApiName
@@ -152,7 +152,7 @@ export default class Reservation extends SObject {
 
   /**
    * Remove a related record form the reservation.
-   * Has to be a configured junction in booker25.
+   * Has to be a configured junction in GoMeddo.
    * Is only persisted through the update reservation methods does not work with saveReservation or deleteReservation
    *
    * @param relatedRecordApiName
