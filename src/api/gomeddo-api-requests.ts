@@ -19,16 +19,16 @@ export default class GoMeddoAPI {
     this.apiKey = apiKey
     switch (environment) {
       case Environment.DEVELOP:
-        this.baseUrl = 'https://dev.api.booker25.com/api/v3/proxy/' // TODO update url to gomeddo when available
+        this.baseUrl = 'https://dev.api.gomeddo.com/api/v3/proxy/'
         break
       case Environment.ACCEPTANCE:
-        this.baseUrl = 'https://acc.api.booker25.com/api/v3/proxy/' // TODO update url to gomeddo when available
+        this.baseUrl = 'https://acc.api.gomeddo.com/api/v3/proxy/'
         break
       case Environment.STAGING:
-        this.baseUrl = 'https://staging.api.booker25.com/api/v3/proxy/' // TODO update url to gomeddo when available
+        this.baseUrl = 'https://staging.api.gomeddo.com/api/v3/proxy/'
         break
       case Environment.PRODUCTION:
-        this.baseUrl = 'https://api.booker25.com/api/v3/proxy/' // TODO update url to gomeddo when available
+        this.baseUrl = 'https://api.gomeddo.com/api/v3/proxy/'
         break
     }
   }
@@ -50,15 +50,12 @@ export default class GoMeddoAPI {
     const url = new URL('B25/v1/reservations/search', this.baseUrl)
     this.addFieldsToUrl(url, fields)
     const reservatinSearchBody = new ReservationSearchBody([...reservationIds], rangeStart, rangeEnd, apiCondition)
-    console.log(JSON.stringify(reservatinSearchBody))
     const response = await fetch(url.href, {
       method: 'POST',
       body: JSON.stringify(reservatinSearchBody),
       headers: this.getHeaders()
     })
-    const json = await response.json()
-    console.log(json)
-    return json
+    return await response.json()
   }
 
   public async saveReservation (saveRequest: ReservationSaveRequest): Promise<object> {
