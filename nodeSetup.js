@@ -1,8 +1,4 @@
-const { default: Booker25, Environment } = require('./dist/index.js')
-const { default: Contact } = require('./dist/s-objects/contact.js')
-const { default: Lead } = require('./dist/s-objects/lead.js')
-const { default: Reservation } = require('./dist/s-objects/reservation.js')
-const { Operator, Condition } = require('./dist/s-objects/s-object.js')
+const { default: GoMeddo, Environment, Contact, Lead, Reservation, Operator, Condition, SObject } = require('./dist/cjs/index.js')
 
 globalThis.fetch = require('node-fetch')
 function requestLogger (httpModule) {
@@ -17,16 +13,54 @@ function requestLogger (httpModule) {
 requestLogger(require('http'))
 requestLogger(require('https'))
 const repl = require('repl').start({ useGlobal: true })
-repl.context.Booker25 = Booker25
+repl.context.GoMeddo = GoMeddo
 repl.context.Environment = Environment
 repl.context.Opperator = Operator
 repl.context.Condition = Condition
 repl.context.Reservation = Reservation
 repl.context.Contact = Contact
 repl.context.Lead = Lead
-const apiKey = process.env.B25_JS_SDK_KEY
+const apiKey = process.env.GOMEDDO_JS_SDK_KEY
 if (!apiKey) {
-  throw new Error('Set your booker25 proxy api key in the environment variable B25_JS_SDK_KEY')
+  throw new Error('Set your GoMeddo proxy api key in the environment variable GOMEDDO_JS_SDK_KEY')
 }
-const booker25 = new Booker25(apiKey, Environment.ACCEPTANCE)
-repl.context.b25 = booker25
+const goMeddo = new GoMeddo(apiKey, Environment.ACCEPTANCE)
+repl.context.goMeddo = goMeddo
+
+// Note these functions are designed to work with a unmodified booker25 install to test functionality.
+repl.context.fetchRentableResources = async () => {
+  return await goMeddo.buildResourceRequest().withType('Rentable Resource').getResults()
+}
+
+repl.context.buildSimpleReservation = (resourceSearchResult, title) => {
+  const reservation = new Reservation()
+  const sampleResource = resourceSearchResult.getResource('Sample Resource 2')
+  reservation.setResource(sampleResource)
+  const startDatetime = new Date()
+  reservation.setStartDatetime(startDatetime)
+  const endDatetime = new Date()
+  endDatetime.setHours(endDatetime.getHours() + 1)
+  reservation.setEndDatetime(endDatetime)
+  reservation.setCustomProperty('B25__Title__c', title)
+  return reservation
+}
+
+repl.context.addReservationContact = (reservation, notes) => {
+  const reservationContact = new SObject()
+  reservationContact.setCustomProperty('B25__Notes__c', notes)
+  reservation.addReservationContact(reservationContact)
+}
+
+repl.context.searchReservationsOnTitle = async (title) => {
+  return await repl.context.goMeddo.buildReservationRequest().withCondition(new Condition('B25__Title__c', Operator.EQUAL, title)).getResults()
+}
+
+repl.context.searchReservationsOnReservationContactNotes = async (notes) => {
+  const reservationRequest = repl.context.goMeddo.buildReservationRequest()
+  reservationRequest.linkedToReservationContacts().withCondition(new Condition('B25__Notes__c', Operator.EQUAL, notes))
+  return await reservationRequest.getResults()
+}
+
+(async () => {
+  // Test code here.
+})()

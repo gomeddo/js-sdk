@@ -3,13 +3,20 @@ type CustomRelationshipName = `${string}__r`
 interface CustomSFSObject {
   Id: string
   Name: string
+  attributes?: SObjectAttributes | undefined
   [key: CustomFieldName]: string | number | boolean | null | undefined
   [key: CustomRelationshipName]: CustomSFSObject
 }
 
 interface StandardSFSObject {
   Id: string
-  [key: string]: string | number | boolean | null | undefined | StandardSFSObject | CustomSFSObject
+  attributes?: SObjectAttributes | undefined
+  [key: string]: string | number | boolean | null | undefined | StandardSFSObject | CustomSFSObject | SObjectAttributes
+}
+
+interface SObjectAttributes {
+  type: string
+  url?: string
 }
 
 export default class SObject {
@@ -43,7 +50,7 @@ export default class SObject {
     return this.customProperties
   }
 
-  public getSFSObject (): Partial<CustomSFSObject> {
+  public getSFSObject (sObjectTypeAttr?: string): Partial<CustomSFSObject> {
     const sObjectData: Partial<CustomSFSObject> = {}
     this.customProperties.forEach((value, fieldName) => {
       // This assumption might not 100% hold but it should be ok to assume the custom property fieldname matches CustomFieldName
@@ -51,6 +58,13 @@ export default class SObject {
       // We could restrict customProperties to CustomFieldName but that might be problematic for the Contact and Lead
       sObjectData[fieldName as CustomFieldName] = value
     })
+    if (sObjectTypeAttr !== undefined) {
+      // When sending this data to the salesforce API and the destination can recieve a generic sObject you need to specify this
+      // Otherwise the salesforce API won't accept it.
+      sObjectData.attributes = {
+        type: sObjectTypeAttr
+      }
+    }
     return sObjectData
   }
 }

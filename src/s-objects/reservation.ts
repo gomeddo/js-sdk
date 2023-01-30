@@ -137,7 +137,7 @@ export default class Reservation extends SObject {
       relatedRecordsList = []
       this.relatedRecords.set(relatedRecordApiName, relatedRecordsList)
     }
-    relatedRecordsList.push(relatedRecord.getSFSObject())
+    relatedRecordsList.push(relatedRecord.getSFSObject(relatedRecordApiName))
   }
 
   /**
@@ -167,7 +167,7 @@ export default class Reservation extends SObject {
       relatedRecordsList = []
       this.removedRelatedRecords.set(relatedRecordApiName, relatedRecordsList)
     }
-    relatedRecordsList.push(relatedRecord.getSFSObject())
+    relatedRecordsList.push(relatedRecord.getSFSObject(relatedRecordApiName))
   }
 
   /**
@@ -257,7 +257,7 @@ export default class Reservation extends SObject {
 
   /**
    * @internal
-   * @returns The Salesforce formatted data for the servuce reservations
+   * @returns The Salesforce formatted data for the service reservations
    */
   private getServiceReservationRestData (): Array<Partial<SFServiceReservation>> {
     return this.serviceReservations.map(serviceReservation => serviceReservation.getSFSObject())
