@@ -1,6 +1,6 @@
-# Booker25 Javascript SDK
+# GoMeddo Javascript SDK
 
-A Javascript library to interact with Booker25 from the browser. More information can be found in our [wiki](https://github.com/booker25/js-sdk/wiki).
+A Javascript library to interact with GoMeddo from the browser. More information can be found in our [wiki](https://github.com/GoMeddo/js-sdk/wiki).
 
 ## Development
 

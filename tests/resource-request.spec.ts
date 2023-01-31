@@ -1,5 +1,5 @@
 import { Environment, Condition, Operator, ResourceRequest, AvailabilitySlotType } from '../src/index'
-import Booker25API from '../src/api/booker25-api-requests'
+import GoMeddoAPI from '../src/api/gomeddo-api-requests'
 import AvailabilityTimeSlotRequest from '../src/api/request-bodies/availability-request'
 import ServiceTimeSlotRequest from '../src/api/request-bodies/service-availability-request'
 import { ResourceGenerator } from './__utils__/resource-responses'
@@ -9,10 +9,10 @@ import DimensionSearchBody from '../src/api/request-bodies/dimension-search-body
 import { APICondition, APIConditionElement, APIConditionGroup } from '../src/api/request-bodies/api-condition'
 import { FetchMock } from 'jest-fetch-mock/types'
 
-const baseResourceSearchUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/dimensionRecords/search'
-const availabilityRequestUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/availability'
-const serviceRequestUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/services/availability'
-const getResourceRequest = (): ResourceRequest => new ResourceRequest(new Booker25API('key', Environment.PRODUCTION))
+const baseResourceSearchUrl = 'https://api.gomeddo.com/api/v3/proxy/B25/v1/dimensionRecords/search'
+const availabilityRequestUrl = 'https://api.gomeddo.com/api/v3/proxy/B25/v1/availability'
+const serviceRequestUrl = 'https://api.gomeddo.com/api/v3/proxy/B25/v1/services/availability'
+const getResourceRequest = (): ResourceRequest => new ResourceRequest(new GoMeddoAPI('key', Environment.PRODUCTION))
 const getExpectedBody = (ids: string[], names: string[], condition: APIConditionElement | undefined): String => {
   return JSON.stringify(new DimensionSearchBody('B25__Resource__c', ids, names, condition, true))
 }
@@ -21,7 +21,7 @@ beforeEach(() => {
   fetchMock.resetMocks()
 })
 
-test('It calls the booker25 resurces endpoint when provided with no additional info', async () => {
+test('It calls the GoMeddo resurces endpoint when provided with no additional info', async () => {
   const resourceRequest = getResourceRequest()
   const mock = fetchMock.once('[]')
   const result = await resourceRequest.getResults()

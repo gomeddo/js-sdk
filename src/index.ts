@@ -1,4 +1,4 @@
-import Booker25API from './api/booker25-api-requests'
+import GoMeddoAPI from './api/gomeddo-api-requests'
 import ResourceRequest from './resource-request'
 import ReservationRequest from './reservation-request'
 import ResourceResult from './resource-result'
@@ -23,26 +23,26 @@ enum Environment {
 }
 
 /**
- * Booker25 object allows for interaction with booker25
+ * GoMeddo object allows for interaction with GoMeddo
  */
-class Booker25 {
+class GoMeddo {
   static version: string = '0.0.5'
   private readonly environment: Environment
-  private readonly api: Booker25API
+  private readonly api: GoMeddoAPI
 
   /**
-   * @param apiKey - The api key generated from the booker25 general settings page.
+   * @param apiKey - The api key generated from the GoMeddo general settings page.
    * @param environment - What environment to connect to. Default: Environment.PRODUCTION
    */
   constructor (apiKey: string, environment: Environment = Environment.PRODUCTION) {
     this.environment = environment
-    this.api = new Booker25API(apiKey, environment)
+    this.api = new GoMeddoAPI(apiKey, environment)
   }
 
   /**
    * Creates a new request for resources. The request can then be specified using methods on the resource request.
    *
-   * @returns new resource request using the authentication from this Booker25 instance
+   * @returns new resource request using the authentication from this GoMeddo instance
    */
   public buildResourceRequest (): ResourceRequest {
     return new ResourceRequest(this.api)
@@ -51,7 +51,7 @@ class Booker25 {
   /**
    * Creates a new request for reservations. The request can then be specified using methods on the reservation request.
    *
-   * @returns new reservation request using the authentication from this Booker25 instance
+   * @returns new reservation request using the authentication from this GoMeddo instance
    */
   public buildReservationRequest (): ReservationRequest {
     return new ReservationRequest(this.api)
@@ -213,4 +213,4 @@ export {
   OrCondition,
   Operator
 }
-export default Booker25
+export default GoMeddo

@@ -1,13 +1,13 @@
 import { FetchMock } from 'jest-fetch-mock/types'
 import { AndCondition, Condition, Contact, Environment, Lead, Operator, OrCondition, ReservationRequest, Resource } from '../src'
-import Booker25API from '../src/api/booker25-api-requests'
+import GoMeddoAPI from '../src/api/gomeddo-api-requests'
 import { APIConditionElement } from '../src/api/request-bodies/api-condition'
 import ReservationSearchBody from '../src/api/request-bodies/reservation-search-body'
 import { JoinCondition } from '../src/filters/conditions'
 import { dummyId0, dummyId1 } from './__utils__/salesforce-dummy-ids'
 
-const baseResourceSearchUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/reservations/search'
-const getReservationRequest = (): ReservationRequest => new ReservationRequest(new Booker25API('key', Environment.PRODUCTION))
+const baseResourceSearchUrl = 'https://api.gomeddo.com/api/v3/proxy/B25/v1/reservations/search'
+const getReservationRequest = (): ReservationRequest => new ReservationRequest(new GoMeddoAPI('key', Environment.PRODUCTION))
 const getExpectedBody = (reservationIds: string[], rangeStart: Date | null, rangeEnd: Date | null, condition: APIConditionElement | undefined): String => {
   return JSON.stringify(new ReservationSearchBody(reservationIds, rangeStart, rangeEnd, condition))
 }
@@ -58,7 +58,7 @@ test('It adds a fields to the url', async () => {
 
 test('It sends the correct request if liked to contact with an id is provided.', async () => {
   const reservationRequest = getReservationRequest()
-  const contact = new Contact('test', 'booker25', 'example@example.com')
+  const contact = new Contact('test', 'GoMeddo', 'example@example.com')
   contact.id = dummyId0
   await reservationRequest.withContact(contact).getResults()
   const expectedCondition = new AndCondition([])
@@ -68,11 +68,11 @@ test('It sends the correct request if liked to contact with an id is provided.',
 
 test('It sends the correct request if liked to contact without an id is provided.', async () => {
   const reservationRequest = getReservationRequest()
-  const contact = new Contact('test', 'booker25', 'example@example.com')
+  const contact = new Contact('test', 'GoMeddo', 'example@example.com')
   await reservationRequest.withContact(contact).getResults()
   const contactCondition = new AndCondition([])
   contactCondition.conditions.push(new Condition('B25__Contact__r.FirstName', Operator.EQUAL, 'test'))
-  contactCondition.conditions.push(new Condition('B25__Contact__r.LastName', Operator.EQUAL, 'booker25'))
+  contactCondition.conditions.push(new Condition('B25__Contact__r.LastName', Operator.EQUAL, 'GoMeddo'))
   contactCondition.conditions.push(new Condition('B25__Contact__r.Email', Operator.EQUAL, 'example@example.com'))
   const expectedCondition = new AndCondition([contactCondition])
   expectMockSearchMockToHaveBeenCalledWith(mock, [], null, null, expectedCondition.getAPICondition(), [])
@@ -80,7 +80,7 @@ test('It sends the correct request if liked to contact without an id is provided
 
 test('It sends the correct request if liked to lead with an id is provided.', async () => {
   const reservationRequest = getReservationRequest()
-  const lead = new Lead('test', 'booker25', 'example@example.com')
+  const lead = new Lead('test', 'GoMeddo', 'example@example.com')
   lead.id = dummyId0
   await reservationRequest.withLead(lead).getResults()
   const expectedCondition = new AndCondition([])
@@ -90,11 +90,11 @@ test('It sends the correct request if liked to lead with an id is provided.', as
 
 test('It sends the correct request if liked to lead without an id is provided.', async () => {
   const reservationRequest = getReservationRequest()
-  const lead = new Lead('test', 'booker25', 'example@example.com')
+  const lead = new Lead('test', 'GoMeddo', 'example@example.com')
   await reservationRequest.withLead(lead).getResults()
   const leadCondition = new AndCondition([])
   leadCondition.conditions.push(new Condition('B25__Lead__r.FirstName', Operator.EQUAL, 'test'))
-  leadCondition.conditions.push(new Condition('B25__Lead__r.LastName', Operator.EQUAL, 'booker25'))
+  leadCondition.conditions.push(new Condition('B25__Lead__r.LastName', Operator.EQUAL, 'GoMeddo'))
   leadCondition.conditions.push(new Condition('B25__Lead__r.Email', Operator.EQUAL, 'example@example.com'))
   const expectedCondition = new AndCondition([leadCondition])
   expectMockSearchMockToHaveBeenCalledWith(mock, [], null, null, expectedCondition.getAPICondition(), [])
@@ -222,12 +222,12 @@ test('It sends the correct request if status names and ids are mixed', async () 
 
 test('It sends the correct request if reservation contacts condition is added', async () => {
   const reservationRequest = getReservationRequest()
-  const contact = new Contact('test', 'booker25', 'example@example.com')
+  const contact = new Contact('test', 'GoMeddo', 'example@example.com')
   reservationRequest.linkedToReservationContacts().linkedToContact(contact)
   await reservationRequest.getResults()
   const contactCondition = new AndCondition([])
   contactCondition.conditions.push(new Condition('B25__Contact_Lookup__r.FirstName', Operator.EQUAL, 'test'))
-  contactCondition.conditions.push(new Condition('B25__Contact_Lookup__r.LastName', Operator.EQUAL, 'booker25'))
+  contactCondition.conditions.push(new Condition('B25__Contact_Lookup__r.LastName', Operator.EQUAL, 'GoMeddo'))
   contactCondition.conditions.push(new Condition('B25__Contact_Lookup__r.Email', Operator.EQUAL, 'example@example.com'))
   const expectedCondition = new AndCondition([new JoinCondition('Id', Operator.IN, 'B25__ReservationContact__c', 'B25__Reservation_Lookup__c', new AndCondition([contactCondition]))])
   expectMockSearchMockToHaveBeenCalledWith(mock, [], null, null, expectedCondition.getAPICondition(), [])
@@ -235,7 +235,7 @@ test('It sends the correct request if reservation contacts condition is added', 
 
 test('It sends the correct request if reservation contacts condition with Id is added', async () => {
   const reservationRequest = getReservationRequest()
-  const contact = new Contact('test', 'booker25', 'example@example.com')
+  const contact = new Contact('test', 'GoMeddo', 'example@example.com')
   contact.id = dummyId0
   reservationRequest.linkedToReservationContacts().linkedToContact(contact)
   await reservationRequest.getResults()

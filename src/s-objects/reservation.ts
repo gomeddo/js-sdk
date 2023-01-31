@@ -109,7 +109,7 @@ export default class Reservation extends SObject {
   public addService (service: Service, quantity: number): ServiceReservation {
     const serviceReservation = new ServiceReservation(service, quantity)
     this.serviceReservations.push(serviceReservation)
-    this.addRelatedRecord('B25__Service_Reservation__c', serviceReservation.getSFSObject())
+    this.addRelatedRecord('B25__Service_Reservation__c', serviceReservation)
     return serviceReservation
   }
 
@@ -119,25 +119,25 @@ export default class Reservation extends SObject {
    *
    * @param reservationContactSObject the reservation contact to add to the reservation
    */
-  public addReservationContact (reservationContactSObject: Partial<CustomSFSObject>): void {
+  public addReservationContact (reservationContactSObject: SObject): void {
     this.addRelatedRecord('B25__ReservationContact__c', reservationContactSObject)
   }
 
   /**
    * Add a related record to the reservation.
-   * Has to be a configured junction in booker25.
+   * Has to be a configured junction in GoMeddo.
    * Is only persisted through the update/delete reservation methods does not work with saveReservation
    *
    * @param relatedRecordApiName
    * @param relatedRecord
    */
-  public addRelatedRecord (relatedRecordApiName: string, relatedRecord: Partial<CustomSFSObject>): void {
+  public addRelatedRecord (relatedRecordApiName: string, relatedRecord: SObject): void {
     let relatedRecordsList = this.relatedRecords.get(relatedRecordApiName)
     if (relatedRecordsList === undefined) {
       relatedRecordsList = []
       this.relatedRecords.set(relatedRecordApiName, relatedRecordsList)
     }
-    relatedRecordsList.push(relatedRecord)
+    relatedRecordsList.push(relatedRecord.getSFSObject(relatedRecordApiName))
   }
 
   /**
@@ -146,20 +146,20 @@ export default class Reservation extends SObject {
    *
    * @param reservationContactSObject the reservation contact to remove
    */
-  public removeReservationContact (reservationContactSObject: Partial<CustomSFSObject>): void {
+  public removeReservationContact (reservationContactSObject: SObject): void {
     this.removeRelatedRecord('B25__ReservationContact__c', reservationContactSObject)
   }
 
   /**
    * Remove a related record form the reservation.
-   * Has to be a configured junction in booker25.
+   * Has to be a configured junction in GoMeddo.
    * Is only persisted through the update reservation methods does not work with saveReservation or deleteReservation
    *
    * @param relatedRecordApiName
    * @param relatedRecord
    */
-  public removeRelatedRecord (relatedRecordApiName: string, relatedRecord: Partial<CustomSFSObject>): void {
-    if (relatedRecord.Id === undefined || !isSalesforceId(relatedRecord.Id)) {
+  public removeRelatedRecord (relatedRecordApiName: string, relatedRecord: SObject): void {
+    if (relatedRecord.id === undefined || !isSalesforceId(relatedRecord.id)) {
       throw new Error('Related records can\t be deleted if they don\'t have a salesforce Id')
     }
     let relatedRecordsList = this.removedRelatedRecords.get(relatedRecordApiName)
@@ -167,7 +167,7 @@ export default class Reservation extends SObject {
       relatedRecordsList = []
       this.removedRelatedRecords.set(relatedRecordApiName, relatedRecordsList)
     }
-    relatedRecordsList.push(relatedRecord)
+    relatedRecordsList.push(relatedRecord.getSFSObject(relatedRecordApiName))
   }
 
   /**
@@ -257,7 +257,7 @@ export default class Reservation extends SObject {
 
   /**
    * @internal
-   * @returns The Salesforce formatted data for the servuce reservations
+   * @returns The Salesforce formatted data for the service reservations
    */
   private getServiceReservationRestData (): Array<Partial<SFServiceReservation>> {
     return this.serviceReservations.map(serviceReservation => serviceReservation.getSFSObject())

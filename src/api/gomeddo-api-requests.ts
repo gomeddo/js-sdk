@@ -12,23 +12,23 @@ import ReservationSearchBody from './request-bodies/reservation-search-body'
 import { SFReservation } from '../s-objects/reservation'
 import ReservationCollection from './request-bodies/reservation-collection'
 
-export default class Booker25API {
+export default class GoMeddoAPI {
   private readonly baseUrl: string
   private readonly apiKey: string
   constructor (apiKey: string, environment: Environment) {
     this.apiKey = apiKey
     switch (environment) {
       case Environment.DEVELOP:
-        this.baseUrl = 'https://dev.api.booker25.com/api/v3/proxy/'
+        this.baseUrl = 'https://dev.api.gomeddo.com/api/v3/proxy/'
         break
       case Environment.ACCEPTANCE:
-        this.baseUrl = 'https://acc.api.booker25.com/api/v3/proxy/'
+        this.baseUrl = 'https://acc.api.gomeddo.com/api/v3/proxy/'
         break
       case Environment.STAGING:
-        this.baseUrl = 'https://staging.api.booker25.com/api/v3/proxy/'
+        this.baseUrl = 'https://staging.api.gomeddo.com/api/v3/proxy/'
         break
       case Environment.PRODUCTION:
-        this.baseUrl = 'https://api.booker25.com/api/v3/proxy/'
+        this.baseUrl = 'https://api.gomeddo.com/api/v3/proxy/'
         break
     }
   }
@@ -138,11 +138,11 @@ export default class Booker25API {
     if (response.ok) {
       return
     }
-    throw new RequestError((await response.json()) as Booker25ApiError)
+    throw new RequestError((await response.json()) as GoMeddoApiError)
   }
 }
 
-class Booker25ApiError {
+class GoMeddoApiError {
   devMessage: string = ''
   userMessage: string = ''
   errorCode: number = 0
@@ -151,8 +151,8 @@ class Booker25ApiError {
 }
 
 class RequestError extends Error {
-  apiError: Booker25ApiError
-  constructor (apiError: Booker25ApiError) {
+  apiError: GoMeddoApiError
+  constructor (apiError: GoMeddoApiError) {
     super(apiError.userMessage)
     this.apiError = apiError
     Object.setPrototypeOf(this, RequestError.prototype)

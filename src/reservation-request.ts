@@ -1,4 +1,4 @@
-import Booker25API from './api/booker25-api-requests'
+import GoMeddoAPI from './api/gomeddo-api-requests'
 import { APIConditionGroup } from './api/request-bodies/api-condition'
 import { AndCondition, Condition, ConditionElement, JoinCondition, Operator, OrCondition } from './filters/conditions'
 import ReservationResult from './reservation-result'
@@ -13,7 +13,7 @@ import { isSalesforceId, splitIntoIdsAndNames } from './utils/salesforce-utils'
  * Methods can be used to filter and narow down the reservations being requested.
  */
 export default class ReservationRequest {
-  private readonly api: Booker25API
+  private readonly api: GoMeddoAPI
   private readonly standardFields: Set<string> = new Set(['Id'])
   private readonly additionalFields: Set<string> = new Set()
 
@@ -28,7 +28,7 @@ export default class ReservationRequest {
   private resource: Resource | undefined
   private condition: OrCondition | undefined
 
-  constructor (api: Booker25API) {
+  constructor (api: GoMeddoAPI) {
     this.api = api
   }
 
@@ -162,7 +162,7 @@ export default class ReservationRequest {
   }
 
   /**
-   * Calls the booker25 APIs to construct the requested reservations.
+   * Calls the GoMeddo APIs to construct the requested reservations.
    *
    * @returns A ReservationResult object containing the requested reservations.
    */
