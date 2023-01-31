@@ -13,8 +13,8 @@ export default class ServiceReservation extends SObject {
     this.unitPrice = this.service.getCustomProperty('B25__Price__c')
   }
 
-  public override getSFSObject (): Partial<SFServiceReservation> {
-    const restData = super.getSFSObject() as Partial<SFServiceReservation>
+  public override getSFSObject (sObjectTypeAttr?: string): Partial<SFServiceReservation> {
+    const restData = super.getSFSObject(sObjectTypeAttr) as Partial<SFServiceReservation>
     restData.B25__Quantity__c = this.quantity
     restData.B25__Service__c = this.service.id
     restData.B25__Unit_Price__c = this.unitPrice

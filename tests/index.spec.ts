@@ -36,7 +36,7 @@ test('You can save a reservations through it', async () => {
   expect(mock).toHaveBeenCalled()
   const expectedBodyData = new ReservationSaveRequest({ B25__Api_Visible__c: true }, null, null, [])
   expect(mock).toHaveBeenCalledWith(
-    'https://api.booker25.com/api/v3/proxy/B25LP/v1/reservations',
+    'https://api.gomeddo.com/api/v3/proxy/B25LP/v1/reservations',
     {
       method: 'POST',
       body: JSON.stringify(expectedBodyData),
@@ -53,7 +53,7 @@ test('You can update a reservation through it', async () => {
   expect(mock).toHaveBeenCalled()
   const expectedBodyData = [new ReservationCollection(reservationData, new Map(), new Map())]
   expect(mock).toHaveBeenCalledWith(
-    'https://api.booker25.com/api/v3/proxy/B25/v1/reservation-collection',
+    'https://api.gomeddo.com/api/v3/proxy/B25/v1/reservation-collection',
     {
       method: 'PATCH',
       body: JSON.stringify(expectedBodyData),
@@ -75,7 +75,7 @@ test('You can update multiple reservations through it', async () => {
     new ReservationCollection(reservation2Data, new Map(), new Map())
   ]
   expect(mock).toHaveBeenCalledWith(
-    'https://api.booker25.com/api/v3/proxy/B25/v1/reservation-collection',
+    'https://api.gomeddo.com/api/v3/proxy/B25/v1/reservation-collection',
     {
       method: 'PATCH',
       body: JSON.stringify(expectedBodyData),
@@ -105,17 +105,17 @@ test('You can update a reservation with related records through it', async () =>
   expect(mock).toHaveBeenCalled()
   const expectedBodyData = [new ReservationCollection(reservationData, new Map(
     [
-      ['B25__Service_Reservation__c', [{ B25__Quantity__c: 12, B25__Service__c: dummyId0, B25__Unit_Price__c: 23 }]],
-      ['B25__ReservationContact__c', [{ B25__Notes__c: 'Test Notes' }]],
-      ['B25__Resource_Reservation__c', [{ Quantity__c: 2 }]]
+      ['B25__Service_Reservation__c', [{ attributes: { type: 'B25__Service_Reservation__c' }, B25__Quantity__c: 12, B25__Service__c: dummyId0, B25__Unit_Price__c: 23 }]],
+      ['B25__ReservationContact__c', [{ B25__Notes__c: 'Test Notes', attributes: { type: 'B25__ReservationContact__c' } }]],
+      ['B25__Resource_Reservation__c', [{ Quantity__c: 2, attributes: { type: 'B25__Resource_Reservation__c' } }]]
     ]), new Map(
     [
-      ['B25__ReservationContact__c', [{ Id: dummyId1, Name: '' }]],
-      ['B25__Resource_Reservation__c', [{ Id: dummyId2, Name: '' }]]
+      ['B25__ReservationContact__c', [{ Id: dummyId1, Name: '', attributes: { type: 'B25__ReservationContact__c' } }]],
+      ['B25__Resource_Reservation__c', [{ Id: dummyId2, Name: '', attributes: { type: 'B25__Resource_Reservation__c' } }]]
     ])
   )]
   expect(mock).toHaveBeenCalledWith(
-    'https://api.booker25.com/api/v3/proxy/B25/v1/reservation-collection',
+    'https://api.gomeddo.com/api/v3/proxy/B25/v1/reservation-collection',
     {
       method: 'PATCH',
       body: JSON.stringify(expectedBodyData),
@@ -132,7 +132,7 @@ test('You can delete a reservation through it', async () => {
   expect(mock).toHaveBeenCalled()
   const expectedBodyData = [new ReservationCollection(reservationData, new Map(), new Map())]
   expect(mock).toHaveBeenCalledWith(
-    'https://api.booker25.com/api/v3/proxy/B25/v1/reservation-collection',
+    'https://api.gomeddo.com/api/v3/proxy/B25/v1/reservation-collection',
     {
       method: 'DELETE',
       body: JSON.stringify(expectedBodyData),
@@ -154,7 +154,7 @@ test('You can delete multiple reservations through it', async () => {
     new ReservationCollection(reservation2Data, new Map(), new Map())
   ]
   expect(mock).toHaveBeenCalledWith(
-    'https://api.booker25.com/api/v3/proxy/B25/v1/reservation-collection',
+    'https://api.gomeddo.com/api/v3/proxy/B25/v1/reservation-collection',
     {
       method: 'DELETE',
       body: JSON.stringify(expectedBodyData),
@@ -176,12 +176,12 @@ test('You can delete a reservation with related records through it', async () =>
   expect(mock).toHaveBeenCalled()
   const expectedBodyData = [new ReservationCollection(reservationData, new Map(
     [
-      ['B25__ReservationContact__c', [{ Id: dummyId1, Name: '' }]],
-      ['B25__Resource_Reservation__c', [{ Id: dummyId2, Name: '' }]]
+      ['B25__ReservationContact__c', [{ Id: dummyId1, Name: '', attributes: { type: 'B25__ReservationContact__c' } }]],
+      ['B25__Resource_Reservation__c', [{ Id: dummyId2, Name: '', attributes: { type: 'B25__Resource_Reservation__c' } }]]
     ]), new Map()
   )]
   expect(mock).toHaveBeenCalledWith(
-    'https://api.booker25.com/api/v3/proxy/B25/v1/reservation-collection',
+    'https://api.gomeddo.com/api/v3/proxy/B25/v1/reservation-collection',
     {
       method: 'PATCH',
       body: JSON.stringify(expectedBodyData),

@@ -27,7 +27,7 @@ if (!apiKey) {
 const goMeddo = new GoMeddo(apiKey, Environment.ACCEPTANCE)
 repl.context.goMeddo = goMeddo
 
-// Note these functions are designed to work with a unmodified booker25 install to test functionality.
+// Note these functions are designed to work with a unmodified GoMeddo install to test functionality.
 repl.context.fetchRentableResources = async () => {
   return await goMeddo.buildResourceRequest().withType('Rentable Resource').getResults()
 }

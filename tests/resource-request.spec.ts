@@ -9,9 +9,9 @@ import DimensionSearchBody from '../src/api/request-bodies/dimension-search-body
 import { APICondition, APIConditionElement, APIConditionGroup } from '../src/api/request-bodies/api-condition'
 import { FetchMock } from 'jest-fetch-mock/types'
 
-const baseResourceSearchUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/dimensionRecords/search'
-const availabilityRequestUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/availability'
-const serviceRequestUrl = 'https://api.booker25.com/api/v3/proxy/B25/v1/services/availability'
+const baseResourceSearchUrl = 'https://api.gomeddo.com/api/v3/proxy/B25/v1/dimensionRecords/search'
+const availabilityRequestUrl = 'https://api.gomeddo.com/api/v3/proxy/B25/v1/availability'
+const serviceRequestUrl = 'https://api.gomeddo.com/api/v3/proxy/B25/v1/services/availability'
 const getResourceRequest = (): ResourceRequest => new ResourceRequest(new GoMeddoAPI('key', Environment.PRODUCTION))
 const getExpectedBody = (ids: string[], names: string[], condition: APIConditionElement | undefined): String => {
   return JSON.stringify(new DimensionSearchBody('B25__Resource__c', ids, names, condition, true))

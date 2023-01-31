@@ -17,7 +17,7 @@ test('url and body are constructed correctly for saveReservation', async () => {
   expect(result).toStrictEqual({})
   expect(mock).toHaveBeenCalled()
   expect(mock).toHaveBeenCalledWith(
-    'https://api.booker25.com/api/v3/proxy/B25LP/v1/reservations',
+    'https://api.gomeddo.com/api/v3/proxy/B25LP/v1/reservations',
     {
       method: 'POST',
       body: JSON.stringify(saveRequest),
@@ -41,7 +41,7 @@ test('the get availabilities makes the correct request', async () => {
   await api.getAvailability(requestBody)
   expect(mock).toHaveBeenCalled()
   expect(mock).toHaveBeenCalledWith(
-    'https://api.booker25.com/api/v3/proxy/B25/v1/availability',
+    'https://api.gomeddo.com/api/v3/proxy/B25/v1/availability',
     {
       method: 'POST',
       body: JSON.stringify(requestBody),
@@ -60,7 +60,7 @@ test('price calculation makes the correct request', async () => {
   const body = new ReservationPriceCalculationRequest({}, [], 0)
   await api.calculatePrice(body)
   expect(mock).toHaveBeenCalledWith(
-    'https://api.booker25.com/api/v3/proxy/B25/v1/priceCalculation',
+    'https://api.gomeddo.com/api/v3/proxy/B25/v1/priceCalculation',
     {
       method: 'POST',
       body: JSON.stringify(body),
