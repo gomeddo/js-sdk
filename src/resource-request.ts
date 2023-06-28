@@ -5,8 +5,6 @@ import ResourceResult from './resource-result'
 import { SFResource } from './s-objects/resource'
 import { AndCondition, OrCondition, ConditionElement, Condition, Operator } from './filters/conditions'
 import { isSalesforceId } from './utils/salesforce-utils'
-import Reservation from './s-objects/reservation'
-import Dimension from './dimension'
 
 /**
  * Resource request by default will request all resources in an org.
@@ -25,7 +23,6 @@ export default class ResourceRequest {
   private startOfRange: Date | null = null
   private endOfRange: Date | null = null
   private fetchServices: boolean = false
-  private reservation: Reservation | null = null
 
   constructor (api: GoMeddoAPI) {
     this.api = api
@@ -122,16 +119,6 @@ export default class ResourceRequest {
   }
 
   /**
-   *
-   * @param reservation
-   * @returns The updated reservation
-   */
-  public whereICanBook (reservation: Reservation): ResourceRequest {
-    this.reservation = reservation
-    return this
-  }
-
-  /**
    * Calls the GoMeddo APIs to construct the requested resources.
    *
    * @returns A ResourceResult object containing the requested resources.
@@ -139,14 +126,6 @@ export default class ResourceRequest {
   public async getResults (): Promise<ResourceResult> {
     const resources = await this.getStartingResourceScope()
     const resourceResult = new ResourceResult(resources)
-
-    if (this.reservation !== null) {
-      const resourceIds = resourceResult.getResourceIds()
-      const dimension = new Dimension('B25__Resource__c', resourceIds, null, this.reservation.getSFSObject())
-      const availableDimensionIds = await this.api.findAvailableDimensionIds(dimension)
-      resourceResult.filterResourcesById(availableDimensionIds)
-    }
-
     if (this.startOfRange !== null && this.endOfRange !== null) {
       const availabilityData = await this.api.getAvailability(new AvailabilityTimeSlotRequest(
         this.startOfRange, this.endOfRange, resourceResult.getResourceIds()
