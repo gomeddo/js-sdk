@@ -81,17 +81,4 @@ export default class ResourceResult {
     }
     return [...this.resourcesById.values()].find(resource => resource.name === idOrName)
   }
-
-  /**
-   * Filters the resources in the `resourcesById` map based on the allowed ids.
-   * @param resourceIds The ids of the resources that are allowed to remain in the map.
-   * @returns void
-   */
-  public filterResourcesById (resourceIds: string[]): void {
-    this.resourcesById.forEach((resource, id) => {
-      if (!resourceIds.includes(id)) {
-        this.resourcesById.delete(id)
-      }
-    })
-  }
 }
