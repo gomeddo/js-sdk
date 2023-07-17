@@ -11,8 +11,7 @@ import ReservationSearchBody from './request-bodies/reservation-search-body'
 import { SFReservation } from '../s-objects/reservation'
 import ReservationCollection from './request-bodies/reservation-collection'
 import Dimension from '../dimension'
-import { SFDimensionRecord } from '../dimension-record'
-
+import { CustomSFSObject } from '../s-objects/s-object'
 export default class GoMeddoAPI {
   private readonly baseUrl: string
   private readonly apiKey: string
@@ -34,7 +33,7 @@ export default class GoMeddoAPI {
     }
   }
 
-  public async searchDimensionRecords (parentIds: string[], parentNames: string[], apiCondition: APIConditionElement | undefined, fields: Set<string>, dimension: string): Promise<SFDimensionRecord[]> {
+  public async searchDimensionRecords (parentIds: string[], parentNames: string[], apiCondition: APIConditionElement | undefined, fields: Set<string>, dimension: string): Promise<CustomSFSObject[]> {
     const url = new URL('B25/v1/dimensionRecords/search', this.baseUrl)
     this.addFieldsToUrl(url, fields)
     const dimensionSearchBody = new DimensionSearchBody(dimension, parentIds, parentNames, apiCondition, true)

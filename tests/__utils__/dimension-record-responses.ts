@@ -1,4 +1,4 @@
-import { SFDimensionRecord } from '../../src/dimension-record'
+import { CustomSFSObject } from '../../src/s-objects/s-object'
 
 class DimensionRecordGenerator {
   private readonly idPrefix: string
@@ -11,8 +11,8 @@ class DimensionRecordGenerator {
     this.dimensionCounter = 1
   }
 
-  public getDimensioRecord (): SFDimensionRecord {
-    const dimensionRecord: SFDimensionRecord = {
+  public getDimensioRecord (): CustomSFSObject {
+    const dimensionRecord: CustomSFSObject = {
       Id: this.getIdString(this.dimensionCounter),
       Name: this.getNameString(this.dimensionCounter)
     }
@@ -20,7 +20,7 @@ class DimensionRecordGenerator {
     return dimensionRecord
   }
 
-  public getDimensionArray (size: number): SFDimensionRecord[] {
+  public getDimensionArray (size: number): CustomSFSObject[] {
     return new Array(size).fill(undefined).map(() => this.getDimensioRecord())
   }
 

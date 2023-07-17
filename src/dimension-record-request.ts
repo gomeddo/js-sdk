@@ -4,7 +4,7 @@ import { AndCondition, OrCondition, ConditionElement } from './filters/condition
 import Reservation from './s-objects/reservation'
 import Dimension from './dimension'
 import DimensionRecordResult from './dimension-record-result'
-import { SFDimensionRecord } from './dimension-record'
+import { CustomSFSObject } from './s-objects/s-object'
 
 /**
  * Dimension record request by default will request all dimensions in an org.
@@ -118,7 +118,7 @@ export default class DimensionRecordRequest {
     return dimensionRecordResult
   }
 
-  private async getStartingDimensionRecordScope (): Promise<SFDimensionRecord[]> {
+  private async getStartingDimensionRecordScope (): Promise<CustomSFSObject[]> {
     const parentIds: string[] = []
     const parentNames: string[] = []
 

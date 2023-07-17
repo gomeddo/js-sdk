@@ -1,5 +1,6 @@
 import AvailabilityTimeSlotResponse from './api/availability-reponse'
-import DimensionRecord, { SFDimensionRecord } from './dimension-record'
+import DimensionRecord from './dimension-record'
+import { CustomSFSObject } from './s-objects/s-object'
 import { isSalesforceId } from './utils/salesforce-utils'
 
 /**
@@ -8,7 +9,7 @@ import { isSalesforceId } from './utils/salesforce-utils'
 export default class DimensionRecordResult {
   private readonly objectById: Map<string, DimensionRecord>
 
-  constructor (sfObjectData: SFDimensionRecord[]) {
+  constructor (sfObjectData: CustomSFSObject[]) {
     // Map all dimension records to their ids
     this.objectById = sfObjectData.reduce((map, sfObjectData) => {
       const dimensionRecord = new DimensionRecord(sfObjectData)
