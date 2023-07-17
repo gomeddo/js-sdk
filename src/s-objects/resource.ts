@@ -1,33 +1,23 @@
-import AvailabilityTimeSlotResponse from '../api/availability-reponse'
-import SObject, { CustomSFSObject } from './s-object'
-import { AvailabilitySlotType, AvailabilityTimeSlot } from '../time-slots/availability-time-slot'
+import { CustomSFSObject } from './s-object'
+import { AvailabilitySlotType } from '../time-slots/availability-time-slot'
 import Service from './service'
 import ServiceTimeSlotResponse from '../api/service-availability-response'
 import { isSalesforceId } from '../utils/salesforce-utils'
+import DimensionRecord from '../dimension-record'
 
 /**
  * A Resource
  */
-export default class Resource extends SObject {
-  public name: string
+export default class Resource extends DimensionRecord {
   public parentId: string | null
   public parent: Resource | null = null
   public children: Resource[] = []
   public services: Map<string, Service> = new Map()
-  private timeSlots: AvailabilityTimeSlot[] = []
 
   constructor (parsedResource: SFResource) {
     super(parsedResource)
     this.name = parsedResource.Name
     this.parentId = parsedResource.B25__Parent__c ?? null
-  }
-
-  /**
-   * @internal
-   * Adds availability slot data for this resource to the resource.
-   */
-  public addAvailabilitySlotData (slotData: AvailabilityTimeSlotResponse): void {
-    this.timeSlots = slotData.timeSlots
   }
 
   /**
@@ -44,14 +34,6 @@ export default class Resource extends SObject {
    */
   public isClosed (): boolean {
     return !this.timeSlots.some(timeSlot => timeSlot.type === AvailabilitySlotType.OPEN)
-  }
-
-  /**
-   * Gets the timeslots for this resource. Only available if withAvailableSlotsBetween was called.
-   * @return The timeslots for this resource.
-   */
-  public getTimeSlots (): AvailabilityTimeSlot[] {
-    return this.timeSlots
   }
 
   /**
