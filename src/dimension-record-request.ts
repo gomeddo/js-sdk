@@ -12,7 +12,7 @@ import { CustomSFSObject } from './s-objects/s-object'
  */
 export default class DimensionRecordRequest {
   protected readonly api: GoMeddoAPI
-
+  protected dimensionRecordName: string
   protected standardFields: Set<string>
   protected readonly additionalFields: Set<string> = new Set()
   protected condition: OrCondition | undefined
@@ -20,11 +20,12 @@ export default class DimensionRecordRequest {
   protected endOfRange: Date | null = null
   protected reservation: Reservation | null = null
 
-  constructor (api: GoMeddoAPI) {
+  constructor (api: GoMeddoAPI, dimensionName: string) {
     this.api = api
     this.standardFields = new Set([
       'Id', 'Name'
     ])
+    this.dimensionRecordName = dimensionName
   }
 
   /**
@@ -123,7 +124,7 @@ export default class DimensionRecordRequest {
     const parentNames: string[] = []
 
     const condition = this.condition
-    return await this.api.searchDimensionRecords(parentIds, parentNames, condition?.getAPICondition(), this.getRequestedFields(), 'B25__Resource__c')
+    return await this.api.searchDimensionRecords(parentIds, parentNames, condition?.getAPICondition(), this.getRequestedFields(), this.dimensionRecordName)
   }
 
   protected getRequestedFields (): Set<string> {

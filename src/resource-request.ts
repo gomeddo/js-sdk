@@ -18,7 +18,7 @@ export default class ResourceRequest extends DimensionRecordRequest {
   private fetchServices: boolean = false
 
   constructor (api: GoMeddoAPI) {
-    super(api)
+    super(api, 'B25__Resource__c')
     this.standardFields = new Set([
       'Id', 'Name', 'B25__Resource_Type__c', 'B25__Parent__c'
     ])
