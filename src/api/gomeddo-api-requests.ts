@@ -12,6 +12,7 @@ import { SFReservation } from '../s-objects/reservation'
 import ReservationCollection from './request-bodies/reservation-collection'
 import Dimension from '../dimension'
 import { CustomSFSObject } from '../s-objects/s-object'
+import { SFResource } from '../s-objects/resource'
 export default class GoMeddoAPI {
   private readonly baseUrl: string
   private readonly apiKey: string
@@ -31,6 +32,10 @@ export default class GoMeddoAPI {
         this.baseUrl = 'https://api.gomeddo.com/api/v3/proxy/'
         break
     }
+  }
+
+  public async searchResources (parentIds: string[], parentNames: string[], apiCondition: APIConditionElement | undefined, fields: Set<string>): Promise<SFResource[]> {
+    return await this.searchDimensionRecords(parentIds, parentNames, apiCondition, fields, 'B25__Resource__c')
   }
 
   public async searchDimensionRecords (parentIds: string[], parentNames: string[], apiCondition: APIConditionElement | undefined, fields: Set<string>, dimension: string): Promise<CustomSFSObject[]> {
