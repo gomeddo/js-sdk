@@ -6,7 +6,7 @@ import { SFResource } from './s-objects/resource'
 import { AndCondition, OrCondition, ConditionElement, Condition, Operator } from './filters/conditions'
 import { isSalesforceId } from './utils/salesforce-utils'
 import Reservation from './s-objects/reservation'
-import Dimension from './dimension'
+import FindAvailableIdsRequest from './findAvailableIdsRequest'
 
 /**
  * Resource request by default will request all resources in an org.
@@ -142,7 +142,7 @@ export default class ResourceRequest {
 
     if (this.reservation !== null) {
       const resourceIds = resourceResult.getResourceIds()
-      const dimension = new Dimension('B25__Resource__c', resourceIds, null, this.reservation.getSFSObject())
+      const dimension = new FindAvailableIdsRequest('B25__Resource__c', resourceIds, null, this.reservation.getSFSObject())
       const availableDimensionIds = await this.api.findAvailableDimensionIds(dimension)
       resourceResult.filterResourcesById(availableDimensionIds)
     }

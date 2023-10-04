@@ -84,6 +84,7 @@ export default class ResourceResult {
 
   /**
    * Filters the resources in the `resourcesById` map based on the allowed ids.
+   * @internal
    * @param resourceIds The ids of the resources that are allowed to remain in the map.
    * @returns void
    */
