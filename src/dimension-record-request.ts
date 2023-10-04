@@ -7,12 +7,12 @@ import DimensionRecordResult from './dimension-record-result'
 import { CustomSFSObject } from './s-objects/s-object'
 
 /**
- * Dimension record request by default will request all dimensions in an org.
- * Methods can be used to filter and narow down the dimensions being requested.
+ * Dimension record request by default will request all records of a given dimension.
+ * Methods can be used to filter and narow down the dimension records being requested.
  */
 export default class DimensionRecordRequest {
   protected readonly api: GoMeddoAPI
-  protected dimensionRecordName: string
+  protected dimensionName: string
   protected standardFields: Set<string>
   protected readonly additionalFields: Set<string> = new Set()
   protected condition: OrCondition | undefined
@@ -25,7 +25,7 @@ export default class DimensionRecordRequest {
     this.standardFields = new Set([
       'Id', 'Name'
     ])
-    this.dimensionRecordName = dimensionName
+    this.dimensionName = dimensionName
   }
 
   /**
@@ -84,9 +84,10 @@ export default class DimensionRecordRequest {
   }
 
   /**
+   * Sets the reservation for the current instance and returns the updated dimension record.
    *
    * @param reservation
-   * @returns The updated reservation
+   * @returns The updated dimension record
    */
   public whereICanBook (reservation: Reservation): this {
     this.reservation = reservation
@@ -124,7 +125,7 @@ export default class DimensionRecordRequest {
     const parentNames: string[] = []
 
     const condition = this.condition
-    return await this.api.searchDimensionRecords(parentIds, parentNames, condition?.getAPICondition(), this.getRequestedFields(), this.dimensionRecordName)
+    return await this.api.searchDimensionRecords(parentIds, parentNames, condition?.getAPICondition(), this.getRequestedFields(), this.dimensionName)
   }
 
   protected getRequestedFields (): Set<string> {
