@@ -10,7 +10,7 @@ import ServiceTimeSlotResponse from './service-availability-response'
 import ReservationSearchBody from './request-bodies/reservation-search-body'
 import { SFReservation } from '../s-objects/reservation'
 import ReservationCollection from './request-bodies/reservation-collection'
-import Dimension from '../dimension'
+import FindAvailableIdsRequest from '../findAvailableIdsRequest'
 import { CustomSFSObject } from '../s-objects/s-object'
 import { SFResource } from '../s-objects/resource'
 export default class GoMeddoAPI {
@@ -129,7 +129,7 @@ export default class GoMeddoAPI {
     return Object.keys(data.resources).map(dimensionId => new ServiceTimeSlotResponse(data.resources[dimensionId]))
   }
 
-  public async findAvailableDimensionIds (requestBody: Dimension): Promise<string[]> {
+  public async findAvailableDimensionIds (requestBody: FindAvailableIdsRequest): Promise<string[]> {
     const url = new URL('B25/v1/findAvailableDimensionIds', this.baseUrl)
     const response = await fetch(url.href, {
       method: 'POST',

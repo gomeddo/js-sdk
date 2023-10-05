@@ -4,7 +4,7 @@ import ResourceResult from './resource-result'
 import { SFResource } from './s-objects/resource'
 import { AndCondition, Condition, Operator } from './filters/conditions'
 import { isSalesforceId } from './utils/salesforce-utils'
-import Dimension from './dimension'
+import FindAvailableIdsRequest from './findAvailableIdsRequest'
 import DimensionRecordRequest from './dimension-record-request'
 import GoMeddoAPI from './api/gomeddo-api-requests'
 
@@ -70,7 +70,7 @@ export default class ResourceRequest extends DimensionRecordRequest {
 
     if (this.reservation !== null) {
       const resourceIds = resourceResult.getResourceIds()
-      const dimension = new Dimension('B25__Resource__c', resourceIds, null, this.reservation.getSFSObject())
+      const dimension = new FindAvailableIdsRequest('B25__Resource__c', resourceIds, null, this.reservation.getSFSObject())
       const availableDimensionIds = await this.api.findAvailableDimensionIds(dimension)
       resourceResult.filterResourcesById(availableDimensionIds)
     }

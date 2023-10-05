@@ -1,6 +1,6 @@
 import { SFReservation } from './s-objects/reservation'
 
-export default class Dimension {
+export default class FindAvailableIdsRequest {
   dimensionFieldName: string
   dimensionIds: string[]
   resourceTypeIds: string[] | null
