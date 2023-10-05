@@ -1,5 +1,4 @@
 import { Environment } from '../index'
-import { SFResource } from '../s-objects/resource'
 import { APIConditionElement } from './request-bodies/api-condition'
 import AvailabilityTimeSlotResponse from './availability-reponse'
 import AvailabilityTimeSlotRequest from './request-bodies/availability-request'
@@ -11,8 +10,9 @@ import ServiceTimeSlotResponse from './service-availability-response'
 import ReservationSearchBody from './request-bodies/reservation-search-body'
 import { SFReservation } from '../s-objects/reservation'
 import ReservationCollection from './request-bodies/reservation-collection'
-import FindAvailableIdsRequest from '../findAvailableIdsRequest'
-
+import FindAvailableIdsRequest from '../find-available-ids-request'
+import { CustomSFSObject } from '../s-objects/s-object'
+import { SFResource } from '../s-objects/resource'
 export default class GoMeddoAPI {
   private readonly baseUrl: string
   private readonly apiKey: string
@@ -35,9 +35,13 @@ export default class GoMeddoAPI {
   }
 
   public async searchResources (parentIds: string[], parentNames: string[], apiCondition: APIConditionElement | undefined, fields: Set<string>): Promise<SFResource[]> {
+    return await this.searchDimensionRecords(parentIds, parentNames, apiCondition, fields, 'B25__Resource__c')
+  }
+
+  public async searchDimensionRecords (parentIds: string[], parentNames: string[], apiCondition: APIConditionElement | undefined, fields: Set<string>, dimension: string): Promise<CustomSFSObject[]> {
     const url = new URL('B25/v1/dimensionRecords/search', this.baseUrl)
     this.addFieldsToUrl(url, fields)
-    const dimensionSearchBody = new DimensionSearchBody('B25__Resource__c', parentIds, parentNames, apiCondition, true)
+    const dimensionSearchBody = new DimensionSearchBody(dimension, parentIds, parentNames, apiCondition, true)
     const response = await fetch(url.href, {
       method: 'POST',
       body: JSON.stringify(dimensionSearchBody),

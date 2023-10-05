@@ -1,15 +1,16 @@
-import AvailabilityTimeSlotResponse from './api/availability-reponse'
 import ServiceTimeSlotResponse from './api/service-availability-response'
+import DimensionRecordResult from './dimension-record-result'
 import Resource, { SFResource } from './s-objects/resource'
 import { isSalesforceId } from './utils/salesforce-utils'
 
 /**
  * Result object of a resource request. Contains methods to extract resources.
  */
-export default class ResourceResult {
+export default class ResourceResult extends DimensionRecordResult {
   private readonly resourcesById: Map<string, Resource>
 
   constructor (sfResourceData: SFResource[]) {
+    super(sfResourceData)
     // Map all resources to their ids
     this.resourcesById = sfResourceData.reduce((map, sfResourceData) => {
       const resource = new Resource(sfResourceData)
@@ -32,19 +33,6 @@ export default class ResourceResult {
       parentResource.children.push(resource)
     })
     return this
-  }
-
-  public addAvailabilitySlotData (dimensionsSlotData: AvailabilityTimeSlotResponse[]): void {
-    dimensionsSlotData.forEach((slotData) => {
-      const matchingResource = this.resourcesById.get(slotData.dimensionId)
-      if (matchingResource === undefined) {
-        return
-      }
-      matchingResource.addAvailabilitySlotData(slotData)
-      if (matchingResource.isClosed()) {
-        this.resourcesById.delete(slotData.dimensionId)
-      }
-    })
   }
 
   public addServiceSlotData (dimensionsServiceSlotData: ServiceTimeSlotResponse[]): void {

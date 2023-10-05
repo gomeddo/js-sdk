@@ -1,34 +1,27 @@
 import AvailabilityTimeSlotRequest from './api/request-bodies/availability-request'
-import GoMeddoAPI from './api/gomeddo-api-requests'
 import ServiceTimeSlotRequest from './api/request-bodies/service-availability-request'
 import ResourceResult from './resource-result'
 import { SFResource } from './s-objects/resource'
-import { AndCondition, OrCondition, ConditionElement, Condition, Operator } from './filters/conditions'
+import { AndCondition, Condition, Operator, OrCondition } from './filters/conditions'
 import { isSalesforceId } from './utils/salesforce-utils'
-import Reservation from './s-objects/reservation'
-import FindAvailableIdsRequest from './findAvailableIdsRequest'
+import FindAvailableIdsRequest from './find-available-ids-request'
+import DimensionRecordRequest from './dimension-record-request'
+import GoMeddoAPI from './api/gomeddo-api-requests'
 
 /**
  * Resource request by default will request all resources in an org.
  * Methods can be used to filter and narow down the resources being requested.
  */
-export default class ResourceRequest {
-  private readonly api: GoMeddoAPI
-  private readonly standardFields: Set<string> = new Set([
-    'Id', 'Name', 'B25__Resource_Type__c', 'B25__Parent__c'
-  ])
-
-  private readonly additionalFields: Set<string> = new Set()
+export default class ResourceRequest extends DimensionRecordRequest {
   private readonly parents: Set<string> = new Set()
   private readonly types: Set<string> = new Set()
-  private condition: OrCondition | undefined
-  private startOfRange: Date | null = null
-  private endOfRange: Date | null = null
   private fetchServices: boolean = false
-  private reservation: Reservation | null = null
 
   constructor (api: GoMeddoAPI) {
-    this.api = api
+    super(api, 'B25__Resource__c')
+    this.standardFields = new Set([
+      'Id', 'Name', 'B25__Resource_Type__c', 'B25__Parent__c'
+    ])
   }
 
   /**
@@ -55,61 +48,6 @@ export default class ResourceRequest {
   }
 
   /**
-   * Filter the resources on field values using conditions.
-   *
-   * @param conditions The conditions to filter on. Multiple conditions wil be combined using AND.
-   * @returns The updated resource request.
-   */
-  public withCondition (...conditions: ConditionElement[]): ResourceRequest {
-    if (this.condition === undefined) {
-      this.condition = new OrCondition([])
-    }
-    if (conditions.length === 1) {
-      this.condition.conditions.push(conditions[0])
-    } else {
-      this.condition.conditions.push(new AndCondition(conditions))
-    }
-    return this
-  }
-
-  /**
-   * Request an additional field to be returned for the resources
-   *
-   * @param fieldName The api name of the field to request
-   * @returns The updated resource request.
-   */
-  public includeAdditionalField (fieldName: string): ResourceRequest {
-    this.additionalFields.add(fieldName)
-    return this
-  }
-
-  /**
-   * Request additional fields to be returned for the resources
-   *
-   * @param fieldName The api names of the fields to request
-   * @returns The updated resource request.
-   */
-  public includeAdditionalFields (fieldNames: Set<string> | string[]): ResourceRequest {
-    fieldNames.forEach(fieldName => this.includeAdditionalField(fieldName))
-    return this
-  }
-
-  /**
-   * Request on resources that are not fully booked between the two datetime.
-   * The input datetimes are interpeted in GMT
-   * When this is requested timeslots for the requested range are provided for each resource.
-   *
-   * @param startOfRange The start of the timeslot range
-   * @param endOfRange The end of the timeslot range
-   * @returns The updated resource request.
-   */
-  public withAvailableSlotsBetween (startOfRange: Date, endOfRange: Date): ResourceRequest {
-    this.startOfRange = startOfRange
-    this.endOfRange = endOfRange
-    return this
-  }
-
-  /**
    * Also fetch the services including slot for when the services are available
    * Only valid if withAvailableSlotsBetween has also been called.
    *
@@ -118,16 +56,6 @@ export default class ResourceRequest {
    */
   public includeServices (includeServices: boolean): ResourceRequest {
     this.fetchServices = includeServices
-    return this
-  }
-
-  /**
-   *
-   * @param reservation
-   * @returns The updated reservation
-   */
-  public whereICanBook (reservation: Reservation): ResourceRequest {
-    this.reservation = reservation
     return this
   }
 
@@ -175,13 +103,9 @@ export default class ResourceRequest {
     if (this.condition !== undefined) {
       condition.conditions.push(this.condition)
     }
-    if(condition.conditions.length === 0){
+    if (condition.conditions.length === 0) {
       condition = undefined
     }
-    return await this.api.searchResources(parentIds, parentNames, condition?.getAPICondition(), this.getRequestedFields())
-  }
-
-  private getRequestedFields (): Set<string> {
-    return new Set([...this.standardFields, ...this.additionalFields])
+    return (await this.api.searchDimensionRecords(parentIds, parentNames, condition?.getAPICondition(), this.getRequestedFields(), 'B25__Resource__c')) as unknown as SFResource[]
   }
 }
