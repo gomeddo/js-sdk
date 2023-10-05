@@ -105,7 +105,7 @@ export default class DimensionRecordRequest {
 
     if (this.reservation !== null) {
       const dimensionIds = dimensionRecordResult.getObjectIds()
-      const dimension = new Dimension('B25__Resource__c', dimensionIds, null, this.reservation.getSFSObject())
+      const dimension = new Dimension(this.dimensionName, dimensionIds, null, this.reservation.getSFSObject())
       const availableDimensionIds = await this.api.findAvailableDimensionIds(dimension)
       dimensionRecordResult.filterDimensionRecordsById(availableDimensionIds)
     }
