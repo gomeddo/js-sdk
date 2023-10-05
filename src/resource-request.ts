@@ -96,12 +96,15 @@ export default class ResourceRequest extends DimensionRecordRequest {
     for (const parent of this.parents) {
       isSalesforceId(parent) ? parentIds.push(parent) : parentNames.push(parent)
     }
-    let condition = this.condition
+    let condition: AndCondition | undefined = new AndCondition([])
     if (this.types.size !== 0) {
-      condition = new AndCondition([...this.types].map(type => new Condition('B25__Resource_Type__r.Name', Operator.EQUAL, type)))
-      if (this.condition !== undefined) {
-        condition.conditions.push(this.condition)
-      }
+      condition.conditions.push(new OrCondition([...this.types].map(type => new Condition('B25__Resource_Type__r.Name', Operator.EQUAL, type))))
+    }
+    if (this.condition !== undefined) {
+      condition.conditions.push(this.condition)
+    }
+    if (condition.conditions.length === 0) {
+      condition = undefined
     }
     return (await this.api.searchDimensionRecords(parentIds, parentNames, condition?.getAPICondition(), this.getRequestedFields(), 'B25__Resource__c')) as unknown as SFResource[]
   }
