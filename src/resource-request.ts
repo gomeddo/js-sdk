@@ -2,9 +2,9 @@ import AvailabilityTimeSlotRequest from './api/request-bodies/availability-reque
 import ServiceTimeSlotRequest from './api/request-bodies/service-availability-request'
 import ResourceResult from './resource-result'
 import { SFResource } from './s-objects/resource'
-import { AndCondition, Condition, Operator } from './filters/conditions'
+import { AndCondition, Condition, Operator, OrCondition } from './filters/conditions'
 import { isSalesforceId } from './utils/salesforce-utils'
-import FindAvailableIdsRequest from './findAvailableIdsRequest'
+import FindAvailableIdsRequest from './find-available-ids-request'
 import DimensionRecordRequest from './dimension-record-request'
 import GoMeddoAPI from './api/gomeddo-api-requests'
 

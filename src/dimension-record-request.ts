@@ -2,7 +2,7 @@ import AvailabilityTimeSlotRequest from './api/request-bodies/availability-reque
 import GoMeddoAPI from './api/gomeddo-api-requests'
 import { AndCondition, OrCondition, ConditionElement } from './filters/conditions'
 import Reservation from './s-objects/reservation'
-import Dimension from './dimension'
+import FindAvailableIdsRequest from './find-available-ids-request'
 import DimensionRecordResult from './dimension-record-result'
 import { CustomSFSObject } from './s-objects/s-object'
 
@@ -105,7 +105,7 @@ export default class DimensionRecordRequest {
 
     if (this.reservation !== null) {
       const dimensionIds = dimensionRecordResult.getObjectIds()
-      const dimension = new Dimension(this.dimensionName, dimensionIds, null, this.reservation.getSFSObject())
+      const dimension = new FindAvailableIdsRequest(this.dimensionName, dimensionIds, null, this.reservation.getSFSObject())
       const availableDimensionIds = await this.api.findAvailableDimensionIds(dimension)
       dimensionRecordResult.filterDimensionRecordsById(availableDimensionIds)
     }

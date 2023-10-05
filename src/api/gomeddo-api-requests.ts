@@ -10,7 +10,7 @@ import ServiceTimeSlotResponse from './service-availability-response'
 import ReservationSearchBody from './request-bodies/reservation-search-body'
 import { SFReservation } from '../s-objects/reservation'
 import ReservationCollection from './request-bodies/reservation-collection'
-import FindAvailableIdsRequest from '../findAvailableIdsRequest'
+import FindAvailableIdsRequest from '../find-available-ids-request'
 import { CustomSFSObject } from '../s-objects/s-object'
 import { SFResource } from '../s-objects/resource'
 export default class GoMeddoAPI {
