@@ -200,10 +200,13 @@ test('It adds a type id to the request if a type is requested', async () => {
   await getResourceRequest()
     .withType(dummyId0, dummyId1)
     .getResults()
-  const expectedCondition = new APIConditionGroup('AND', [
-    new APICondition('B25__Resource_Type__r.Name', '=', [dummyId0]),
-    new APICondition('B25__Resource_Type__r.Name', '=', [dummyId1])
-  ])
+  const expectedCondition =
+    new APIConditionGroup('AND', [
+      new APIConditionGroup('OR', [
+        new APICondition('B25__Resource_Type__r.Name', '=', [dummyId0]),
+        new APICondition('B25__Resource_Type__r.Name', '=', [dummyId1])
+      ])
+    ])
   expect(resourceFetchMock).toBeCalledTimes(1)
   expectSearchMockToHaveBeenCalledWith(resourceFetchMock, [], [], expectedCondition, [])
 })
@@ -215,8 +218,10 @@ test('It passes the condition to the search endpoint', async () => {
   await getResourceRequest()
     .withCondition(new Condition('B25__Api_Visible__c', Operator.EQUAL, true))
     .getResults()
-  const expectedCondition = new APIConditionGroup('OR', [
-    new APICondition('B25__Api_Visible__c', '=', ['true'])
+  const expectedCondition = new APIConditionGroup('AND', [
+    new APIConditionGroup('OR', [
+      new APICondition('B25__Api_Visible__c', '=', ['true'])
+    ])
   ])
   expect(resourceFetchMock).toBeCalledTimes(1)
   expectSearchMockToHaveBeenCalledWith(resourceFetchMock, [], [], expectedCondition, [])
@@ -233,10 +238,14 @@ test('It conbines conditions with an and grouping', async () => {
     )
     .getResults()
 
-  const expectedCondition = new APIConditionGroup('OR', [new APIConditionGroup('AND', [
-    new APICondition('B25__Api_Visible__c', '=', ['true']),
-    new APICondition('B25__Capacity__c', '<', ['25'])
-  ])])
+  const expectedCondition = new APIConditionGroup('AND', [
+    new APIConditionGroup('OR', [
+      new APIConditionGroup('AND', [
+        new APICondition('B25__Api_Visible__c', '=', ['true']),
+        new APICondition('B25__Capacity__c', '<', ['25'])
+      ])
+    ])
+  ])
   expect(resourceFetchMock).toBeCalledTimes(1)
   expectSearchMockToHaveBeenCalledWith(resourceFetchMock, [], [], expectedCondition, [])
 })
@@ -251,8 +260,10 @@ test('It combines types and conditions with an and grouping', async () => {
     .getResults()
 
   const expectedCondition = new APIConditionGroup('AND', [
-    new APICondition('B25__Resource_Type__r.Name', '=', [dummyId0]),
-    new APICondition('B25__Resource_Type__r.Name', '=', [dummyId1]),
+    new APIConditionGroup('OR', [
+      new APICondition('B25__Resource_Type__r.Name', '=', [dummyId0]),
+      new APICondition('B25__Resource_Type__r.Name', '=', [dummyId1])
+    ]),
     new APIConditionGroup('OR', [
       new APICondition('B25__Api_Visible__c', '=', ['true'])
     ])
