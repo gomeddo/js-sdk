@@ -94,6 +94,8 @@ export default class DimensionRecord extends SObject {
       if (boundaryOffset !== 0) {
         const newDate = new Date(date.getTime())
         newDate.setMinutes(date.getMinutes() + (slotBoundary - boundaryOffset))
+        newDate.setSeconds(0)
+        newDate.setMilliseconds(0)
         return newDate
       }
     }
