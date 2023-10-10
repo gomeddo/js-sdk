@@ -1,4 +1,4 @@
-const { default: GoMeddo, Environment, Contact, Lead, Reservation, Operator, Condition, SObject } = require('./dist/cjs/index.js')
+const { default: GoMeddo, Environment, Contact, Lead, Reservation, Operator, Condition, SObject, TimeSlotConfiguration } = require('./dist/cjs/index.js')
 
 globalThis.fetch = require('node-fetch')
 function requestLogger (httpModule) {
@@ -20,11 +20,12 @@ repl.context.Condition = Condition
 repl.context.Reservation = Reservation
 repl.context.Contact = Contact
 repl.context.Lead = Lead
+repl.context.TimeSlotConfiguration = TimeSlotConfiguration
 const apiKey = process.env.GOMEDDO_JS_SDK_KEY
 if (!apiKey) {
   throw new Error('Set your GoMeddo proxy api key in the environment variable GOMEDDO_JS_SDK_KEY')
 }
-const goMeddo = new GoMeddo(apiKey, Environment.ACCEPTANCE)
+const goMeddo = new GoMeddo(apiKey, Environment.DEVELOP)
 repl.context.goMeddo = goMeddo
 
 // Note these functions are designed to work with a unmodified GoMeddo install to test functionality.
