@@ -14,6 +14,8 @@ import { TimeSlot } from './time-slots/time-slot'
 import { AvailabilityTimeSlot, AvailabilitySlotType } from './time-slots/availability-time-slot'
 import { ServiceTimeSlot } from './time-slots/service-time-slot'
 import { Condition, AndCondition, OrCondition, Operator } from './filters/conditions'
+import DimensionRecordRequest from './dimension-record-request'
+import TimeSlotConfiguration from './utils/time-slot-configuration'
 
 enum Environment {
   DEVELOP,
@@ -46,6 +48,15 @@ class GoMeddo {
    */
   public buildResourceRequest (): ResourceRequest {
     return new ResourceRequest(this.api)
+  }
+
+  /**
+   * Creates a new request for resources. The request can then be specified using methods on the resource request.
+   *
+   * @returns new resource request using the authentication from this GoMeddo instance
+   */
+  public buildDimensionRecordRequest (dimensionName: string): DimensionRecordRequest {
+    return new DimensionRecordRequest(this.api, dimensionName)
   }
 
   /**
@@ -194,6 +205,7 @@ class GoMeddo {
 export {
   Environment,
   ResourceRequest,
+  DimensionRecordRequest,
   ReservationRequest,
   ResourceResult,
   ReservationResult,
@@ -211,6 +223,7 @@ export {
   Condition,
   AndCondition,
   OrCondition,
-  Operator
+  Operator,
+  TimeSlotConfiguration
 }
 export default GoMeddo

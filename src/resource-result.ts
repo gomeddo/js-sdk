@@ -1,3 +1,4 @@
+import AvailabilityTimeSlotResponse from './api/availability-reponse'
 import ServiceTimeSlotResponse from './api/service-availability-response'
 import DimensionRecordResult from './dimension-record-result'
 import Resource, { SFResource } from './s-objects/resource'
@@ -33,6 +34,19 @@ export default class ResourceResult extends DimensionRecordResult {
       parentResource.children.push(resource)
     })
     return this
+  }
+
+  public addAvailabilitySlotData (resourceSlotData: AvailabilityTimeSlotResponse[]): void {
+    resourceSlotData.forEach((slotData) => {
+      const matchingResource = this.resourcesById.get(slotData.dimensionId)
+      if (matchingResource === undefined) {
+        return
+      }
+      matchingResource.addAvailabilitySlotData(slotData)
+      if (matchingResource.isClosed()) {
+        this.resourcesById.delete(slotData.dimensionId)
+      }
+    })
   }
 
   public addServiceSlotData (dimensionsServiceSlotData: ServiceTimeSlotResponse[]): void {
