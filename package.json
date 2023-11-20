@@ -1,6 +1,6 @@
 {
   "name": "@gomeddo/sdk",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Package allowing for the easy use of GoMeddo APIs.",
   "keywords": [
     "GoMeddo"
@@ -11,6 +11,7 @@
   "types": "dist/cjs/index.d.ts",
   "author": "GoMeddo <support@gomeddo.com>",
   "scripts": {
+    "release": "yarn build && yarn publish --access public",
     "build": "yarn build:cjs && yarn build:esm",
     "build:cjs": "tsc --project tsconfig.build.json",
     "build:esm": "tsc --project tsconfig.esm.json",
