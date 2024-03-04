@@ -141,6 +141,20 @@ export default class GoMeddoAPI {
     return data
   }
 
+  public async getReservationContacts (reservationId: string | null, fields: Set<string>): Promise<CustomSFSObject[]> {
+    const url = new URL('B25/v1/reservation-contacts', this.baseUrl)
+    if (reservationId !== null) {
+      url.searchParams.append('reservationId', reservationId)
+    }
+    this.addFieldsToUrl(url, fields)
+    const response = await fetch(url.href, {
+      method: 'GET',
+      headers: this.getHeaders()
+    })
+    await this.checkResponse(response)
+    return await response.json()
+  }
+
   private getHeaders (): Record<string, string> {
     return {
       Authorization: `Bearer ${this.apiKey}`
