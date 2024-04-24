@@ -4,6 +4,7 @@ import ReservationRequest from './reservation-request'
 import TimeSlotsRequest from './timeslots-request'
 import ResourceResult from './resource-result'
 import ReservationResult from './reservation-result'
+import ReservationContactsRequest from './reservation-contacts-request'
 import TimeSlotsResult from './timeslots-result'
 import Contact from './s-objects/contact'
 import Lead from './s-objects/lead'
@@ -31,7 +32,7 @@ enum Environment {
  * GoMeddo object allows for interaction with GoMeddo
  */
 class GoMeddo {
-  static version: string = '0.0.5'
+  static version: string = '0.0.8'
   private readonly environment: Environment
   private readonly api: GoMeddoAPI
 
@@ -69,6 +70,15 @@ class GoMeddo {
    */
   public buildReservationRequest (): ReservationRequest {
     return new ReservationRequest(this.api)
+  }
+
+  /**
+   * Creates a new request for Reservation Contacts. The request can then be specified using methods on the Reservation Contacts request.
+   *
+   * @returns new Reservation Contacts request using the authentication from this GoMeddo instance
+   */
+  public buildReservationContactsRequest (): ReservationContactsRequest {
+    return new ReservationContactsRequest(this.api)
   }
 
   /**
