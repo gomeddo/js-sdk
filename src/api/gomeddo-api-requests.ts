@@ -13,6 +13,9 @@ import ReservationCollection from './request-bodies/reservation-collection'
 import FindAvailableIdsRequest from '../find-available-ids-request'
 import { CustomSFSObject } from '../s-objects/s-object'
 import { SFResource } from '../s-objects/resource'
+import TimeSlotRequestBody, { TimeSlotJunctions } from './request-bodies/timeslots-request-body'
+import { ReservationTimeSlot } from '../time-slots/reservation-time-slot'
+
 export default class GoMeddoAPI {
   private readonly baseUrl: string
   private readonly apiKey: string
@@ -139,6 +142,40 @@ export default class GoMeddoAPI {
     await this.checkResponse(response)
     const data = await response.json()
     return data
+  }
+
+  public async getTimeSlots (requestBody: TimeSlotRequestBody): Promise<ReservationTimeSlot[]> {
+    const url = new URL('B25/v1/timeSlots', this.baseUrl)
+    const response = await fetch(url.href, {
+      method: 'POST',
+      body: JSON.stringify(requestBody),
+      headers: this.getHeaders()
+    })
+    await this.checkResponse(response)
+    const data = await response.json()
+
+    if (data.timeSlots === undefined) {
+      return []
+    }
+
+    return data.timeSlots.map((slot: any) => {
+      let reservations: SFReservation[] = []
+      let junctions: TimeSlotJunctions | undefined
+
+      if (slot.reservations !== undefined) {
+        slot.reservations.forEach((reservation: any) => {
+          reservations.push(reservation)
+          if (reservation.childRecords !== undefined) {
+            junctions = reservation.childRecords
+          }
+        })
+      } else {
+        const inputReservation = requestBody.reservation as SFReservation
+        reservations = [inputReservation]
+      }
+
+      return new ReservationTimeSlot(new Date(slot.startDatetime), new Date(slot.endDatetime), reservations, junctions)
+    })
   }
 
   private getHeaders (): Record<string, string> {

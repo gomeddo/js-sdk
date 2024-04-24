@@ -4,6 +4,9 @@ import AvailabilityTimeSlotRequest from '../../src/api/request-bodies/availabili
 import ReservationPriceCalculationRequest from '../../src/api/request-bodies/reservation-price-calculation-request'
 import { ReservationSaveRequest } from '../../src/api/request-bodies/reservation-save-request'
 import { getAvailabilityResponse, getAvailabilitySlot } from '../__utils__/availability-responses'
+import TimeSlotRequestBody from '../../src/api/request-bodies/timeslots-request-body'
+import { ReservationTimeSlot } from '../../src/time-slots/reservation-time-slot'
+import { dummyId0 } from '../__utils__/salesforce-dummy-ids'
 
 beforeEach(() => {
   fetchMock.resetMocks()
@@ -67,4 +70,34 @@ test('price calculation makes the correct request', async () => {
       headers: { Authorization: 'Bearer key' }
     }
   )
+})
+
+test('getTimeSlots makes the correct request and processes response correctly', async () => {
+  const mock = fetchMock.once(JSON.stringify({
+    timeSlots: [
+      {
+        startDatetime: '2024-01-01T09:00:00Z',
+        endDatetime: '2024-01-01T10:00:00Z',
+        reservations: [
+          {
+            B25__Resource__c: dummyId0
+          }
+        ]
+      }
+    ]
+  }))
+  const api = new GoMeddoAPI('key', Environment.PRODUCTION)
+  const requestBody = new TimeSlotRequestBody('2024-01-01T00:00:00Z', '2024-01-01T23:59:59Z')
+  const timeSlots = await api.getTimeSlots(requestBody)
+  expect(mock).toHaveBeenCalledWith(
+    'https://api.gomeddo.com/api/v3/proxy/B25/v1/timeSlots',
+    {
+      method: 'POST',
+      body: JSON.stringify(requestBody),
+      headers: { Authorization: 'Bearer key' }
+    }
+  )
+
+  expect(timeSlots).toBeInstanceOf(Array)
+  expect(timeSlots[0]).toBeInstanceOf(ReservationTimeSlot)
 })
