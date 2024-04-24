@@ -78,5 +78,6 @@ export {
   CustomRelationshipName,
   CustomSFSObject,
   StandardSFSObject,
-  getRelationshiptNameFromFieldName
+  getRelationshiptNameFromFieldName,
+  SObjectAttributes
 }
