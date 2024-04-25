@@ -1,22 +1,49 @@
 import { ReservationTimeSlot } from '../../src/time-slots/reservation-time-slot'
 import Reservation from '../../src/s-objects/reservation'
-import { TimeSlotJunctions } from '../../src/api/request-bodies/timeslots-request-body'
+import TimeSlotRequestBody from '../../src/api/request-bodies/timeslots-request-body'
+import { dummyId0 } from '../__utils__/salesforce-dummy-ids'
 
 describe('ReservationTimeSlot', () => {
+  let reservationTimeSlotEmpty: ReservationTimeSlot
   let reservationTimeSlot: ReservationTimeSlot
+  const requestBody: TimeSlotRequestBody = {
+    reservation: {
+      B25__Resource__c: dummyId0
+    },
+    junctions: {
+      key: [
+        {
+          attributes: {
+            type: 'value'
+          }
+        }
+      ]
+    },
+    timeSlotContext: {
+      startOfRange: '2024-04-12T09:00:00Z',
+      endOfRange: '2024-04-12T10:00:00Z'
+    }
+  }
 
   beforeEach(() => {
     const startOfSlot = new Date('2024-04-12T09:00:00Z')
     const endOfSlot = new Date('2024-04-12T10:00:00Z')
-    const reservations: Reservation[] = []
-    const junctions: TimeSlotJunctions | undefined = undefined
+    const reservationsEmpty: Reservation[] = []
+    const reservations: Reservation[] = [
+      new Reservation().setStartDatetime(new Date(startOfSlot)).setEndDatetime(new Date(endOfSlot))
+    ]
 
-    reservationTimeSlot = new ReservationTimeSlot(startOfSlot, endOfSlot, reservations, junctions)
+    reservationTimeSlotEmpty = new ReservationTimeSlot(startOfSlot, endOfSlot, reservationsEmpty, requestBody)
+    reservationTimeSlot = new ReservationTimeSlot(startOfSlot, endOfSlot, reservations, requestBody)
   })
 
   it('should have the correct start and end time', () => {
     expect(reservationTimeSlot.startOfSlot).toEqual(new Date('2024-04-12T09:00:00Z'))
     expect(reservationTimeSlot.endOfSlot).toEqual(new Date('2024-04-12T10:00:00Z'))
+  })
+
+  it('should have zero reservation', () => {
+    expect(reservationTimeSlotEmpty.reservations).toHaveLength(0)
   })
 
   it('should have one reservation', () => {
@@ -44,49 +71,7 @@ describe('ReservationTimeSlot', () => {
       new Reservation().setStartDatetime(new Date(startOfSlot)).setEndDatetime(new Date(endOfSlot))
     ]
 
-    reservationTimeSlot = new ReservationTimeSlot(new Date(startOfSlot), new Date(endOfSlot), reservations, undefined)
+    reservationTimeSlot = new ReservationTimeSlot(new Date(startOfSlot), new Date(endOfSlot), reservations, requestBody)
     expect(reservationTimeSlot.numberOfReservations()).toBe(2)
-  })
-
-  it('should have undefined junctions', () => {
-    expect(reservationTimeSlot.junctions).toBeUndefined()
-  })
-
-  it('should return the correct number of junctions', () => {
-    expect(reservationTimeSlot.numberOfJunctions()).toBe(0)
-  })
-
-  it('should return undefined for getJunctions', () => {
-    expect(reservationTimeSlot.getJunctions()).toBeUndefined()
-  })
-
-  it('should return a junction with the correct attributes', () => {
-    const junctions: TimeSlotJunctions = {
-      key: [
-        {
-          attributes: {
-            type: 'value'
-          }
-        }
-      ]
-    }
-
-    reservationTimeSlot = new ReservationTimeSlot(new Date(), new Date(), [], junctions)
-    expect(reservationTimeSlot.getJunctions()).toEqual(junctions)
-  })
-
-  it('should return the correct number of junctions', () => {
-    const junctions: TimeSlotJunctions = {
-      key: [
-        {
-          attributes: {
-            type: 'value'
-          }
-        }
-      ]
-    }
-
-    reservationTimeSlot = new ReservationTimeSlot(new Date(), new Date(), [], junctions)
-    expect(reservationTimeSlot.numberOfJunctions()).toBe(1)
   })
 })

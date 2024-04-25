@@ -1,5 +1,5 @@
 import { SFReservation } from '../../s-objects/reservation'
-import { SObjectAttributes } from '../../s-objects/s-object'
+import { CustomFieldName, CustomRelationshipName, CustomSFSObject } from '../../s-objects/s-object'
 
 interface TimeSlotFields {
   [key: string]: string[]
@@ -7,17 +7,12 @@ interface TimeSlotFields {
 
 interface DimensionJunctionDefinition {
   sObjectName: string
-  relationshipName: string
-  dimensionLookup: string
+  relationshipName: CustomRelationshipName
+  dimensionLookup: CustomFieldName
 }
 
 interface TimeSlotJunctions {
-  [key: string]: TimeSlotDimensionIds[]
-}
-
-interface TimeSlotDimensionIds {
-  attributes?: SObjectAttributes | undefined
-  [key: string]: string | undefined | SObjectAttributes
+  [key: string]: Array<Partial<CustomSFSObject>>
 }
 
 interface TimeSlotContext {
@@ -56,6 +51,5 @@ export {
   TimeSlotFields,
   DimensionJunctionDefinition,
   TimeSlotJunctions,
-  TimeSlotDimensionIds,
   TimeSlotRequestedNumberOfJunctions
 }

@@ -13,7 +13,7 @@ import ReservationCollection from './request-bodies/reservation-collection'
 import FindAvailableIdsRequest from '../find-available-ids-request'
 import { CustomSFSObject } from '../s-objects/s-object'
 import { SFResource } from '../s-objects/resource'
-import TimeSlotRequestBody, { TimeSlotJunctions } from './request-bodies/timeslots-request-body'
+import TimeSlotRequestBody from './request-bodies/timeslots-request-body'
 import { ReservationTimeSlot } from '../time-slots/reservation-time-slot'
 
 export default class GoMeddoAPI {
@@ -173,22 +173,7 @@ export default class GoMeddoAPI {
     }
 
     return data.timeSlots.map((slot: any) => {
-      let reservations: SFReservation[] = []
-      let junctions: TimeSlotJunctions | undefined
-
-      if (slot.reservations !== undefined) {
-        slot.reservations.forEach((reservation: any) => {
-          reservations.push(reservation)
-          if (reservation.childRecords !== undefined) {
-            junctions = reservation.childRecords
-          }
-        })
-      } else {
-        const inputReservation = requestBody.reservation as SFReservation
-        reservations = [inputReservation]
-      }
-
-      return new ReservationTimeSlot(new Date(slot.startDatetime), new Date(slot.endDatetime), reservations, junctions)
+      return new ReservationTimeSlot(new Date(slot.startDatetime), new Date(slot.endDatetime), slot.reservations, requestBody)
     })
   }
 
