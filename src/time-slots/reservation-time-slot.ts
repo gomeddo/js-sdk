@@ -19,7 +19,7 @@ class ReservationTimeSlot extends TimeSlot {
     } else {
       this.reservations = reservations.map((reservation: any) => {
         const newReservation = new Reservation(this.removeKeys(reservation?.reservation)).setStartDatetime(startOfSlot).setEndDatetime(endOfSlot)
-        this.junctionsToRelatedRecords(reservation?.junctions, newReservation)
+        this.junctionsToRelatedRecords(reservation?.childRecords, newReservation)
         return newReservation
       })
     }
