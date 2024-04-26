@@ -1,8 +1,11 @@
 import GoMeddoAPI from './api/gomeddo-api-requests'
 import ResourceRequest from './resource-request'
 import ReservationRequest from './reservation-request'
+import TimeSlotsRequest from './timeslots-request'
 import ResourceResult from './resource-result'
 import ReservationResult from './reservation-result'
+import ReservationContactsRequest from './reservation-contacts-request'
+import TimeSlotsResult from './timeslots-result'
 import Contact from './s-objects/contact'
 import Lead from './s-objects/lead'
 import Reservation from './s-objects/reservation'
@@ -13,6 +16,7 @@ import ServiceReservation, { SFServiceReservation } from './s-objects/service-re
 import { TimeSlot } from './time-slots/time-slot'
 import { AvailabilityTimeSlot, AvailabilitySlotType } from './time-slots/availability-time-slot'
 import { ServiceTimeSlot } from './time-slots/service-time-slot'
+import { ReservationTimeSlot } from './time-slots/reservation-time-slot'
 import { Condition, AndCondition, OrCondition, Operator } from './filters/conditions'
 import DimensionRecordRequest from './dimension-record-request'
 import TimeSlotConfiguration from './utils/time-slot-configuration'
@@ -28,7 +32,7 @@ enum Environment {
  * GoMeddo object allows for interaction with GoMeddo
  */
 class GoMeddo {
-  static version: string = '0.0.5'
+  static version: string = '0.0.8'
   private readonly environment: Environment
   private readonly api: GoMeddoAPI
 
@@ -66,6 +70,26 @@ class GoMeddo {
    */
   public buildReservationRequest (): ReservationRequest {
     return new ReservationRequest(this.api)
+  }
+
+  /**
+   * Creates a new request for Reservation Contacts. The request can then be specified using methods on the Reservation Contacts request.
+   *
+   * @returns new Reservation Contacts request using the authentication from this GoMeddo instance
+   */
+  public buildReservationContactsRequest (): ReservationContactsRequest {
+    return new ReservationContactsRequest(this.api)
+  }
+
+  /**
+   * Creates a new request to fetch TimeSlots. The request can then be specified using methods on the TimeSlots request.
+   *
+   * @param startDatetime The start of the range to fetch timeslots (in UTC/GMT time).
+   * @param endDatetime The end of the range to fetch timeslots (in UTC/GMT time).
+   * @returns new TimeSlots request using the authentication from this GoMeddo instance
+   */
+  public buildTimeSlotsRequest (startDatetime: Date, endDatetime: Date): TimeSlotsRequest {
+    return new TimeSlotsRequest(this.api, startDatetime, endDatetime)
   }
 
   /**
@@ -224,6 +248,9 @@ export {
   AndCondition,
   OrCondition,
   Operator,
-  TimeSlotConfiguration
+  TimeSlotConfiguration,
+  TimeSlotsRequest,
+  TimeSlotsResult,
+  ReservationTimeSlot
 }
 export default GoMeddo

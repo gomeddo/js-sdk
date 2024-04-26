@@ -1,6 +1,6 @@
 {
   "name": "@gomeddo/sdk",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Package allowing for the easy use of GoMeddo APIs.",
   "keywords": [
     "GoMeddo"
