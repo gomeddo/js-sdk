@@ -3,11 +3,10 @@ import TimeSlotRequestBody, {
   TimeSlotFields,
   TimeSlotJunctions,
   DimensionJunctionDefinition,
-  TimeSlotRequestedNumberOfJunctions,
-  TimeSlotDimensionIds
+  TimeSlotRequestedNumberOfJunctions
 } from './api/request-bodies/timeslots-request-body'
 import TimeSlotsResult from './timeslots-result'
-import SObject from './s-objects/s-object'
+import SObject, { CustomSFSObject } from './s-objects/s-object'
 import Reservation, { SFReservation } from './s-objects/reservation'
 
 export default class TimeSlotsRequest {
@@ -93,11 +92,12 @@ export default class TimeSlotsRequest {
       this.requestedNumberOfJunctions[relationshipName] = requestedNumberOfJunctions
     }
 
-    const junctionsList: TimeSlotDimensionIds[] = dimensionIds.map((dimensionId) => {
-      return {
-        attributes: { type: sObjectName },
-        [dimensionLookup]: dimensionId
+    const junctionsList: Array<Partial<CustomSFSObject>> = dimensionIds.map((dimensionId) => {
+      const junctionRecord: Partial<CustomSFSObject> = {
+        attributes: { type: sObjectName }
       }
+      junctionRecord[dimensionLookup] = dimensionId
+      return junctionRecord
     })
 
     this.junctions[relationshipName] = junctionsList

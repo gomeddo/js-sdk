@@ -1,27 +1,27 @@
 import { TimeSlot } from './time-slot'
-import Reservation from '../s-objects/reservation'
-import { TimeSlotJunctions } from '../api/request-bodies/timeslots-request-body'
+import Reservation, { SFReservation } from '../s-objects/reservation'
+import TimeSlotRequestBody from '../api/request-bodies/timeslots-request-body'
+import SObject from '../s-objects/s-object'
 
 class ReservationTimeSlot extends TimeSlot {
   reservations: Reservation[]
-  junctions: TimeSlotJunctions | undefined
 
-  constructor (startOfSlot: Date, endOfSlot: Date, reservations: any[], junctions: TimeSlotJunctions | undefined) {
+  constructor (startOfSlot: Date, endOfSlot: Date, reservations: any[], requestBody: TimeSlotRequestBody) {
     super(startOfSlot, endOfSlot)
 
-    if (reservations.length === 0) {
-      const newReservation = new Reservation().setStartDatetime(startOfSlot).setEndDatetime(endOfSlot)
+    const inputReservation = requestBody.reservation as SFReservation
+    const inputJunctions = requestBody.junctions
+
+    if (reservations === undefined) {
+      const newReservation = new Reservation(this.removeKeys(inputReservation)).setStartDatetime(startOfSlot).setEndDatetime(endOfSlot)
+      this.junctionsToRelatedRecords(inputJunctions, newReservation)
       this.reservations = [newReservation]
     } else {
-      this.reservations = reservations.map((reservation: any) =>
-        new Reservation(this.removeKeys(reservation?.reservation))
-          .setStartDatetime(startOfSlot)
-          .setEndDatetime(endOfSlot)
-      )
-    }
-
-    if (junctions != null) {
-      this.junctions = junctions
+      this.reservations = reservations.map((reservation: any) => {
+        const newReservation = new Reservation(this.removeKeys(reservation?.reservation)).setStartDatetime(startOfSlot).setEndDatetime(endOfSlot)
+        this.junctionsToRelatedRecords(reservation?.childRecords, newReservation)
+        return newReservation
+      })
     }
   }
 
@@ -45,23 +45,17 @@ class ReservationTimeSlot extends TimeSlot {
     return this.reservations
   }
 
-  /**
-   * Get the number of junctions
-   * @returns Number of junctions
-   */
-  public numberOfJunctions (): number {
-    if (this.junctions != null) {
-      return Object.keys(this.junctions).length
+  private junctionsToRelatedRecords (junctions: any, reservation: Reservation): void {
+    if (junctions !== undefined) {
+      Object.keys(junctions).forEach((junctionKey: any) => {
+        const junction = junctions[junctionKey]
+        const relatedRecordApiName = junction[0].attributes.type
+        junction.forEach((record: any) => {
+          const newRecord = new SObject(record)
+          reservation.addRelatedRecord(relatedRecordApiName, newRecord)
+        })
+      })
     }
-    return 0
-  }
-
-  /**
-   * Get the junctions for this TimeSlot
-   * @returns Junctions
-   */
-  public getJunctions (): TimeSlotJunctions | undefined {
-    return this.junctions
   }
 
   private removeKeys (obj: any): any {
