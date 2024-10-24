@@ -78,7 +78,7 @@ export default class GoMeddoAPI {
   }
 
   public async updateReservationCollection (reservationCollections: ReservationCollection[]): Promise<void> {
-    const url = new URL('B25/v1/reservation-collection', this.baseUrl)
+    const url = new URL('B25LP/v1/reservation', this.baseUrl)
     const response = await fetch(url.href, {
       method: 'PATCH',
       body: JSON.stringify(reservationCollections),
