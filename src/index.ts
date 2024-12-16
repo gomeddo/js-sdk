@@ -100,7 +100,7 @@ class GoMeddo {
    * @returns The saved reservation object with any new values populated by the save in salesforce.
    */
   public async saveReservation (reservation: Reservation): Promise<Reservation> {
-    const result = await this.api.saveReservation(reservation.getReservationSaveRequest()) as any
+    const result = await this.api.saveReservation(reservation.getReservationProcessRequest()) as any
     const outputReservation = new Reservation()
     outputReservation.id = result.reservation.Id
     outputReservation.setStartDatetime(new Date(result.reservation.B25__Start__c))
@@ -164,7 +164,7 @@ class GoMeddo {
    * @param reservations The reservations to update
    */
   public async updateReservations (reservations: Reservation[]): Promise<void> {
-    const reservationCollections = reservations.map(reservation => reservation.getReservationCollection())
+    const reservationCollections = reservations.map(reservation => reservation.getReservationProcessRequest())
     await this.api.updateReservationCollection(reservationCollections)
   }
 

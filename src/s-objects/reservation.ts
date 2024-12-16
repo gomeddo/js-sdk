@@ -1,6 +1,6 @@
 import ReservationCollection from '../api/request-bodies/reservation-collection'
 import ReservationPriceCalculationRequest from '../api/request-bodies/reservation-price-calculation-request'
-import { ReservationSaveRequest } from '../api/request-bodies/reservation-save-request'
+import { ReservationProcessRequest } from '../api/request-bodies/reservation-save-request'
 import { isSalesforceId } from '../utils/salesforce-utils'
 import Contact from './contact'
 import Lead from './lead'
@@ -174,12 +174,14 @@ export default class Reservation extends SObject {
    * @internal
    * @returns Save request data for this reservation
    */
-  public getReservationSaveRequest (): ReservationSaveRequest {
-    return new ReservationSaveRequest(
+  public getReservationProcessRequest (): ReservationProcessRequest {
+    return new ReservationProcessRequest(
       this.getSFSObject(),
       this.getLead(),
       this.getContact(),
-      this.getServiceReservationRestData()
+      this.getServiceReservationRestData(),
+      this.getRelatedRecordsRestData(),
+      this.getRemovedRelatedRecordsRestData()
     )
   }
 
@@ -261,6 +263,32 @@ export default class Reservation extends SObject {
    */
   private getServiceReservationRestData (): Array<Partial<SFServiceReservation>> {
     return this.serviceReservations.map(serviceReservation => serviceReservation.getSFSObject())
+  }
+
+  /**
+   * @internal
+   * @returns The Salesforce formatted data for the related records
+   */
+  private getRelatedRecordsRestData (): Record<string, Array<Partial<CustomSFSObject>>> {
+    return Object.fromEntries(
+      Object.entries(this.relatedRecords).map(([key, relatedRecordArray]) => [
+        key,
+        (relatedRecordArray as SObject[]).map((relatedRecord: SObject) => relatedRecord.getSFSObject())
+      ])
+    )
+  }
+
+  /**
+   * @internal
+   * @returns The Salesforce formatted data for the removed related records
+   */
+  private getRemovedRelatedRecordsRestData (): Record<string, Array<Partial<CustomSFSObject>>> {
+    return Object.fromEntries(
+      Object.entries(this.removedRelatedRecords).map(([key, removedRelatedRecordArray]) => [
+        key,
+        (removedRelatedRecordArray as SObject[]).map((removedRelatedRecord: SObject) => removedRelatedRecord.getSFSObject())
+      ])
+    )
   }
 
   /**

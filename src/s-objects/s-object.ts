@@ -50,6 +50,10 @@ export default class SObject {
     return this.customProperties
   }
 
+  public removeCustomProperty (propertyName: string): void {
+    this.customProperties.delete(propertyName)
+  }
+
   public getSFSObject (sObjectTypeAttr?: string): Partial<CustomSFSObject> {
     const sObjectData: Partial<CustomSFSObject> = {}
     this.customProperties.forEach((value, fieldName) => {

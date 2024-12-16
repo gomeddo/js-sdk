@@ -1,5 +1,5 @@
 import GoMeddo, { Environment, Reservation, Service, SObject } from '../src/index'
-import { ReservationSaveRequest } from '../src/api/request-bodies/reservation-save-request'
+import { ReservationProcessRequest } from '../src/api/request-bodies/reservation-save-request'
 import { getSObject } from './__utils__/s-object-data'
 import { dummyId0, dummyId1, dummyId2 } from './__utils__/salesforce-dummy-ids'
 import ReservationCollection from '../src/api/request-bodies/reservation-collection'
@@ -34,7 +34,7 @@ test('You can save a reservations through it', async () => {
   result.setEndDatetime(dummyDate)
   expect(result).toStrictEqual(expectedResult)
   expect(mock).toHaveBeenCalled()
-  const expectedBodyData = new ReservationSaveRequest({ B25__Api_Visible__c: true }, null, null, [])
+  const expectedBodyData = new ReservationProcessRequest({ B25__Api_Visible__c: true }, null, null, [])
   expect(mock).toHaveBeenCalledWith(
     'https://api.gomeddo.com/api/v3/proxy/B25LP/v1/reservations',
     {

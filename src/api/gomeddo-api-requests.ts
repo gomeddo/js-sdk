@@ -4,7 +4,7 @@ import AvailabilityTimeSlotResponse from './availability-reponse'
 import AvailabilityTimeSlotRequest from './request-bodies/availability-request'
 import DimensionSearchBody from './request-bodies/dimension-search-body'
 import ReservationPriceCalculationRequest from './request-bodies/reservation-price-calculation-request'
-import { ReservationSaveRequest } from './request-bodies/reservation-save-request'
+import { ReservationProcessRequest } from './request-bodies/reservation-save-request'
 import ServiceTimeSlotRequest from './request-bodies/service-availability-request'
 import ServiceTimeSlotResponse from './service-availability-response'
 import ReservationSearchBody from './request-bodies/reservation-search-body'
@@ -66,7 +66,7 @@ export default class GoMeddoAPI {
     return await response.json()
   }
 
-  public async saveReservation (saveRequest: ReservationSaveRequest): Promise<object> {
+  public async saveReservation (saveRequest: ReservationProcessRequest): Promise<object> {
     const url = new URL('B25LP/v1/reservations', this.baseUrl)
     const response = await fetch(url.href, {
       method: 'POST',
@@ -77,8 +77,8 @@ export default class GoMeddoAPI {
     return await response.json()
   }
 
-  public async updateReservationCollection (reservationCollections: ReservationCollection[]): Promise<void> {
-    const url = new URL('B25LP/v1/reservation', this.baseUrl)
+  public async updateReservationCollection (reservationCollections: ReservationProcessRequest[]): Promise<void> {
+    const url = new URL('B25LP/v1/reservations', this.baseUrl)
     const response = await fetch(url.href, {
       method: 'PATCH',
       body: JSON.stringify(reservationCollections),

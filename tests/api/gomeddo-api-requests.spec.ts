@@ -2,7 +2,7 @@ import { Environment } from '../../src/index'
 import GoMeddoAPI from '../../src/api/gomeddo-api-requests'
 import AvailabilityTimeSlotRequest from '../../src/api/request-bodies/availability-request'
 import ReservationPriceCalculationRequest from '../../src/api/request-bodies/reservation-price-calculation-request'
-import { ReservationSaveRequest } from '../../src/api/request-bodies/reservation-save-request'
+import { ReservationProcessRequest } from '../../src/api/request-bodies/reservation-save-request'
 import { getAvailabilityResponse, getAvailabilitySlot } from '../__utils__/availability-responses'
 import TimeSlotRequestBody from '../../src/api/request-bodies/timeslots-request-body'
 import { ReservationTimeSlot } from '../../src/time-slots/reservation-time-slot'
@@ -15,7 +15,7 @@ beforeEach(() => {
 test('url and body are constructed correctly for saveReservation', async () => {
   const api = new GoMeddoAPI('key', Environment.PRODUCTION)
   const mock = fetchMock.once('{}')
-  const saveRequest = new ReservationSaveRequest({}, null, null, [])
+  const saveRequest = new ReservationProcessRequest({}, null, null, [])
   const result = await api.saveReservation(saveRequest)
   expect(result).toStrictEqual({})
   expect(mock).toHaveBeenCalled()
