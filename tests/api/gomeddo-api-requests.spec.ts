@@ -13,7 +13,7 @@ beforeEach(() => {
 })
 
 test('url and body are constructed correctly for saveReservation', async () => {
-  const api = new GoMeddoAPI('key', Environment.PRODUCTION)
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
   const mock = fetchMock.once('{}')
   const saveRequest = new ReservationProcessRequest({}, null, null, [])
   const result = await api.saveReservation(saveRequest)
@@ -30,7 +30,7 @@ test('url and body are constructed correctly for saveReservation', async () => {
 })
 
 test('the get availabilities makes the correct request', async () => {
-  const api = new GoMeddoAPI('key', Environment.PRODUCTION)
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
   const mock = fetchMock.once(
     JSON.stringify(
       getAvailabilityResponse(['1', '2'], [getAvailabilitySlot(1, 1, 10, 12, 'Open')])
@@ -59,7 +59,7 @@ test('price calculation makes the correct request', async () => {
     serviceReservations: [],
     serviceCosts: 0
   }))
-  const api = new GoMeddoAPI('key', Environment.PRODUCTION)
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
   const body = new ReservationPriceCalculationRequest({}, [], 0)
   await api.calculatePrice(body)
   expect(mock).toHaveBeenCalledWith(
@@ -86,7 +86,7 @@ test('getTimeSlots makes the correct request and processes response correctly', 
       }
     ]
   }))
-  const api = new GoMeddoAPI('key', Environment.PRODUCTION)
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
   const requestBody = new TimeSlotRequestBody('2024-01-01T00:00:00Z', '2024-01-01T23:59:59Z')
   const timeSlots = await api.getTimeSlots(requestBody)
   expect(mock).toHaveBeenCalledWith(
