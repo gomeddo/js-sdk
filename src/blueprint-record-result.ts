@@ -41,17 +41,4 @@ export default class BlueprintRecordResult {
     }
     return [...this.objectById.values()].find(blueprintRecord => blueprintRecord.name === idOrName)
   }
-
-  /**
-   * Filters the blueprint records in the `objectById` map based on the allowed ids.
-   * @param blueprintRecordIds The ids of the blueprint records that are allowed to remain in the map.
-   * @returns void
-   */
-  public filterBlueprintRecordsById (blueprintRecordIds: string[]): void {
-    this.objectById.forEach((blueprintRecord, id) => {
-      if (!blueprintRecordIds.includes(id)) {
-        this.objectById.delete(id)
-      }
-    })
-  }
 }

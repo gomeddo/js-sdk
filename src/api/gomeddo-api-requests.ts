@@ -178,10 +178,10 @@ export default class GoMeddoAPI {
     })
   }
 
-  public async searchBlueprintRecords (parentIds: string[], parentNames: string[], apiCondition: APIConditionElement | undefined, fields: Set<string>): Promise<CustomSFSObject[]> {
+  public async searchBlueprintRecords (ids: string[], names: string[], apiCondition: APIConditionElement | undefined, fields: Set<string>): Promise<CustomSFSObject[]> {
     const url = new URL('B25/v1/blueprints/search', this.baseUrl)
     this.addFieldsToUrl(url, fields)
-    const blueprintSearchBody = new BlueprintSearchBody(parentIds, parentNames, apiCondition)
+    const blueprintSearchBody = new BlueprintSearchBody(ids, names, apiCondition)
     const response = await fetch(url.href, {
       method: 'POST',
       body: JSON.stringify(blueprintSearchBody),
