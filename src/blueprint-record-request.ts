@@ -79,12 +79,14 @@ export default class BlueprintRecordRequest {
     return await this.api.searchBlueprintRecords(this.ids, this.names, condition?.getAPICondition(), this.getRequestedFields())
   }
 
-  protected setRequestedIds (ids: string[]): void {
+  public setRequestedIds (ids: string[]): this {
     this.ids = ids
+    return this
   }
 
-  protected setRequestedNames (names: string[]): void {
+  public setRequestedNames (names: string[]): this {
     this.names = names
+    return this
   }
 
   protected getRequestedFields (): Set<string> {
