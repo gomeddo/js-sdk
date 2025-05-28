@@ -20,7 +20,7 @@ import { ReservationTimeSlot } from './time-slots/reservation-time-slot'
 import { Condition, AndCondition, OrCondition, Operator } from './filters/conditions'
 import DimensionRecordRequest from './dimension-record-request'
 import TimeSlotConfiguration from './utils/time-slot-configuration'
-import BlueprintRecordRequest, { IBlueprintRecordRequest } from './blueprint-record-request'
+import BlueprintRecordRequest from './blueprint-record-request'
 
 enum Environment {
   DEVELOP,
@@ -99,8 +99,7 @@ class GoMeddo {
    * @returns new blueprint request using the authentication from this GoMeddo instance
    */
   public buildBlueprintRecordRequest (): BlueprintRecordRequest {
-    const request: IBlueprintRecordRequest = { api: this.api }
-    return new BlueprintRecordRequest(request)
+    return new BlueprintRecordRequest(this.api)
   }
 
   /**

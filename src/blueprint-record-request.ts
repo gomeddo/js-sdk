@@ -3,36 +3,23 @@ import { AndCondition, OrCondition, ConditionElement } from './filters/condition
 import BlueprintRecordResult from './blueprint-record-result'
 import { CustomSFSObject } from './s-objects/s-object'
 
-export interface IBlueprintRecordRequest {
-  api: GoMeddoAPI
-  standardFields?: Set<string>
-  names?: string[]
-  ids?: string[]
-}
-
 /**
  * Blueprint record request by default will request all records of a given blueprint.
  * Methods can be used to filter and narow down the blueprint records being requested.
  */
 export default class BlueprintRecordRequest {
   protected readonly api: GoMeddoAPI
-  protected standardFields: Set<string> = new Set(['Id', 'Name'])
+  protected standardFields: Set<string>
   protected ids: string[] = []
   protected names: string[] = []
   protected readonly additionalFields: Set<string> = new Set()
   protected condition: OrCondition | undefined
 
-  constructor (blueprintRecordRequest: IBlueprintRecordRequest) {
-    this.api = blueprintRecordRequest.api
-    if (blueprintRecordRequest.standardFields !== undefined) {
-      this.standardFields = blueprintRecordRequest.standardFields
-    }
-    if (blueprintRecordRequest.ids !== undefined) {
-      this.ids = blueprintRecordRequest.ids
-    }
-    if (blueprintRecordRequest.names !== undefined) {
-      this.names = blueprintRecordRequest.names
-    }
+  constructor (api: GoMeddoAPI) {
+    this.api = api
+    this.standardFields = new Set([
+      'Id', 'Name'
+    ])
   }
 
   /**

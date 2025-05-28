@@ -4,16 +4,12 @@ import GoMeddoAPI from '../src/api/gomeddo-api-requests'
 import BlueprintSearchBody from '../src/api/request-bodies/blueprint-search-body'
 import { APICondition, APIConditionElement, APIConditionGroup } from '../src/api/request-bodies/api-condition'
 import { FetchMock } from 'jest-fetch-mock/types'
-import BlueprintRecordRequest, { IBlueprintRecordRequest } from '../src/blueprint-record-request'
+import BlueprintRecordRequest from '../src/blueprint-record-request'
 import { BlueprintRecordGenerator } from './__utils__/blueprint-record-responses'
 
 const baseBlueprintRecordsSearchUrl = 'https://api.gomeddo.com/api/v3/proxy/B25/v1/blueprints/search'
+const getBlueprintRecordRequest = (): BlueprintRecordRequest => new BlueprintRecordRequest(new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION))
 
-const request: IBlueprintRecordRequest = {
-  api: new GoMeddoAPI('9c30c47d-3033-472e-8bba-cf027322635d', Environment.PRODUCTION)
-}
-
-const getBlueprintRecordRequest = (): BlueprintRecordRequest => new BlueprintRecordRequest(request)
 const getExpectedBody = (ids: string[], names: string[], condition: APIConditionElement | undefined): String => {
   return JSON.stringify(new BlueprintSearchBody(ids, names, condition))
 }
