@@ -89,15 +89,15 @@ export default class BlueprintRecordRequest {
 
   private async getStartingBlueprintRecordScope (): Promise<CustomSFSObject[]> {
     const condition = this.condition
-    return await this.api.searchBlueprintRecords(this.getRequestedIds(), this.getRequestedNames(), condition?.getAPICondition(), this.getRequestedFields())
+    return await this.api.searchBlueprintRecords(this.ids, this.names, condition?.getAPICondition(), this.getRequestedFields())
   }
 
-  protected getRequestedIds (): string[] {
-    return this.ids
+  protected setRequestedIds (ids: string[]): void {
+    this.ids = ids
   }
 
-  protected getRequestedNames (): string[] {
-    return this.names
+  protected setRequestedNames (names: string[]): void {
+    this.names = names
   }
 
   protected getRequestedFields (): Set<string> {
