@@ -7,7 +7,7 @@ import { JoinCondition } from '../src/filters/conditions'
 import { dummyId0, dummyId1 } from './__utils__/salesforce-dummy-ids'
 
 const baseResourceSearchUrl = 'https://api.gomeddo.com/api/v3/proxy/B25/v1/reservations/search'
-const getReservationRequest = (): ReservationRequest => new ReservationRequest(new GoMeddoAPI('key', Environment.PRODUCTION))
+const getReservationRequest = (): ReservationRequest => new ReservationRequest(new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION))
 const getExpectedBody = (reservationIds: string[], rangeStart: Date | null, rangeEnd: Date | null, condition: APIConditionElement | undefined): String => {
   return JSON.stringify(new ReservationSearchBody(reservationIds, rangeStart, rangeEnd, condition))
 }

@@ -3,6 +3,7 @@ import { APIConditionElement } from './request-bodies/api-condition'
 import AvailabilityTimeSlotResponse from './availability-reponse'
 import AvailabilityTimeSlotRequest from './request-bodies/availability-request'
 import DimensionSearchBody from './request-bodies/dimension-search-body'
+import BlueprintSearchBody from './request-bodies/blueprint-search-body'
 import ReservationPriceCalculationRequest from './request-bodies/reservation-price-calculation-request'
 import { ReservationProcessRequest } from './request-bodies/reservation-save-request'
 import ServiceTimeSlotRequest from './request-bodies/service-availability-request'
@@ -175,6 +176,19 @@ export default class GoMeddoAPI {
     return data.timeSlots.map((slot: any) => {
       return new ReservationTimeSlot(new Date(slot.startDatetime), new Date(slot.endDatetime), slot.reservations, requestBody)
     })
+  }
+
+  public async searchBlueprintRecords (ids: string[], names: string[], apiCondition: APIConditionElement | undefined, fields: Set<string>): Promise<CustomSFSObject[]> {
+    const url = new URL('B25/v1/blueprints/search', this.baseUrl)
+    this.addFieldsToUrl(url, fields)
+    const blueprintSearchBody = new BlueprintSearchBody(ids, names, apiCondition)
+    const response = await fetch(url.href, {
+      method: 'POST',
+      body: JSON.stringify(blueprintSearchBody),
+      headers: this.getHeaders()
+    })
+    await this.checkResponse(response)
+    return await response.json()
   }
 
   private getHeaders (): Record<string, string> {

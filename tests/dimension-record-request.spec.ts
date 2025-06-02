@@ -10,7 +10,7 @@ import { DimensionRecordGenerator } from './__utils__/dimension-record-responses
 
 const baseDimensionRecordsSearchUrl = 'https://api.gomeddo.com/api/v3/proxy/B25/v1/dimensionRecords/search'
 const availabilityRequestUrl = 'https://api.gomeddo.com/api/v3/proxy/B25/v1/availability'
-const getDimensionRecordRequest = (): DimensionRecordRequest => new DimensionRecordRequest(new GoMeddoAPI('key', Environment.PRODUCTION), 'B25__Staff__c')
+const getDimensionRecordRequest = (): DimensionRecordRequest => new DimensionRecordRequest(new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION), 'B25__Staff__c')
 const getExpectedBody = (ids: string[], names: string[], condition: APIConditionElement | undefined): String => {
   return JSON.stringify(new DimensionSearchBody('B25__Staff__c', ids, names, condition, true))
 }

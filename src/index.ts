@@ -20,6 +20,7 @@ import { ReservationTimeSlot } from './time-slots/reservation-time-slot'
 import { Condition, AndCondition, OrCondition, Operator } from './filters/conditions'
 import DimensionRecordRequest from './dimension-record-request'
 import TimeSlotConfiguration from './utils/time-slot-configuration'
+import BlueprintRecordRequest from './blueprint-record-request'
 
 enum Environment {
   DEVELOP,
@@ -90,6 +91,15 @@ class GoMeddo {
    */
   public buildTimeSlotsRequest (startDatetime: Date, endDatetime: Date): TimeSlotsRequest {
     return new TimeSlotsRequest(this.api, startDatetime, endDatetime)
+  }
+
+  /**
+   * Creates a new request for blueprints. The request can then be specified using methods on the blueprint request.
+   *
+   * @returns new blueprint request using the authentication from this GoMeddo instance
+   */
+  public buildBlueprintRecordRequest (): BlueprintRecordRequest {
+    return new BlueprintRecordRequest(this.api)
   }
 
   /**
