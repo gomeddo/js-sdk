@@ -1,4 +1,5 @@
 import ReservationCollection from '../reservation-collection'
+import Reservation from '../s-objects/reservation'
 
 class ReservationCollectionTimeSlot {
   reservationCollections: ReservationCollection[]
@@ -21,11 +22,15 @@ class ReservationCollectionTimeSlot {
     return this.endDatetime
   }
 
-  public getFirstCollection (): ReservationCollection {
+  public getFirstCollection (): ReservationCollection | undefined {
     return this.firstCollection
   }
 
-  public getReservationCollections (): ReservationCollection[] {
+  public getParentReservation (): Reservation | undefined {
+    return this.firstCollection?.parentReservation
+  }
+
+  public getReservationCollections (): ReservationCollection[] | undefined {
     return this.reservationCollections
   }
 }
