@@ -1,0 +1,76 @@
+import GoMeddoAPI from './api/gomeddo-api-requests'
+import BlueprintTimeslotsResult from './blueprint-timeslots-result'
+import DateRange from './date-range'
+
+import { SFReservation } from './s-objects/reservation'
+import { ReservationCollectionTimeSlot } from './time-slots/reservation-collection-time-slot'
+
+export default class BlueprintTimeslotsRequest {
+  private readonly api: GoMeddoAPI
+  private timeslotRange: DateRange = new DateRange()
+  private mdaRange: DateRange = new DateRange()
+  private blueprintName: string = ''
+  private duration: number = 60
+  private interval: number = 60
+  private prototype: Partial<SFReservation> = {}
+
+  constructor (api: GoMeddoAPI) {
+    this.api = api
+  }
+
+  /**
+   * Calls the GoMeddo APIs to construct the requested blueprint-based timeslot records.
+   *
+   * @returns A BlueprintTimeslotsResult object containing the requested timeslot records for the given blueprint.
+   */
+  public async getResults (): Promise<BlueprintTimeslotsResult> {
+    const blueprintTimeslots = await this.getBlueprintTimeslots()
+    const blueprintTimeslotResults = new BlueprintTimeslotsResult(blueprintTimeslots)
+
+    return blueprintTimeslotResults
+  }
+
+  private async getBlueprintTimeslots (): Promise<ReservationCollectionTimeSlot[]> {
+    return await this.api.getBlueprintTimeslots(this.blueprintName, this.duration, this.interval, this.timeslotRange, this.mdaRange, this.prototype)
+  }
+
+  public setTimeslotRange (startDate: Date, durationDays: number, offsetDays: number): this {
+    const timeslotRange = new DateRange()
+    timeslotRange.setStartDate(startDate)
+    timeslotRange.setDurationDays(durationDays)
+    timeslotRange.setOffsetDays(offsetDays)
+
+    this.timeslotRange = timeslotRange
+    return this
+  }
+
+  public setMDARange (startDate: Date, durationDays: number, offsetDays: number): this {
+    const mdaRange = new DateRange()
+    mdaRange.setStartDate(startDate)
+    mdaRange.setDurationDays(durationDays)
+    mdaRange.setOffsetDays(offsetDays)
+
+    this.mdaRange = mdaRange
+    return this
+  }
+
+  public setBlueprintName (blueprintName: string): this {
+    this.blueprintName = blueprintName
+    return this
+  }
+
+  public setDuration (duration: number): this {
+    this.duration = duration
+    return this
+  }
+
+  public setInterval (interval: number): this {
+    this.interval = interval
+    return this
+  }
+
+  public setPrototype (prototype: SFReservation): this {
+    this.prototype = prototype
+    return this
+  }
+}
