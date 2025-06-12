@@ -9,6 +9,7 @@ export default class BlueprintFieldOptionsRequest {
   protected readonly fieldIdentifier: string
   protected standardFields: Set<string>
   protected readonly additionalFields: Set<string> = new Set()
+  protected prototype: SFReservation
 
   constructor (api: GoMeddoAPI, blueprintIdentifier: string, fieldIdentifier: string) {
     this.api = api
@@ -17,6 +18,7 @@ export default class BlueprintFieldOptionsRequest {
     this.standardFields = new Set([
       'Id', 'Name'
     ])
+    this.prototype = { Id: '', Name: '' }
   }
 
   /**
@@ -53,9 +55,12 @@ export default class BlueprintFieldOptionsRequest {
   }
 
   private async getStartingBlueprintRecordScope (): Promise<CustomSFSObject[]> {
-    // Temp so this can be committed
-    const temp: SFReservation = { Id: '', Name: '' }
-    return await this.api.getBlueprintFieldOptions(this.blueprintIdentifier, this.fieldIdentifier, temp, this.getRequestedFields())
+    return await this.api.getBlueprintFieldOptions(this.blueprintIdentifier, this.fieldIdentifier, this.prototype, this.getRequestedFields())
+  }
+
+  public setFieldOnPrototype<T extends keyof SFReservation> (fieldName: T, fieldValue: SFReservation[T]): this {
+    this.prototype[fieldName] = fieldValue
+    return this
   }
 
   protected getRequestedFields (): Set<string> {
