@@ -4,7 +4,7 @@
 export default class DateRange {
   public startDate: Date
   public durationDays: number
-  public offsetDays: number
+  public offsetDays?: number
 
   constructor (startDate: Date = new Date(), durationDays: number = 7, offsetDays: number = 0) {
     this.startDate = startDate

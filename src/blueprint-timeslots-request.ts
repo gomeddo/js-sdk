@@ -31,22 +31,12 @@ export default class BlueprintTimeslotsRequest {
   }
 
   public setTimeslotRange (startDate: Date, durationDays: number, offsetDays: number): this {
-    const timeslotRange = new DateRange()
-    timeslotRange.setStartDate(startDate)
-    timeslotRange.setDurationDays(durationDays)
-    timeslotRange.setOffsetDays(offsetDays)
-
-    this.timeslotRange = timeslotRange
+    this.timeslotRange = new DateRange(startDate, durationDays, offsetDays)
     return this
   }
 
   public setMDARange (startDate: Date, durationDays: number, offsetDays: number): this {
-    const mdaRange = new DateRange()
-    mdaRange.setStartDate(startDate)
-    mdaRange.setDurationDays(durationDays)
-    mdaRange.setOffsetDays(offsetDays)
-
-    this.mdaRange = mdaRange
+    this.mdaRange = new DateRange(startDate, durationDays, offsetDays)
     return this
   }
 
