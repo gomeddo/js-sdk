@@ -192,7 +192,7 @@ export default class GoMeddoAPI {
     return await response.json()
   }
 
-  public async getBlueprintFieldOptions (blueprintIdentifier: string, fieldIdentifier: string, reservation: SFReservation, fields: Set<string>): Promise<CustomSFSObject[]> {
+  public async getBlueprintFieldOptions (blueprintIdentifier: string, fieldIdentifier: string, reservation: Partial<SFReservation>, fields: Set<string>): Promise<CustomSFSObject[]> {
     const url = new URL(`B25/v1/blueprints/${blueprintIdentifier}/fields/${fieldIdentifier}/options`, this.baseUrl)
     this.addFieldsToUrl(url, fields)
     const blueprintFieldOptionsBody = new BlueprintFieldOptionsBody(reservation)

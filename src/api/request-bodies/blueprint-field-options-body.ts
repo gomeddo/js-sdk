@@ -1,9 +1,9 @@
 import { SFReservation } from '../../s-objects/reservation'
 
 export default class BlueprintFieldOptionsBody {
-  private readonly prototype: SFReservation
+  private readonly prototype: Partial<SFReservation>
 
-  constructor (prototype: SFReservation) {
+  constructor (prototype: Partial<SFReservation>) {
     this.prototype = prototype
   }
 }

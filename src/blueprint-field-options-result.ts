@@ -30,8 +30,8 @@ export default class BlueprintFieldOptionsResult {
   }
 
   /**
-   * @param idOrName the Id or the Name of the blueprint record to retrieve.
-   * @returns The matching blueprint record. Or undefined if not found.
+   * @param idOrName the Id or the Name of the record to retrieve.
+   * @returns The matching record. Or undefined if not found.
    */
   public getRecord (id: string): SObject | undefined {
     return this.objectById.get(id)
