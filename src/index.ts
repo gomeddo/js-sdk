@@ -21,6 +21,7 @@ import { Condition, AndCondition, OrCondition, Operator } from './filters/condit
 import DimensionRecordRequest from './dimension-record-request'
 import TimeSlotConfiguration from './utils/time-slot-configuration'
 import BlueprintRecordRequest from './blueprint-record-request'
+import BlueprintFieldOptionsRequest from './blueprint-field-options-request'
 import BlueprintTimeslotsRequest from './blueprint-timeslots-request'
 
 enum Environment {
@@ -101,6 +102,17 @@ class GoMeddo {
    */
   public buildBlueprintRecordRequest (): BlueprintRecordRequest {
     return new BlueprintRecordRequest(this.api)
+  }
+
+  /**
+   * Creates a new request for blueprint field options.
+   *
+   * @param blueprintIdentifier The name or id of the blueprint to make this request for.
+   * @param fieldIdentifier The id or field api name of the field to set to make this request for.
+   * @returns new BlueprintFieldOptions request using the authentication from this GoMeddo instance
+   */
+  public buildBlueprintFieldOptionsRequest (blueprintIdentifier: string, fieldIdentifier: string): BlueprintFieldOptionsRequest {
+    return new BlueprintFieldOptionsRequest(this.api, blueprintIdentifier, fieldIdentifier)
   }
 
   /**

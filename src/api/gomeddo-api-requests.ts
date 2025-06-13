@@ -16,6 +16,7 @@ import { CustomSFSObject } from '../s-objects/s-object'
 import { SFResource } from '../s-objects/resource'
 import TimeSlotRequestBody from './request-bodies/timeslots-request-body'
 import { ReservationTimeSlot } from '../time-slots/reservation-time-slot'
+import BlueprintFieldOptionsBody from './request-bodies/blueprint-field-options-body'
 import BlueprintTimeslotGenerationBody from './request-bodies/blueprint-timeslot-generation-body'
 import DateRange from '../date-range'
 import { ReservationCollectionTimeSlot } from '../time-slots/reservation-collection-time-slot'
@@ -207,6 +208,19 @@ export default class GoMeddoAPI {
     const response = await fetch(url.href, {
       method: 'POST',
       body: JSON.stringify(blueprintSearchBody),
+      headers: this.getHeaders()
+    })
+    await this.checkResponse(response)
+    return await response.json()
+  }
+
+  public async getBlueprintFieldOptions (blueprintIdentifier: string, fieldIdentifier: string, reservation: Partial<SFReservation>, fields: Set<string>): Promise<CustomSFSObject[]> {
+    const url = new URL(`B25/v1/blueprints/${blueprintIdentifier}/fields/${fieldIdentifier}/options`, this.baseUrl)
+    this.addFieldsToUrl(url, fields)
+    const blueprintFieldOptionsBody = new BlueprintFieldOptionsBody(reservation)
+    const response = await fetch(url.href, {
+      method: 'POST',
+      body: JSON.stringify(blueprintFieldOptionsBody),
       headers: this.getHeaders()
     })
     await this.checkResponse(response)
