@@ -22,6 +22,7 @@ import DimensionRecordRequest from './dimension-record-request'
 import TimeSlotConfiguration from './utils/time-slot-configuration'
 import BlueprintRecordRequest from './blueprint-record-request'
 import BlueprintFieldOptionsRequest from './blueprint-field-options-request'
+import BlueprintTimeslotsRequest from './blueprint-timeslots-request'
 
 enum Environment {
   DEVELOP,
@@ -112,6 +113,16 @@ class GoMeddo {
    */
   public buildBlueprintFieldOptionsRequest (blueprintIdentifier: string, fieldIdentifier: string): BlueprintFieldOptionsRequest {
     return new BlueprintFieldOptionsRequest(this.api, blueprintIdentifier, fieldIdentifier)
+  }
+
+  /**
+   * Creates a new request to fetch BlueprintTimeslots based on a given blueprint.
+   * The request can then be specified using methods on the BlueprintTimeSlots request.
+   *
+   * @returns new BlueprintTimeslotsRequest request using the authentication from this GoMeddo instance
+   */
+  public buildBlueprintTimeSlotsRequest (): BlueprintTimeslotsRequest {
+    return new BlueprintTimeslotsRequest(this.api)
   }
 
   /**
