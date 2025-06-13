@@ -1,4 +1,5 @@
 import GoMeddoAPI from './api/gomeddo-api-requests'
+import BlueprintTimeslotsResult from './blueprint-timeslots-result'
 import DateRange from './date-range'
 
 import { SFReservation } from './s-objects/reservation'
@@ -22,8 +23,9 @@ export default class BlueprintTimeslotsRequest {
    *
    * @returns A list of ReservationCollectionTimeSlot objects containing the requested timeslot records for the given blueprint.
    */
-  public async getResults (): Promise<ReservationCollectionTimeSlot[]> {
-    return await this.getBlueprintTimeslots()
+  public async getResults (): Promise<BlueprintTimeslotsResult> {
+    const blueprintTimeslots = await this.getBlueprintTimeslots()
+    return new BlueprintTimeslotsResult(blueprintTimeslots)
   }
 
   private async getBlueprintTimeslots (): Promise<ReservationCollectionTimeSlot[]> {
