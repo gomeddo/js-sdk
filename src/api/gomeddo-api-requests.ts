@@ -16,6 +16,9 @@ import { CustomSFSObject } from '../s-objects/s-object'
 import { SFResource } from '../s-objects/resource'
 import TimeSlotRequestBody from './request-bodies/timeslots-request-body'
 import { ReservationTimeSlot } from '../time-slots/reservation-time-slot'
+import BlueprintTimeslotGenerationBody from './request-bodies/blueprint-timeslot-generation-body'
+import DateRange from '../date-range'
+import { ReservationCollectionTimeSlot } from '../time-slots/reservation-collection-time-slot'
 
 export default class GoMeddoAPI {
   private readonly baseUrl: string
@@ -175,6 +178,25 @@ export default class GoMeddoAPI {
 
     return data.timeSlots.map((slot: any) => {
       return new ReservationTimeSlot(new Date(slot.startDatetime), new Date(slot.endDatetime), slot.reservations, requestBody)
+    })
+  }
+
+  public async getBlueprintTimeslots (blueprintName: string, duration: number, interval: number, timeslotRange: DateRange, mdaRange: DateRange, prototype: Partial<SFReservation>): Promise<ReservationCollectionTimeSlot[]> {
+    const url = new URL('B25/v1/blueprints/timeSlots', this.baseUrl)
+    const blueprintTimeslotGenerationBody = new BlueprintTimeslotGenerationBody(blueprintName, duration, interval, timeslotRange, mdaRange, prototype)
+    const response = await fetch(url.href, {
+      method: 'POST',
+      body: JSON.stringify(blueprintTimeslotGenerationBody),
+      headers: this.getHeaders()
+    })
+    await this.checkResponse(response)
+    const data = await response.json()
+    if (data.timeSlots === undefined) {
+      return []
+    }
+
+    return data.timeSlots.map((slot: any) => {
+      return new ReservationCollectionTimeSlot(slot.startDatetime, slot.endDatetime, slot.reservationCollections, slot.firstCollection)
     })
   }
 

@@ -21,6 +21,7 @@ import { Condition, AndCondition, OrCondition, Operator } from './filters/condit
 import DimensionRecordRequest from './dimension-record-request'
 import TimeSlotConfiguration from './utils/time-slot-configuration'
 import BlueprintRecordRequest from './blueprint-record-request'
+import BlueprintTimeslotsRequest from './blueprint-timeslots-request'
 
 enum Environment {
   DEVELOP,
@@ -100,6 +101,16 @@ class GoMeddo {
    */
   public buildBlueprintRecordRequest (): BlueprintRecordRequest {
     return new BlueprintRecordRequest(this.api)
+  }
+
+  /**
+   * Creates a new request to fetch BlueprintTimeslots based on a given blueprint.
+   * The request can then be specified using methods on the BlueprintTimeSlots request.
+   *
+   * @returns new BlueprintTimeslotsRequest request using the authentication from this GoMeddo instance
+   */
+  public buildBlueprintTimeSlotsRequest (): BlueprintTimeslotsRequest {
+    return new BlueprintTimeslotsRequest(this.api)
   }
 
   /**
