@@ -35,7 +35,7 @@ export default class BlueprintFieldOptionsRequest {
   /**
    * Request additional fields to be returned for the records
    *
-   * @param fieldName The api names of the fields to request
+   * @param fieldNames The api names of the fields to request
    * @returns The updated blueprint field options request.
    */
   public includeAdditionalFields (fieldNames: Set<string> | string[]): this {
@@ -50,8 +50,7 @@ export default class BlueprintFieldOptionsRequest {
    */
   public async getResults (): Promise<BlueprintFieldOptionsResult> {
     const sObjectOptions = await this.getStartingBlueprintRecordScope()
-    const blueprintRecordResult = new BlueprintFieldOptionsResult(sObjectOptions)
-    return blueprintRecordResult
+    return new BlueprintFieldOptionsResult(sObjectOptions)
   }
 
   private async getStartingBlueprintRecordScope (): Promise<CustomSFSObject[]> {
