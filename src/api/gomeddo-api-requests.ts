@@ -6,6 +6,7 @@ import DimensionSearchBody from './request-bodies/dimension-search-body'
 import BlueprintSearchBody from './request-bodies/blueprint-search-body'
 import ReservationPriceCalculationRequest from './request-bodies/reservation-price-calculation-request'
 import { ReservationProcessRequest } from './request-bodies/reservation-save-request'
+import { FrontendBuilderReservationProcessRequest } from './request-bodies/frontend-builder-save-request'
 import ServiceTimeSlotRequest from './request-bodies/service-availability-request'
 import ServiceTimeSlotResponse from './service-availability-response'
 import ReservationSearchBody from './request-bodies/reservation-search-body'
@@ -82,7 +83,28 @@ export default class GoMeddoAPI {
     return await response.json()
   }
 
+  public async saveFrontendBuilderReservation (saveRequest: FrontendBuilderReservationProcessRequest): Promise<object> {
+    const url = new URL('GMFB/v1/reservations', this.baseUrl)
+    const response = await fetch(url.href, {
+      method: 'POST',
+      body: JSON.stringify(saveRequest),
+      headers: this.getHeaders()
+    })
+    await this.checkResponse(response)
+    return await response.json()
+  }
+
   public async updateReservationCollection (reservationCollections: ReservationProcessRequest[]): Promise<void> {
+    const url = new URL('B25LP/v1/reservations', this.baseUrl)
+    const response = await fetch(url.href, {
+      method: 'PATCH',
+      body: JSON.stringify(reservationCollections),
+      headers: this.getHeaders()
+    })
+    await this.checkResponse(response)
+  }
+
+  public async updateFrontendBuilderReservationCollection (reservationCollections: FrontendBuilderReservationProcessRequest[]): Promise<void> {
     const url = new URL('B25LP/v1/reservations', this.baseUrl)
     const response = await fetch(url.href, {
       method: 'PATCH',
