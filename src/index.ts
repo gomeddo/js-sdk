@@ -181,6 +181,56 @@ class GoMeddo {
   }
 
   /**
+   * Saves a reservation object to salesforce. With the contact added to it.
+   * Behaviour and allowed operations can be changed through settings on the salesforce org.
+   *
+   * @param reservation The reservation object to save
+   * @returns The saved reservation object with any new values populated by the save in salesforce.
+   */
+  public async saveFrontendBuilderReservation (reservation: Reservation): Promise<Reservation> {
+    const result = await this.api.saveFrontendBuilderReservation(reservation.getFrontendBuilderReservationProcessRequest()) as any
+    const outputReservation = new Reservation()
+    outputReservation.id = result.reservation.Id
+    outputReservation.setStartDatetime(new Date(result.reservation.B25__Start__c))
+    outputReservation.setEndDatetime(new Date(result.reservation.B25__End__c))
+    const resource = reservation.getResource()
+    if (resource !== null) {
+      outputReservation.setResource(resource)
+    }
+    Object.entries(result.reservation).forEach(([fieldName, fieldValue]) => {
+      outputReservation.setCustomProperty(fieldName, fieldValue)
+    })
+    if (result.contact !== null) {
+      const contact = new Contact('', '', '') // Note these values are custom properties and will be overriden
+      Object.entries(result.contact).forEach(([fieldName, fieldValue]) => {
+        contact.setCustomProperty(fieldName, fieldValue)
+      })
+      outputReservation.setContact(contact)
+    }
+
+    return outputReservation
+  }
+
+  /**
+   * Updates a reservation including related sObjects.
+   *
+   * @param reservation The reservation to update
+   */
+  public async updateFrontendBuilderReservation (reservation: Reservation): Promise<void> {
+    await this.updateFrontendBuilderReservations([reservation])
+  }
+
+  /**
+   * Updates a list of reservations including related sObjects.
+   *
+   * @param reservations The reservations to update
+   */
+  public async updateFrontendBuilderReservations (reservations: Reservation[]): Promise<void> {
+    const reservationCollections = reservations.map(reservation => reservation.getFrontendBuilderReservationProcessRequest())
+    await this.api.updateFrontendBuilderReservationCollection(reservationCollections)
+  }
+
+  /**
    * Updates a reservation including related sObjects.
    * Will not create contacts or leads only junction records and service reservatios.
    *

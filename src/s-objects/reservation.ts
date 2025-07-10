@@ -1,6 +1,7 @@
 import ReservationCollection from '../api/request-bodies/reservation-collection'
 import ReservationPriceCalculationRequest from '../api/request-bodies/reservation-price-calculation-request'
 import { ReservationProcessRequest } from '../api/request-bodies/reservation-save-request'
+import { FrontendBuilderReservationProcessRequest } from '../api/request-bodies/frontend-builder-save-request'
 import { isSalesforceId } from '../utils/salesforce-utils'
 import Contact from './contact'
 import Lead from './lead'
@@ -18,6 +19,7 @@ export default class Reservation extends SObject {
   public serviceReservations: ServiceReservation[] = []
   public relatedRecords: Map<string, Array<Partial<CustomSFSObject>>> = new Map()
   public removedRelatedRecords: Map<string, Array<Partial<CustomSFSObject>>> = new Map()
+  public frontendBuilderDeveloperName: string | null = null
 
   /**
    * Attatch this reservation to the given resource.
@@ -187,6 +189,19 @@ export default class Reservation extends SObject {
 
   /**
    * @internal
+   * @returns Save request data for this reservation for the frontend builder path
+   */
+  public getFrontendBuilderReservationProcessRequest (): FrontendBuilderReservationProcessRequest {
+    return new FrontendBuilderReservationProcessRequest(
+      this.getSFSObject(),
+      this.getContact(),
+      this.getFrontendBuilderDeveloperName(),
+      this.getRelatedRecordsRestData()
+    )
+  }
+
+  /**
+   * @internal
    * @returns Reservation Collection for this reservation
    */
   public getReservationCollection (): ReservationCollection {
@@ -263,6 +278,14 @@ export default class Reservation extends SObject {
    */
   private getServiceReservationRestData (): Array<Partial<SFServiceReservation>> {
     return this.serviceReservations.map(serviceReservation => serviceReservation.getSFSObject())
+  }
+
+  /**
+   * @internal
+   * @returns The Salesforce Developer Name of the frontend builder configuration being used
+   */
+  private getFrontendBuilderDeveloperName (): string | null {
+    return this.frontendBuilderDeveloperName
   }
 
   /**
