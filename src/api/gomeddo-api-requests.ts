@@ -104,16 +104,6 @@ export default class GoMeddoAPI {
     await this.checkResponse(response)
   }
 
-  public async updateFrontendBuilderReservationCollection (reservationCollections: FrontendBuilderReservationProcessRequest[]): Promise<void> {
-    const url = new URL('B25LP/v1/reservations', this.baseUrl)
-    const response = await fetch(url.href, {
-      method: 'PATCH',
-      body: JSON.stringify(reservationCollections),
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
-  }
-
   public async deleteReservationCollection (reservationCollections: ReservationCollection[]): Promise<void> {
     const url = new URL('B25/v1/reservation-collection', this.baseUrl)
     const response = await fetch(url.href, {

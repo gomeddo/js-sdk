@@ -213,25 +213,6 @@ class GoMeddo {
 
   /**
    * Updates a reservation including related sObjects.
-   *
-   * @param reservation The reservation to update
-   */
-  public async updateFrontendBuilderReservation (reservation: Reservation): Promise<void> {
-    await this.updateFrontendBuilderReservations([reservation])
-  }
-
-  /**
-   * Updates a list of reservations including related sObjects.
-   *
-   * @param reservations The reservations to update
-   */
-  public async updateFrontendBuilderReservations (reservations: Reservation[]): Promise<void> {
-    const reservationCollections = reservations.map(reservation => reservation.getFrontendBuilderReservationProcessRequest())
-    await this.api.updateFrontendBuilderReservationCollection(reservationCollections)
-  }
-
-  /**
-   * Updates a reservation including related sObjects.
    * Will not create contacts or leads only junction records and service reservatios.
    *
    * @param reservation The reservation to update
