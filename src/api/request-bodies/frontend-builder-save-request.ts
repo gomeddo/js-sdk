@@ -12,12 +12,17 @@ class FrontendBuilderReservationProcessRequest extends ReservationProcessRequest
   ) {
     super(
       reservation,
-      null, // lead removed
+      null,
       contact,
-      [], // no service reservations
-      relatedRecords ?? {},
-      {} // no records to delete
+      undefined,
+      relatedRecords ?? undefined,
+      undefined
     )
+
+    // Override to remove properties from instance
+    delete this.serviceReservations
+    delete this.relatedRecordsToDelete
+
     this.frontendBuilderDeveloperName = frontendBuilderDeveloperName
   }
 }

@@ -7,17 +7,17 @@ class ReservationProcessRequest {
   reservation: Partial<SFReservation>
   lead: Partial<StandardSFSObject> | null
   contact: Partial<StandardSFSObject> | null
-  serviceReservations: Array<Partial<SFServiceReservation>>
+  serviceReservations?: Array<Partial<SFServiceReservation>>
   relatedRecords: Record<string, Array<Partial<CustomSFSObject>>>
-  relatedRecordsToDelete: Record<string, Array<Partial<CustomSFSObject>>>
+  relatedRecordsToDelete?: Record<string, Array<Partial<CustomSFSObject>>>
 
-  constructor (reservation: Partial<SFReservation>, lead: Partial<StandardSFSObject> | null, contact: Partial<StandardSFSObject> | null, serviceReservations: Array<Partial<SFServiceReservation>>, relatedRecords?: Record<string, Array<Partial<CustomSFSObject>>>, relatedRecordsToDelete?: Record<string, Array<Partial<CustomSFSObject>>>) {
+  constructor (reservation: Partial<SFReservation>, lead: Partial<StandardSFSObject> | null, contact: Partial<StandardSFSObject> | null, serviceReservations?: Array<Partial<SFServiceReservation>>, relatedRecords?: Record<string, Array<Partial<CustomSFSObject>>>, relatedRecordsToDelete?: Record<string, Array<Partial<CustomSFSObject>>>) {
     this.reservation = reservation
     this.lead = lead
     this.contact = contact
     this.serviceReservations = serviceReservations
     this.relatedRecords = relatedRecords ?? {}
-    this.relatedRecordsToDelete = relatedRecordsToDelete ?? {}
+    this.relatedRecordsToDelete = relatedRecordsToDelete
   }
 }
 
