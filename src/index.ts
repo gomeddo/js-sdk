@@ -145,7 +145,7 @@ class GoMeddo {
    * @returns new FrontendBuilderSaveRequest request using the authentication from this GoMeddo instance
    */
   private buildFrontendBuilderSaveRequest (reservationProcessRequest: ReservationProcessRequest, frontendBuilderDetails: FrontendBuilderDetails): FrontendBuilderSaveRequest {
-    return new FrontendBuilderSaveRequest(this.api, reservationProcessRequest, frontendBuilderDetails)
+    return new FrontendBuilderSaveRequest(reservationProcessRequest, frontendBuilderDetails)
   }
 
   /**
