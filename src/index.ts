@@ -232,6 +232,9 @@ class GoMeddo {
       })
       outputReservation.setContact(contact)
     }
+    if (result.paymentUrl !== null) {
+      outputReservation.setPaymentUrl(result.paymentUrl)
+    }
 
     return outputReservation
   }
