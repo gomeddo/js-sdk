@@ -6,7 +6,6 @@ import DimensionSearchBody from './request-bodies/dimension-search-body'
 import BlueprintSearchBody from './request-bodies/blueprint-search-body'
 import ReservationPriceCalculationRequest from './request-bodies/reservation-price-calculation-request'
 import { ReservationProcessRequest } from './request-bodies/reservation-save-request'
-import { FrontendBuilderReservationProcessRequest } from './request-bodies/frontend-builder-save-request'
 import ServiceTimeSlotRequest from './request-bodies/service-availability-request'
 import ServiceTimeSlotResponse from './service-availability-response'
 import ReservationSearchBody from './request-bodies/reservation-search-body'
@@ -21,6 +20,7 @@ import BlueprintFieldOptionsBody from './request-bodies/blueprint-field-options-
 import BlueprintTimeslotGenerationBody from './request-bodies/blueprint-timeslot-generation-body'
 import DateRange from '../date-range'
 import { ReservationCollectionTimeSlot } from '../time-slots/reservation-collection-time-slot'
+import { FrontendBuilderSaveRequest } from './request-bodies/frontend-builder-save-request'
 
 export default class GoMeddoAPI {
   private readonly baseUrl: string
@@ -83,7 +83,7 @@ export default class GoMeddoAPI {
     return await response.json()
   }
 
-  public async saveFrontendBuilderReservation (saveRequest: FrontendBuilderReservationProcessRequest): Promise<object> {
+  public async saveFrontendBuilderReservation (saveRequest: FrontendBuilderSaveRequest): Promise<object> {
     const url = new URL('GMFB/v1/reservations', this.baseUrl)
     const response = await fetch(url.href, {
       method: 'POST',

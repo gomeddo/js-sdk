@@ -5,7 +5,7 @@ import { SFServiceReservation } from '../../s-objects/service-reservation'
 // Property names have to be exact to the endpoint
 class ReservationProcessRequest {
   reservation: Partial<SFReservation>
-  lead: Partial<StandardSFSObject> | null
+  lead?: Partial<StandardSFSObject> | null
   contact: Partial<StandardSFSObject> | null
   serviceReservations?: Array<Partial<SFServiceReservation>>
   relatedRecords: Record<string, Array<Partial<CustomSFSObject>>>

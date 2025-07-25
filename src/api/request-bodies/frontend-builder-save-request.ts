@@ -1,30 +1,38 @@
-import { SFReservation } from '../../s-objects/reservation'
-import { StandardSFSObject, CustomSFSObject } from '../../s-objects/s-object'
+import FrontendBuilderDetails from '../../frontend-builder-details'
+import GoMeddoAPI from '../gomeddo-api-requests'
 import { ReservationProcessRequest } from './reservation-save-request'
 
-class FrontendBuilderReservationProcessRequest extends ReservationProcessRequest {
-  frontendBuilderDeveloperName: string | null
+class FrontendBuilderSaveRequest extends ReservationProcessRequest {
+  protected readonly api: GoMeddoAPI
+  frontendBuilderDeveloperName: string
+  blueprintDeveloperName: string
+  shopperLocale: string | null
+  countryCode: string | null
+
   constructor (
-    reservation: Partial<SFReservation>,
-    contact: Partial<StandardSFSObject> | null,
-    frontendBuilderDeveloperName: string | null,
-    relatedRecords?: Record<string, Array<Partial<CustomSFSObject>>>
+    api: GoMeddoAPI,
+    reservationProcessRequest: ReservationProcessRequest,
+    frontendBuilderDetails: FrontendBuilderDetails
   ) {
     super(
-      reservation,
+      reservationProcessRequest.reservation,
       null,
-      contact,
+      reservationProcessRequest.contact,
       undefined,
-      relatedRecords ?? undefined,
+      reservationProcessRequest.relatedRecords ?? undefined,
       undefined
     )
+    this.api = api
+    this.frontendBuilderDeveloperName = frontendBuilderDetails.getFrontendBuilderDeveloperName()
+    this.blueprintDeveloperName = frontendBuilderDetails.getBlueprintDeveloperName()
+    this.shopperLocale = frontendBuilderDetails.getShopperLocale()
+    this.countryCode = frontendBuilderDetails.getCountryCode()
 
     // Override to remove properties from instance
     delete this.serviceReservations
     delete this.relatedRecordsToDelete
-
-    this.frontendBuilderDeveloperName = frontendBuilderDeveloperName
+    delete this.lead
   }
 }
 
-export { FrontendBuilderReservationProcessRequest }
+export { FrontendBuilderSaveRequest }

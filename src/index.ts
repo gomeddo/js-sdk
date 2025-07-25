@@ -23,6 +23,9 @@ import TimeSlotConfiguration from './utils/time-slot-configuration'
 import BlueprintRecordRequest from './blueprint-record-request'
 import BlueprintFieldOptionsRequest from './blueprint-field-options-request'
 import BlueprintTimeslotsRequest from './blueprint-timeslots-request'
+import FrontendBuilderDetails from './frontend-builder-details'
+import { FrontendBuilderSaveRequest } from './api/request-bodies/frontend-builder-save-request'
+import { ReservationProcessRequest } from './api/request-bodies/reservation-save-request'
 
 enum Environment {
   DEVELOP,
@@ -126,6 +129,26 @@ class GoMeddo {
   }
 
   /**
+   * Creates a new instance of the additional details required to save a frontend builder-based reservation.
+   *
+   * @returns new FrontendBuilderDetails request using the authentication from this GoMeddo instance
+   */
+  public buildFrontendBuilderDetails (): FrontendBuilderDetails {
+    return new FrontendBuilderDetails(this.api)
+  }
+
+  /**
+   * Creates a new request to save a frontend builder-based reservation.
+   *
+   * @param reservationProcessRequest The base reservation request
+   * @param frontendBuilderDetails The additional details required to save a frontend builder-based reservation
+   * @returns new FrontendBuilderSaveRequest request using the authentication from this GoMeddo instance
+   */
+  private buildFrontendBuilderSaveRequest (reservationProcessRequest: ReservationProcessRequest, frontendBuilderDetails: FrontendBuilderDetails): FrontendBuilderSaveRequest {
+    return new FrontendBuilderSaveRequest(this.api, reservationProcessRequest, frontendBuilderDetails)
+  }
+
+  /**
    * Saves a reservation object to salesforce. With the contact, lead, and service reservations added to it.
    * Behaviour and allowed opperations can be changed through settings on the salesforce org.
    *
@@ -185,10 +208,12 @@ class GoMeddo {
    * Behaviour and allowed operations can be changed through settings on the salesforce org.
    *
    * @param reservation The reservation object to save
+   * @param frontendBuilderDetails The frontend builder object details to include
    * @returns The saved reservation object with any new values populated by the save in salesforce.
    */
-  public async saveFrontendBuilderReservation (reservation: Reservation): Promise<Reservation> {
-    const result = await this.api.saveFrontendBuilderReservation(reservation.getFrontendBuilderReservationProcessRequest()) as any
+  public async saveFrontendBuilderReservation (reservation: Reservation, frontendBuilderDetails: FrontendBuilderDetails): Promise<Reservation> {
+    const saveRequest = this.buildFrontendBuilderSaveRequest(reservation.getReservationProcessRequest(), frontendBuilderDetails)
+    const result = await this.api.saveFrontendBuilderReservation(saveRequest) as any
     const outputReservation = new Reservation()
     outputReservation.id = result.reservation.Id
     outputReservation.setStartDatetime(new Date(result.reservation.B25__Start__c))
