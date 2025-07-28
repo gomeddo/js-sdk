@@ -20,6 +20,7 @@ import BlueprintFieldOptionsBody from './request-bodies/blueprint-field-options-
 import BlueprintTimeslotGenerationBody from './request-bodies/blueprint-timeslot-generation-body'
 import DateRange from '../date-range'
 import { ReservationCollectionTimeSlot } from '../time-slots/reservation-collection-time-slot'
+import { FrontendBuilderSaveRequest } from './request-bodies/frontend-builder-save-request'
 
 export default class GoMeddoAPI {
   private readonly baseUrl: string
@@ -73,6 +74,17 @@ export default class GoMeddoAPI {
 
   public async saveReservation (saveRequest: ReservationProcessRequest): Promise<object> {
     const url = new URL('B25LP/v1/reservations', this.baseUrl)
+    const response = await fetch(url.href, {
+      method: 'POST',
+      body: JSON.stringify(saveRequest),
+      headers: this.getHeaders()
+    })
+    await this.checkResponse(response)
+    return await response.json()
+  }
+
+  public async saveFrontendBuilderReservation (saveRequest: FrontendBuilderSaveRequest): Promise<object> {
+    const url = new URL('GMFB/v1/reservations', this.baseUrl)
     const response = await fetch(url.href, {
       method: 'POST',
       body: JSON.stringify(saveRequest),

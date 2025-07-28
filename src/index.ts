@@ -23,6 +23,9 @@ import TimeSlotConfiguration from './utils/time-slot-configuration'
 import BlueprintRecordRequest from './blueprint-record-request'
 import BlueprintFieldOptionsRequest from './blueprint-field-options-request'
 import BlueprintTimeslotsRequest from './blueprint-timeslots-request'
+import FrontendBuilderDetails from './frontend-builder-details'
+import { FrontendBuilderSaveRequest } from './api/request-bodies/frontend-builder-save-request'
+import { ReservationProcessRequest } from './api/request-bodies/reservation-save-request'
 
 enum Environment {
   DEVELOP,
@@ -126,6 +129,26 @@ class GoMeddo {
   }
 
   /**
+   * Creates a new instance of the additional details required to save a frontend builder-based reservation.
+   *
+   * @returns new FrontendBuilderDetails request using the authentication from this GoMeddo instance
+   */
+  public buildFrontendBuilderDetails (): FrontendBuilderDetails {
+    return new FrontendBuilderDetails(this.api)
+  }
+
+  /**
+   * Creates a new request to save a frontend builder-based reservation.
+   *
+   * @param reservationProcessRequest The base reservation request
+   * @param frontendBuilderDetails The additional details required to save a frontend builder-based reservation
+   * @returns new FrontendBuilderSaveRequest request using the authentication from this GoMeddo instance
+   */
+  private buildFrontendBuilderSaveRequest (reservationProcessRequest: ReservationProcessRequest, frontendBuilderDetails: FrontendBuilderDetails): FrontendBuilderSaveRequest {
+    return new FrontendBuilderSaveRequest(reservationProcessRequest, frontendBuilderDetails)
+  }
+
+  /**
    * Saves a reservation object to salesforce. With the contact, lead, and service reservations added to it.
    * Behaviour and allowed opperations can be changed through settings on the salesforce org.
    *
@@ -177,6 +200,42 @@ class GoMeddo {
       }).filter((serviceReservation: any) => serviceReservation !== null)
       outputReservation.serviceReservations = serviceReservations
     }
+    return outputReservation
+  }
+
+  /**
+   * Saves a reservation object to salesforce. With the contact added to it.
+   * Behaviour and allowed operations can be changed through settings on the salesforce org.
+   *
+   * @param reservation The reservation object to save
+   * @param frontendBuilderDetails The frontend builder object details to include
+   * @returns The saved reservation object with any new values populated by the save in salesforce.
+   */
+  public async saveFrontendBuilderReservation (reservation: Reservation, frontendBuilderDetails: FrontendBuilderDetails): Promise<Reservation> {
+    const saveRequest = this.buildFrontendBuilderSaveRequest(reservation.getReservationProcessRequest(), frontendBuilderDetails)
+    const result = await this.api.saveFrontendBuilderReservation(saveRequest) as any
+    const outputReservation = new Reservation()
+    outputReservation.id = result.reservation.Id
+    outputReservation.setStartDatetime(new Date(result.reservation.B25__Start__c))
+    outputReservation.setEndDatetime(new Date(result.reservation.B25__End__c))
+    const resource = reservation.getResource()
+    if (resource !== null) {
+      outputReservation.setResource(resource)
+    }
+    Object.entries(result.reservation).forEach(([fieldName, fieldValue]) => {
+      outputReservation.setCustomProperty(fieldName, fieldValue)
+    })
+    if (result.contact !== null) {
+      const contact = new Contact('', '', '') // Note these values are custom properties and will be overriden
+      Object.entries(result.contact).forEach(([fieldName, fieldValue]) => {
+        contact.setCustomProperty(fieldName, fieldValue)
+      })
+      outputReservation.setContact(contact)
+    }
+    if (result.paymentUrl !== null) {
+      outputReservation.setPaymentUrl(result.paymentUrl)
+    }
+
     return outputReservation
   }
 

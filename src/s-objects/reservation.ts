@@ -18,6 +18,7 @@ export default class Reservation extends SObject {
   public serviceReservations: ServiceReservation[] = []
   public relatedRecords: Map<string, Array<Partial<CustomSFSObject>>> = new Map()
   public removedRelatedRecords: Map<string, Array<Partial<CustomSFSObject>>> = new Map()
+  public paymentUrl: string | null = null
 
   /**
    * Attatch this reservation to the given resource.
@@ -96,6 +97,17 @@ export default class Reservation extends SObject {
    */
   public setLead (lead: Lead): Reservation {
     this.lead = lead
+    return this
+  }
+
+  /**
+   * Sets the related payment url for this reservation.
+   *
+   * @param paymentUrl The payment url to relate to the reservation
+   * @returns This reservation
+   */
+  public setPaymentUrl (paymentUrl: string): Reservation {
+    this.paymentUrl = paymentUrl
     return this
   }
 
