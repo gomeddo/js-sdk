@@ -38,7 +38,7 @@ enum Environment {
  * GoMeddo object allows for interaction with GoMeddo
  */
 class GoMeddo {
-  static version: string = '0.0.12'
+  static version: string = '0.0.13'
   private readonly environment: Environment
   private readonly api: GoMeddoAPI
 
