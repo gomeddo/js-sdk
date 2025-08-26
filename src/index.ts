@@ -317,6 +317,23 @@ class GoMeddo {
     reservation.setCustomProperty('B25__Total_Price__c', priceFieldValue ?? (subtotalValue + serviceCosts.serviceCosts))
     return reservation
   }
+
+  /**
+   * Sends the reservation object to salesforce to have the price calculations run.
+   * The calculated price is then populated on the reservation returned.
+   *
+   * @param reservation The reservation to calculate the price for.
+   * @returns The reservation with updated price fields.
+   */
+  public async calculatePriceFrontendBuilder (reservation: Reservation): Promise<Reservation> {
+    const updatedPriceCalculationData = await this.api.calculatePrice(reservation.getPriceCalculationData())
+    Object.entries(updatedPriceCalculationData.reservation).forEach(([fieldName, value]) => reservation.setCustomProperty(fieldName, value))
+    const priceFieldValue = reservation.getCustomProperty('B25__Price__c')
+    const subtotalValue = (reservation.getCustomProperty('B25__Subtotal__c') ?? 0) as number
+
+    reservation.setCustomProperty('B25__Total_Price__c', priceFieldValue ?? subtotalValue)
+    return reservation
+  }
 }
 export {
   Environment,
