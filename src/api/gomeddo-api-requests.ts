@@ -21,6 +21,7 @@ import BlueprintTimeslotGenerationBody from './request-bodies/blueprint-timeslot
 import DateRange from '../date-range'
 import { ReservationCollectionTimeSlot } from '../time-slots/reservation-collection-time-slot'
 import { FrontendBuilderSaveRequest } from './request-bodies/frontend-builder-save-request'
+import { FrontendBuilderCancelRequest } from './request-bodies/frontend-builder-cancel-request'
 
 export default class GoMeddoAPI {
   private readonly baseUrl: string
@@ -88,6 +89,17 @@ export default class GoMeddoAPI {
     const response = await fetch(url.href, {
       method: 'POST',
       body: JSON.stringify(saveRequest),
+      headers: this.getHeaders()
+    })
+    await this.checkResponse(response)
+    return await response.json()
+  }
+
+  public async cancelFrontendBuilderReservation (cancelRequest: FrontendBuilderCancelRequest): Promise<object> {
+    const url = new URL('GMFB/v1/cancel-reservations', this.baseUrl)
+    const response = await fetch(url.href, {
+      method: 'POST',
+      body: JSON.stringify(cancelRequest),
       headers: this.getHeaders()
     })
     await this.checkResponse(response)

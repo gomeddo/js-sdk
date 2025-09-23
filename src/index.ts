@@ -25,6 +25,7 @@ import BlueprintFieldOptionsRequest from './blueprint-field-options-request'
 import BlueprintTimeslotsRequest from './blueprint-timeslots-request'
 import FrontendBuilderDetails from './frontend-builder-details'
 import { FrontendBuilderSaveRequest } from './api/request-bodies/frontend-builder-save-request'
+import { FrontendBuilderCancelRequest } from './api/request-bodies/frontend-builder-cancel-request'
 import { ReservationProcessRequest } from './api/request-bodies/reservation-save-request'
 
 enum Environment {
@@ -149,6 +150,17 @@ class GoMeddo {
   }
 
   /**
+   * Creates a new request to cancel a frontend builder-based reservation.
+   *
+   * @param reservationCancellationId The uuid of the reservation to cancel
+   * @param frontendBuilderDetails The additional details required to cancel a frontend builder-based reservation
+   * @returns new FrontendBuilderCancelRequest request using the authentication from this GoMeddo instance
+   */
+  private buildFrontendBuilderCancelRequest (reservationCancellationId: string, frontendBuilderDetails: FrontendBuilderDetails): FrontendBuilderCancelRequest {
+    return new FrontendBuilderCancelRequest(reservationCancellationId, frontendBuilderDetails)
+  }
+
+  /**
    * Saves a reservation object to salesforce. With the contact, lead, and service reservations added to it.
    * Behaviour and allowed opperations can be changed through settings on the salesforce org.
    *
@@ -235,6 +247,30 @@ class GoMeddo {
     if (result.paymentUrl !== null) {
       outputReservation.setPaymentUrl(result.paymentUrl)
     }
+
+    return outputReservation
+  }
+
+  /**
+   * Updates a reservation objects to the cancelled status in Salesforce.
+   * Behaviour and allowed operations can be changed through settings on the salesforce org.
+   *
+   * @param reservationCancellationId The uuid of the reservation to cancel
+   * @param frontendBuilderDetails The frontend builder object details to include
+   * @returns The cancelled reservation object with any new values populated by the action in salesforce.
+   */
+  public async cancelFrontendBuilderReservation (reservationCancellationId: string, frontendBuilderDetails: FrontendBuilderDetails): Promise<Reservation> {
+    const cancelRequest = this.buildFrontendBuilderCancelRequest(reservationCancellationId, frontendBuilderDetails)
+    const result = await this.api.cancelFrontendBuilderReservation(cancelRequest) as any
+    const outputReservation = new Reservation()
+    outputReservation.id = result.reservation.Id
+    const resource = result.reservation.getResource()
+    if (resource !== null) {
+      outputReservation.setResource(resource)
+    }
+    Object.entries(result.reservation).forEach(([fieldName, fieldValue]) => {
+      outputReservation.setCustomProperty(fieldName, fieldValue)
+    })
 
     return outputReservation
   }
