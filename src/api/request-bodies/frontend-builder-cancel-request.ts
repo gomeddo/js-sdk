@@ -2,7 +2,6 @@ import FrontendBuilderDetails from '../../frontend-builder-details'
 
 class FrontendBuilderCancelRequest {
   frontendBuilderDeveloperName: string
-  blueprintDeveloperName: string
   reservationCancellationId: string
 
   constructor (
@@ -10,7 +9,6 @@ class FrontendBuilderCancelRequest {
     frontendBuilderDetails: FrontendBuilderDetails
   ) {
     this.frontendBuilderDeveloperName = frontendBuilderDetails.getFrontendBuilderDeveloperName()
-    this.blueprintDeveloperName = frontendBuilderDetails.getBlueprintDeveloperName()
     this.reservationCancellationId = reservationCancellationId
   }
 }
