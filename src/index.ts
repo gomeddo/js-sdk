@@ -261,18 +261,7 @@ class GoMeddo {
    */
   public async cancelFrontendBuilderReservation (reservationCancellationId: string, frontendBuilderDetails: FrontendBuilderDetails): Promise<Reservation> {
     const cancelRequest = this.buildFrontendBuilderCancelRequest(reservationCancellationId, frontendBuilderDetails)
-    const result = await this.api.cancelFrontendBuilderReservation(cancelRequest) as any
-    const outputReservation = new Reservation()
-    outputReservation.id = result.reservation.Id
-    const resource = result.reservation.getResource()
-    if (resource !== null) {
-      outputReservation.setResource(resource)
-    }
-    Object.entries(result.reservation).forEach(([fieldName, fieldValue]) => {
-      outputReservation.setCustomProperty(fieldName, fieldValue)
-    })
-
-    return outputReservation
+    return await this.api.cancelFrontendBuilderReservation(cancelRequest) as any
   }
 
   /**
