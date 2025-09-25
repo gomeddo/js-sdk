@@ -283,9 +283,15 @@ export default class Reservation extends SObject {
    */
   private getRelatedRecordsRestData (): Record<string, Array<Partial<CustomSFSObject>>> {
     return Object.fromEntries(
-      Object.entries(this.relatedRecords).map(([key, relatedRecordArray]) => [
+      Array.from(this.relatedRecords.entries()).map(([key, relatedRecordArray]) => [
         key,
-        (relatedRecordArray as SObject[]).map((relatedRecord: SObject) => relatedRecord.getSFSObject())
+        relatedRecordArray.map((rawRecord) => {
+          const relatedRecord = rawRecord instanceof SObject
+            ? rawRecord
+            : new SObject(rawRecord as CustomSFSObject)
+
+          return relatedRecord.getSFSObject(key)
+        })
       ])
     )
   }
@@ -296,9 +302,15 @@ export default class Reservation extends SObject {
    */
   private getRemovedRelatedRecordsRestData (): Record<string, Array<Partial<CustomSFSObject>>> {
     return Object.fromEntries(
-      Object.entries(this.removedRelatedRecords).map(([key, removedRelatedRecordArray]) => [
+      Array.from(this.removedRelatedRecords.entries()).map(([key, removedRelatedRecordArray]) => [
         key,
-        (removedRelatedRecordArray as SObject[]).map((removedRelatedRecord: SObject) => removedRelatedRecord.getSFSObject())
+        removedRelatedRecordArray.map((rawRecord) => {
+          const removedRelatedRecord = rawRecord instanceof SObject
+            ? rawRecord
+            : new SObject(rawRecord as CustomSFSObject)
+
+          return removedRelatedRecord.getSFSObject(key)
+        })
       ])
     )
   }
