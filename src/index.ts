@@ -252,7 +252,7 @@ class GoMeddo {
   }
 
   /**
-   * Updates a reservation objects to the cancelled status in Salesforce.
+   * Updates a reservation object to the cancelled status in Salesforce.
    * Behaviour and allowed operations can be changed through settings on the salesforce org.
    *
    * @param reservationCancellationId The uuid of the reservation to cancel
