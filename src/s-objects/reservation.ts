@@ -290,7 +290,7 @@ export default class Reservation extends SObject {
             ? rawRecord
             : new SObject(rawRecord as CustomSFSObject)
 
-          return relatedRecord.getSFSObject(key)
+          return relatedRecord.getSFSObject()
         })
       ])
     )
@@ -309,7 +309,7 @@ export default class Reservation extends SObject {
             ? rawRecord
             : new SObject(rawRecord as CustomSFSObject)
 
-          return removedRelatedRecord.getSFSObject(key)
+          return removedRelatedRecord.getSFSObject()
         })
       ])
     )
