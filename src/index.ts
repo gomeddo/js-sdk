@@ -27,6 +27,7 @@ import FrontendBuilderDetails from './frontend-builder-details'
 import { FrontendBuilderSaveRequest } from './api/request-bodies/frontend-builder-save-request'
 import { FrontendBuilderCancelRequest } from './api/request-bodies/frontend-builder-cancel-request'
 import { ReservationProcessRequest } from './api/request-bodies/reservation-save-request'
+import { FrontendBuilderParentReservationRequest } from './api/request-bodies/frontend-builder-parent-res-request'
 
 enum Environment {
   DEVELOP,
@@ -161,6 +162,16 @@ class GoMeddo {
   }
 
   /**
+   * Creates a new request to retrieve parent reservations that match the configuration specified in the frontend builder record specified in the details parameter.
+   *
+   * @param frontendBuilderDetails The additional details containing the related frontend builder record to use for querying parent reservations.
+   * @returns new FrontendBuilderParentReservationRequest request using the authentication from this GoMeddo instance
+   */
+  private buildFrontendBuilderParentReservationRequest (frontendBuilderDetails: FrontendBuilderDetails): FrontendBuilderParentReservationRequest {
+    return new FrontendBuilderParentReservationRequest(frontendBuilderDetails)
+  }
+
+  /**
    * Saves a reservation object to salesforce. With the contact, lead, and service reservations added to it.
    * Behaviour and allowed opperations can be changed through settings on the salesforce org.
    *
@@ -253,15 +264,27 @@ class GoMeddo {
 
   /**
    * Updates a reservation object to the cancelled status in Salesforce.
-   * Behaviour and allowed operations can be changed through settings on the salesforce org.
+   * Behaviour and allowed operations can be changed through settings on the Salesforce org.
    *
    * @param reservationCancellationId The uuid of the reservation to cancel
    * @param frontendBuilderDetails The frontend builder object details to include
-   * @returns The cancelled reservation object with any new values populated by the action in salesforce.
+   * @returns The cancelled reservation object with any new values populated by the action in Salesforce.
    */
   public async cancelFrontendBuilderReservation (reservationCancellationId: string, frontendBuilderDetails: FrontendBuilderDetails): Promise<Reservation> {
     const cancelRequest = this.buildFrontendBuilderCancelRequest(reservationCancellationId, frontendBuilderDetails)
     return await this.api.cancelFrontendBuilderReservation(cancelRequest) as any
+  }
+
+  /**
+   * Retrieve matching parent reservations based on the configuration of the supplied frontend builder record in Salesforce.
+   * Behaviour and allowed operations can be changed through settings on the Salesforce org.
+   *
+   * @param frontendBuilderDetails The frontend builder object details to include
+   * @returns A list of matching reservation objects with any new values populated by the action in Salesforce.
+   */
+  public async getParentReservations (frontendBuilderDetails: FrontendBuilderDetails): Promise<Reservation[]> {
+    const parentReservationRequest = this.buildFrontendBuilderParentReservationRequest(frontendBuilderDetails)
+    return await this.api.getParentReservations(parentReservationRequest) as any
   }
 
   /**
