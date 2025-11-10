@@ -284,7 +284,14 @@ class GoMeddo {
    */
   public async getParentReservations (frontendBuilderDetails: FrontendBuilderDetails): Promise<Reservation[]> {
     const parentReservationRequest = this.buildFrontendBuilderParentReservationRequest(frontendBuilderDetails)
-    return await this.api.getParentReservations(parentReservationRequest) as any
+    const matchingParentSFReservations = await this.api.getParentReservations(parentReservationRequest)
+
+    const parentReservations: Reservation[] = []
+    for (const res of matchingParentSFReservations) {
+      parentReservations.push(new Reservation(res))
+    }
+
+    return parentReservations
   }
 
   /**

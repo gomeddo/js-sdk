@@ -107,7 +107,7 @@ export default class GoMeddoAPI {
     return await response.json()
   }
 
-  public async getParentReservations (parentReservationRequest: FrontendBuilderParentReservationRequest): Promise<object> {
+  public async getParentReservations (parentReservationRequest: FrontendBuilderParentReservationRequest): Promise<SFReservation[]> {
     const url = new URL('GMFB/v1/parent-reservations', this.baseUrl)
     const response = await fetch(url.href, {
       method: 'POST',
