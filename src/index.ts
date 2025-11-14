@@ -24,10 +24,9 @@ import BlueprintRecordRequest from './blueprint-record-request'
 import BlueprintFieldOptionsRequest from './blueprint-field-options-request'
 import BlueprintTimeslotsRequest from './blueprint-timeslots-request'
 import FrontendBuilderDetails from './frontend-builder-details'
-import { FrontendBuilderSaveRequest } from './api/request-bodies/frontend-builder-save-request'
+import { FrontendBuilderSaveRequest as FrontendBuilderReservationProcessRequest } from './api/request-bodies/frontend-builder-save-request'
 import { FrontendBuilderCancelRequest } from './api/request-bodies/frontend-builder-cancel-request'
 import { ReservationProcessRequest } from './api/request-bodies/reservation-save-request'
-import { FrontendBuilderParentReservationRequest } from './api/request-bodies/frontend-builder-parent-res-request'
 
 enum Environment {
   DEVELOP,
@@ -140,14 +139,14 @@ class GoMeddo {
   }
 
   /**
-   * Creates a new request to save a frontend builder-based reservation.
+   * Creates a new request to process a frontend builder-based reservation, either saving a new reservation or retrieving parent reservations based on the provided info.
    *
    * @param reservationProcessRequest The base reservation request
-   * @param frontendBuilderDetails The additional details required to save a frontend builder-based reservation
-   * @returns new FrontendBuilderSaveRequest request using the authentication from this GoMeddo instance
+   * @param frontendBuilderDetails The additional details required to process a frontend builder-based reservation
+   * @returns new FrontendBuilderReservationProcessRequest request using the authentication from this GoMeddo instance
    */
-  private buildFrontendBuilderSaveRequest (reservationProcessRequest: ReservationProcessRequest, frontendBuilderDetails: FrontendBuilderDetails): FrontendBuilderSaveRequest {
-    return new FrontendBuilderSaveRequest(reservationProcessRequest, frontendBuilderDetails)
+  private buildFrontendBuilderReservationProcessRequest (reservationProcessRequest: ReservationProcessRequest, frontendBuilderDetails: FrontendBuilderDetails): FrontendBuilderReservationProcessRequest {
+    return new FrontendBuilderReservationProcessRequest(reservationProcessRequest, frontendBuilderDetails)
   }
 
   /**
@@ -159,16 +158,6 @@ class GoMeddo {
    */
   private buildFrontendBuilderCancelRequest (reservationCancellationId: string, frontendBuilderDetails: FrontendBuilderDetails): FrontendBuilderCancelRequest {
     return new FrontendBuilderCancelRequest(reservationCancellationId, frontendBuilderDetails)
-  }
-
-  /**
-   * Creates a new request to retrieve parent reservations that match the configuration specified in the frontend builder record specified in the details parameter.
-   *
-   * @param frontendBuilderDetails The additional details containing the related frontend builder record to use for querying parent reservations.
-   * @returns new FrontendBuilderParentReservationRequest request using the authentication from this GoMeddo instance
-   */
-  private buildFrontendBuilderParentReservationRequest (frontendBuilderDetails: FrontendBuilderDetails): FrontendBuilderParentReservationRequest {
-    return new FrontendBuilderParentReservationRequest(frontendBuilderDetails)
   }
 
   /**
@@ -235,7 +224,7 @@ class GoMeddo {
    * @returns The saved reservation object with any new values populated by the save in salesforce.
    */
   public async saveFrontendBuilderReservation (reservation: Reservation, frontendBuilderDetails: FrontendBuilderDetails): Promise<Reservation> {
-    const saveRequest = this.buildFrontendBuilderSaveRequest(reservation.getReservationProcessRequest(), frontendBuilderDetails)
+    const saveRequest = this.buildFrontendBuilderReservationProcessRequest(reservation.getReservationProcessRequest(), frontendBuilderDetails)
     const result = await this.api.saveFrontendBuilderReservation(saveRequest) as any
     const outputReservation = new Reservation()
     outputReservation.id = result.reservation.Id
@@ -279,11 +268,12 @@ class GoMeddo {
    * Retrieve matching parent reservations based on the configuration of the supplied frontend builder record in Salesforce.
    * Behaviour and allowed operations can be changed through settings on the Salesforce org.
    *
+   * @param reservation The reservation to use as the basis for finding parent reservations
    * @param frontendBuilderDetails The frontend builder object details to include
    * @returns A list of matching reservation objects with any new values populated by the action in Salesforce.
    */
-  public async getParentReservations (frontendBuilderDetails: FrontendBuilderDetails): Promise<Reservation[]> {
-    const parentReservationRequest = this.buildFrontendBuilderParentReservationRequest(frontendBuilderDetails)
+  public async getParentReservations (reservation: Reservation, frontendBuilderDetails: FrontendBuilderDetails): Promise<Reservation[]> {
+    const parentReservationRequest = this.buildFrontendBuilderReservationProcessRequest(reservation.getReservationProcessRequest(), frontendBuilderDetails)
     const matchingParentSFReservations = await this.api.getParentReservations(parentReservationRequest)
 
     const parentReservations: Reservation[] = []
