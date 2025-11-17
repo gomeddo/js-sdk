@@ -20,9 +20,8 @@ import BlueprintFieldOptionsBody from './request-bodies/blueprint-field-options-
 import BlueprintTimeslotGenerationBody from './request-bodies/blueprint-timeslot-generation-body'
 import DateRange from '../date-range'
 import { ReservationCollectionTimeSlot } from '../time-slots/reservation-collection-time-slot'
-import { FrontendBuilderSaveRequest } from './request-bodies/frontend-builder-save-request'
+import { FrontendBuilderSaveRequest as FrontendBuilderReservationProcessRequest } from './request-bodies/frontend-builder-save-request'
 import { FrontendBuilderCancelRequest } from './request-bodies/frontend-builder-cancel-request'
-import { FrontendBuilderParentReservationRequest } from './request-bodies/frontend-builder-parent-res-request'
 
 export default class GoMeddoAPI {
   private readonly baseUrl: string
@@ -85,7 +84,7 @@ export default class GoMeddoAPI {
     return await response.json()
   }
 
-  public async saveFrontendBuilderReservation (saveRequest: FrontendBuilderSaveRequest): Promise<object> {
+  public async saveFrontendBuilderReservation (saveRequest: FrontendBuilderReservationProcessRequest): Promise<object> {
     const url = new URL('GMFB/v1/reservations', this.baseUrl)
     const response = await fetch(url.href, {
       method: 'POST',
@@ -107,7 +106,7 @@ export default class GoMeddoAPI {
     return await response.json()
   }
 
-  public async getParentReservations (parentReservationRequest: FrontendBuilderParentReservationRequest): Promise<SFReservation[]> {
+  public async getParentReservations (parentReservationRequest: FrontendBuilderReservationProcessRequest): Promise<SFReservation[]> {
     const url = new URL('GMFB/v1/parent-reservations', this.baseUrl)
     const response = await fetch(url.href, {
       method: 'POST',
