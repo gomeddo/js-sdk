@@ -27,6 +27,7 @@ import FrontendBuilderDetails from './frontend-builder-details'
 import { FrontendBuilderSaveRequest as FrontendBuilderReservationProcessRequest } from './api/request-bodies/frontend-builder-save-request'
 import { FrontendBuilderCancelRequest } from './api/request-bodies/frontend-builder-cancel-request'
 import { ReservationProcessRequest } from './api/request-bodies/reservation-save-request'
+import { FrontendBuilderGenerateChildRequest } from './api/request-bodies/frontend-builder-generate-child-request'
 
 enum Environment {
   DEVELOP,
@@ -161,6 +162,17 @@ class GoMeddo {
   }
 
   /**
+   * Creates a new request to generate a frontend builder-based child reservation.
+   *
+   * @param parentReservationId The id of the parent reservation
+   * @param frontendBuilderDetails The frontend builder object details to include
+   * @returns new FrontendBuilderGenerateChildRequest request using the authentication from this GoMeddo instance
+   */
+  private buildFrontendBuilderGenerateChildRequest (parentReservationId: string, frontendBuilderDetails: FrontendBuilderDetails): FrontendBuilderGenerateChildRequest {
+    return new FrontendBuilderGenerateChildRequest(parentReservationId, frontendBuilderDetails)
+  }
+
+  /**
    * Saves a reservation object to salesforce. With the contact, lead, and service reservations added to it.
    * Behaviour and allowed opperations can be changed through settings on the salesforce org.
    *
@@ -262,6 +274,19 @@ class GoMeddo {
   public async cancelFrontendBuilderReservation (reservationCancellationId: string, frontendBuilderDetails: FrontendBuilderDetails): Promise<Reservation> {
     const cancelRequest = this.buildFrontendBuilderCancelRequest(reservationCancellationId, frontendBuilderDetails)
     return await this.api.cancelFrontendBuilderReservation(cancelRequest) as any
+  }
+
+  /**
+   * Generates conflict checked child reservations in Salesforce based on the parent and the frontend builder details.
+   * Behaviour and allowed operations can be changed through settings on the Salesforce org.
+   *
+   * @param parentReservationId The id of the parent reservation
+   * @param frontendBuilderDetails The frontend builder object details to include
+   * @returns The generated conflict checked child reservation object from Salesforce.
+   */
+  public async generateChildReservation (parentReservationId: string, frontendBuilderDetails: FrontendBuilderDetails): Promise<Reservation> {
+    const generateChildRequest = this.buildFrontendBuilderGenerateChildRequest(parentReservationId, frontendBuilderDetails)
+    return await this.api.generateChildReservation(generateChildRequest) as any
   }
 
   /**

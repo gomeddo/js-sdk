@@ -22,6 +22,7 @@ import DateRange from '../date-range'
 import { ReservationCollectionTimeSlot } from '../time-slots/reservation-collection-time-slot'
 import { FrontendBuilderSaveRequest as FrontendBuilderReservationProcessRequest } from './request-bodies/frontend-builder-save-request'
 import { FrontendBuilderCancelRequest } from './request-bodies/frontend-builder-cancel-request'
+import { FrontendBuilderGenerateChildRequest } from './request-bodies/frontend-builder-generate-child-request'
 
 export default class GoMeddoAPI {
   private readonly baseUrl: string
@@ -100,6 +101,17 @@ export default class GoMeddoAPI {
     const response = await fetch(url.href, {
       method: 'POST',
       body: JSON.stringify(cancelRequest),
+      headers: this.getHeaders()
+    })
+    await this.checkResponse(response)
+    return await response.json()
+  }
+
+  public async generateChildReservation (generateChildRequest: FrontendBuilderGenerateChildRequest): Promise<SFReservation[]> {
+    const url = new URL('GMFB/v1/generate-child-reservation', this.baseUrl)
+    const response = await fetch(url.href, {
+      method: 'POST',
+      body: JSON.stringify(generateChildRequest),
       headers: this.getHeaders()
     })
     await this.checkResponse(response)
