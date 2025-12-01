@@ -115,7 +115,9 @@ export default class GoMeddoAPI {
       headers: this.getHeaders()
     })
     await this.checkResponse(response)
-    return await response.json()
+
+    const body = await response.json()
+    return Array.isArray(body?.reservations) ? body.reservations as SFReservation[] : []
   }
 
   public async getParentReservations (parentReservationRequest: FrontendBuilderReservationProcessRequest): Promise<SFReservation[]> {
