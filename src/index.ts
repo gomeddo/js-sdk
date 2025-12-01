@@ -40,7 +40,7 @@ enum Environment {
  * GoMeddo object allows for interaction with GoMeddo
  */
 class GoMeddo {
-  static version: string = '0.0.18'
+  static version: string = '0.0.19'
   private readonly environment: Environment
   private readonly api: GoMeddoAPI
 
@@ -282,11 +282,18 @@ class GoMeddo {
    *
    * @param parentReservationId The id of the parent reservation
    * @param frontendBuilderDetails The frontend builder object details to include
-   * @returns The generated conflict checked child reservation object from Salesforce.
+   * @returns The generated conflict checked child reservation objects from Salesforce.
    */
-  public async generateChildReservation (parentReservationId: string, frontendBuilderDetails: FrontendBuilderDetails): Promise<Reservation> {
+  public async generateChildReservation (parentReservationId: string, frontendBuilderDetails: FrontendBuilderDetails): Promise<Reservation[]> {
     const generateChildRequest = this.buildFrontendBuilderGenerateChildRequest(parentReservationId, frontendBuilderDetails)
-    return await this.api.generateChildReservation(generateChildRequest) as any
+    const generatedChildSFReservations = await this.api.generateChildReservation(generateChildRequest)
+
+    const childReservations: Reservation[] = []
+    for (const res of generatedChildSFReservations) {
+      childReservations.push(new Reservation(res))
+    }
+
+    return childReservations
   }
 
   /**
