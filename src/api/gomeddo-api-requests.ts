@@ -23,6 +23,7 @@ import { ReservationCollectionTimeSlot } from '../time-slots/reservation-collect
 import { FrontendBuilderSaveRequest as FrontendBuilderReservationProcessRequest } from './request-bodies/frontend-builder-save-request'
 import { FrontendBuilderCancelRequest } from './request-bodies/frontend-builder-cancel-request'
 import { FrontendBuilderGenerateChildRequest } from './request-bodies/frontend-builder-generate-child-request'
+import ApexTimeSlot from './request-bodies/apex-time-slot'
 
 export default class GoMeddoAPI {
   private readonly baseUrl: string
@@ -231,9 +232,11 @@ export default class GoMeddoAPI {
     })
   }
 
-  public async getBlueprintTimeslots (blueprintName: string, duration: number, interval: number, timeslotRange: DateRange, mdaRange: DateRange, prototype: Partial<SFReservation>): Promise<ReservationCollectionTimeSlot[]> {
+  public async getBlueprintTimeslots (
+    blueprintName: string, duration: number, interval: number, timeslotRange: DateRange, mdaRange: DateRange, fixedSlots: ApexTimeSlot[] | null, prototype: Partial<SFReservation>
+  ): Promise<ReservationCollectionTimeSlot[]> {
     const url = new URL('B25/v1/blueprints/timeSlots', this.baseUrl)
-    const blueprintTimeslotGenerationBody = new BlueprintTimeslotGenerationBody(blueprintName, duration, interval, timeslotRange, mdaRange, prototype)
+    const blueprintTimeslotGenerationBody = new BlueprintTimeslotGenerationBody(blueprintName, duration, interval, timeslotRange, mdaRange, fixedSlots, prototype)
     const response = await fetch(url.href, {
       method: 'POST',
       body: JSON.stringify(blueprintTimeslotGenerationBody),

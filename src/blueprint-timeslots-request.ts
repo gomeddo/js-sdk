@@ -1,4 +1,5 @@
 import GoMeddoAPI from './api/gomeddo-api-requests'
+import ApexTimeSlot from './api/request-bodies/apex-time-slot'
 import BlueprintTimeslotsResult from './blueprint-timeslots-result'
 import DateRange from './date-range'
 
@@ -12,6 +13,7 @@ export default class BlueprintTimeslotsRequest {
   private blueprintName: string = ''
   private duration: number = 60
   private interval: number = 60
+  private fixedSlots: ApexTimeSlot[] | null = null
   private prototype: Partial<SFReservation> = {}
 
   constructor (api: GoMeddoAPI) {
@@ -29,7 +31,7 @@ export default class BlueprintTimeslotsRequest {
   }
 
   private async getBlueprintTimeslots (): Promise<ReservationCollectionTimeSlot[]> {
-    return await this.api.getBlueprintTimeslots(this.blueprintName, this.duration, this.interval, this.timeslotRange, this.mdaRange, this.prototype)
+    return await this.api.getBlueprintTimeslots(this.blueprintName, this.duration, this.interval, this.timeslotRange, this.mdaRange, this.fixedSlots, this.prototype)
   }
 
   public setTimeslotRange (startDate: Date, durationDays: number, offsetDays: number): this {
@@ -54,6 +56,11 @@ export default class BlueprintTimeslotsRequest {
 
   public setInterval (interval: number): this {
     this.interval = interval
+    return this
+  }
+
+  public setFixedSlots (fixedSlots: ApexTimeSlot[]): this {
+    this.fixedSlots = fixedSlots
     return this
   }
 
