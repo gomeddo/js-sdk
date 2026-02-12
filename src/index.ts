@@ -22,6 +22,7 @@ import DimensionRecordRequest from './dimension-record-request'
 import TimeSlotConfiguration from './utils/time-slot-configuration'
 import BlueprintRecordRequest from './blueprint-record-request'
 import BlueprintFieldOptionsRequest from './blueprint-field-options-request'
+import BlueprintRelatedListFieldOptionsRequest from './blueprint-related-list-field-options-request'
 import BlueprintTimeslotsRequest from './blueprint-timeslots-request'
 import FrontendBuilderDetails from './frontend-builder-details'
 import { FrontendBuilderSaveRequest as FrontendBuilderReservationProcessRequest } from './api/request-bodies/frontend-builder-save-request'
@@ -118,6 +119,18 @@ class GoMeddo {
    */
   public buildBlueprintFieldOptionsRequest (blueprintIdentifier: string, fieldIdentifier: string): BlueprintFieldOptionsRequest {
     return new BlueprintFieldOptionsRequest(this.api, blueprintIdentifier, fieldIdentifier)
+  }
+
+  /**
+   * Creates a new request for blueprint related list field options.
+   *
+   * @param blueprintIdentifier The name or id of the blueprint to make this request for.
+   * @param relatedListIdentifier The id or api name of the related list to make this request for.
+   * @param fieldIdentifier The id or field api name of the field to make this request for.
+   * @returns new BlueprintRelatedListFieldOptionsRequest using the authentication from this GoMeddo instance
+   */
+  public buildBlueprintRelatedListFieldOptionsRequest (blueprintIdentifier: string, relatedListIdentifier: string, fieldIdentifier: string): BlueprintRelatedListFieldOptionsRequest {
+    return new BlueprintRelatedListFieldOptionsRequest(this.api, blueprintIdentifier, relatedListIdentifier, fieldIdentifier)
   }
 
   /**
@@ -437,6 +450,7 @@ export {
   TimeSlotConfiguration,
   TimeSlotsRequest,
   TimeSlotsResult,
-  ReservationTimeSlot
+  ReservationTimeSlot,
+  BlueprintRelatedListFieldOptionsRequest
 }
 export default GoMeddo

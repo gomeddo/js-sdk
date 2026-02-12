@@ -279,6 +279,19 @@ export default class GoMeddoAPI {
     return await response.json()
   }
 
+  public async getBlueprintRelatedListFieldOptions (blueprintIdentifier: string, relatedListIdentifier: string, fieldIdentifier: string, reservation: Partial<SFReservation>, fields: Set<string>): Promise<CustomSFSObject[]> {
+    const url = new URL(`B25/v1/blueprints/${blueprintIdentifier}/relatedLists/${relatedListIdentifier}/fields/${fieldIdentifier}/options`, this.baseUrl)
+    this.addFieldsToUrl(url, fields)
+    const blueprintFieldOptionsBody = new BlueprintFieldOptionsBody(reservation)
+    const response = await fetch(url.href, {
+      method: 'POST',
+      body: JSON.stringify(blueprintFieldOptionsBody),
+      headers: this.getHeaders()
+    })
+    await this.checkResponse(response)
+    return await response.json()
+  }
+
   private getHeaders (): Record<string, string> {
     return {
       Authorization: `Bearer ${this.apiKey}`
