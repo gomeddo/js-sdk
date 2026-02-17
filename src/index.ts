@@ -256,6 +256,13 @@ class GoMeddo {
       })
       outputReservation.setContact(contact)
     }
+    if (result.lead !== null) {
+      const lead = new Lead('', '', '') // Note these values are custom properties and will be overriden
+      Object.entries(result.lead).forEach(([fieldName, fieldValue]) => {
+        lead.setCustomProperty(fieldName, fieldValue)
+      })
+      outputReservation.setLead(lead)
+    }
     if (result.paymentUrl !== null) {
       outputReservation.setPaymentUrl(result.paymentUrl)
     }
