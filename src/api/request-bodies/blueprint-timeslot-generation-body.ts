@@ -1,5 +1,6 @@
 import DateRange from '../../date-range'
 import { SFReservation } from '../../s-objects/reservation'
+import { CustomSFSObject } from '../../s-objects/s-object'
 import ApexTimeSlot from './apex-time-slot'
 
 export default class BlueprintTimeslotGenerationBody {
@@ -10,6 +11,7 @@ export default class BlueprintTimeslotGenerationBody {
   private readonly mdaRange: DateRange
   private readonly fixedSlots: ApexTimeSlot[] | null
   private readonly prototype: Partial<SFReservation>
+  private readonly relatedRecords?: Record<string, Array<Partial<CustomSFSObject>>>
 
   constructor (
     blueprintName: string,
@@ -18,7 +20,8 @@ export default class BlueprintTimeslotGenerationBody {
     timeslotRange: DateRange,
     mdaRange: DateRange,
     fixedSlots: ApexTimeSlot[] | null,
-    prototype: Partial<SFReservation>
+    prototype: Partial<SFReservation>,
+    relatedRecords: Record<string, Array<Partial<CustomSFSObject>>> | null
   ) {
     this.blueprintName = blueprintName
     this.duration = duration
@@ -27,5 +30,8 @@ export default class BlueprintTimeslotGenerationBody {
     this.mdaRange = mdaRange
     this.fixedSlots = fixedSlots
     this.prototype = prototype
+    if (relatedRecords !== null && relatedRecords !== undefined && Object.keys(relatedRecords).length > 0) {
+      this.relatedRecords = relatedRecords
+    }
   }
 }

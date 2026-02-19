@@ -4,6 +4,7 @@ import BlueprintTimeslotsResult from './blueprint-timeslots-result'
 import DateRange from './date-range'
 
 import { SFReservation } from './s-objects/reservation'
+import { CustomSFSObject } from './s-objects/s-object'
 import { ReservationCollectionTimeSlot } from './time-slots/reservation-collection-time-slot'
 
 export default class BlueprintTimeslotsRequest {
@@ -15,6 +16,7 @@ export default class BlueprintTimeslotsRequest {
   private interval: number = 60
   private fixedSlots: ApexTimeSlot[] | null = null
   private prototype: Partial<SFReservation> = {}
+  private relatedRecords: Record<string, Array<Partial<CustomSFSObject>>> | null = null
 
   constructor (api: GoMeddoAPI) {
     this.api = api
@@ -31,7 +33,7 @@ export default class BlueprintTimeslotsRequest {
   }
 
   private async getBlueprintTimeslots (): Promise<ReservationCollectionTimeSlot[]> {
-    return await this.api.getBlueprintTimeslots(this.blueprintName, this.duration, this.interval, this.timeslotRange, this.mdaRange, this.fixedSlots, this.prototype)
+    return await this.api.getBlueprintTimeslots(this.blueprintName, this.duration, this.interval, this.timeslotRange, this.mdaRange, this.fixedSlots, this.prototype, this.relatedRecords)
   }
 
   public setTimeslotRange (startDate: Date, durationDays: number, offsetDays: number): this {
@@ -66,6 +68,11 @@ export default class BlueprintTimeslotsRequest {
 
   public setPrototype (prototype: SFReservation): this {
     this.prototype = prototype
+    return this
+  }
+
+  public setRelatedRecords (relatedRecords: Record<string, Array<Partial<CustomSFSObject>>> | null): this {
+    this.relatedRecords = relatedRecords
     return this
   }
 }
