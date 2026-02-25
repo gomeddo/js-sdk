@@ -34,15 +34,35 @@ test('You can save a reservations through it', async () => {
   result.setEndDatetime(dummyDate)
   expect(result).toStrictEqual(expectedResult)
   expect(mock).toHaveBeenCalled()
-  const expectedBodyData = new ReservationProcessRequest({ B25__Api_Visible__c: true }, null, null, [])
+  const expectedBodyData = new ReservationProcessRequest({ B25__Api_Visible__c: true }, null, null, [], {}, {})
   expect(mock).toHaveBeenCalledWith(
     'https://api.gomeddo.com/api/v3/proxy/B25LP/v1/reservations',
     {
       method: 'POST',
       body: JSON.stringify(expectedBodyData),
-      headers: { Authorization: 'Bearer key' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY' }
     }
   )
+})
+
+test('You can save a reservation when the API response omits lead, contact, and serviceReservations', async () => {
+  fetchMock.once(JSON.stringify({
+    reservation: {
+      B25__Resource__c: 'test'
+    }
+  }))
+  const reservation = new Reservation()
+  reservation.setCustomProperty('B25__Api_Visible__c', true)
+  const result = await (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION)).saveReservation(reservation)
+  const expectedResult = new Reservation()
+  const dummyDate = new Date()
+  expectedResult.id = undefined as any
+  expectedResult.setStartDatetime(dummyDate)
+  expectedResult.setEndDatetime(dummyDate)
+  expectedResult.setCustomProperty('B25__Resource__c', 'test')
+  result.setStartDatetime(dummyDate)
+  result.setEndDatetime(dummyDate)
+  expect(result).toStrictEqual(expectedResult)
 })
 
 test('You can update a reservation through it', async () => {
@@ -51,13 +71,13 @@ test('You can update a reservation through it', async () => {
   const reservation = new Reservation(reservationData)
   await (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION)).updateReservation(reservation)
   expect(mock).toHaveBeenCalled()
-  const expectedBodyData = [new ReservationCollection(reservationData, new Map(), new Map())]
+  const expectedBodyData = [new ReservationProcessRequest(reservationData, null, null, [], {}, {})]
   expect(mock).toHaveBeenCalledWith(
-    'https://api.gomeddo.com/api/v3/proxy/B25/v1/reservation-collection',
+    'https://api.gomeddo.com/api/v3/proxy/B25LP/v1/reservations',
     {
       method: 'PATCH',
       body: JSON.stringify(expectedBodyData),
-      headers: { Authorization: 'Bearer key' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY' }
     }
   )
 })
@@ -71,15 +91,15 @@ test('You can update multiple reservations through it', async () => {
   await (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION)).updateReservations([reservation1, reservation2])
   expect(mock).toHaveBeenCalled()
   const expectedBodyData = [
-    new ReservationCollection(reservation1Data, new Map(), new Map()),
-    new ReservationCollection(reservation2Data, new Map(), new Map())
+    new ReservationProcessRequest(reservation1Data, null, null, [], {}, {}),
+    new ReservationProcessRequest(reservation2Data, null, null, [], {}, {})
   ]
   expect(mock).toHaveBeenCalledWith(
-    'https://api.gomeddo.com/api/v3/proxy/B25/v1/reservation-collection',
+    'https://api.gomeddo.com/api/v3/proxy/B25LP/v1/reservations',
     {
       method: 'PATCH',
       body: JSON.stringify(expectedBodyData),
-      headers: { Authorization: 'Bearer key' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY' }
     }
   )
 })
@@ -103,23 +123,27 @@ test('You can update a reservation with related records through it', async () =>
 
   await (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION)).updateReservation(reservation)
   expect(mock).toHaveBeenCalled()
-  const expectedBodyData = [new ReservationCollection(reservationData, new Map(
-    [
-      ['B25__Service_Reservation__c', [{ attributes: { type: 'B25__Service_Reservation__c' }, B25__Quantity__c: 12, B25__Service__c: dummyId0, B25__Unit_Price__c: 23 }]],
-      ['B25__ReservationContact__c', [{ B25__Notes__c: 'Test Notes', attributes: { type: 'B25__ReservationContact__c' } }]],
-      ['B25__Resource_Reservation__c', [{ Quantity__c: 2, attributes: { type: 'B25__Resource_Reservation__c' } }]]
-    ]), new Map(
-    [
-      ['B25__ReservationContact__c', [{ Id: dummyId1, Name: '', attributes: { type: 'B25__ReservationContact__c' } }]],
-      ['B25__Resource_Reservation__c', [{ Id: dummyId2, Name: '', attributes: { type: 'B25__Resource_Reservation__c' } }]]
-    ])
+  const expectedBodyData = [new ReservationProcessRequest(
+    reservationData,
+    null,
+    null,
+    [{ B25__Quantity__c: 12, B25__Service__c: dummyId0, B25__Unit_Price__c: 23 }],
+    {
+      B25__Service_Reservation__c: [{ attributes: { type: 'B25__Service_Reservation__c' }, B25__Quantity__c: 12, B25__Service__c: dummyId0, B25__Unit_Price__c: 23 }],
+      B25__ReservationContact__c: [{ B25__Notes__c: 'Test Notes', attributes: { type: 'B25__ReservationContact__c' } }],
+      B25__Resource_Reservation__c: [{ Quantity__c: 2, attributes: { type: 'B25__Resource_Reservation__c' } }]
+    },
+    {
+      B25__ReservationContact__c: [{ Id: dummyId1, Name: '', attributes: { type: 'B25__ReservationContact__c' } }],
+      B25__Resource_Reservation__c: [{ Id: dummyId2, Name: '', attributes: { type: 'B25__Resource_Reservation__c' } }]
+    }
   )]
   expect(mock).toHaveBeenCalledWith(
-    'https://api.gomeddo.com/api/v3/proxy/B25/v1/reservation-collection',
+    'https://api.gomeddo.com/api/v3/proxy/B25LP/v1/reservations',
     {
       method: 'PATCH',
       body: JSON.stringify(expectedBodyData),
-      headers: { Authorization: 'Bearer key' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY' }
     }
   )
 })
@@ -136,7 +160,7 @@ test('You can delete a reservation through it', async () => {
     {
       method: 'DELETE',
       body: JSON.stringify(expectedBodyData),
-      headers: { Authorization: 'Bearer key' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY' }
     }
   )
 })
@@ -158,7 +182,7 @@ test('You can delete multiple reservations through it', async () => {
     {
       method: 'DELETE',
       body: JSON.stringify(expectedBodyData),
-      headers: { Authorization: 'Bearer key' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY' }
     }
   )
 })
@@ -174,18 +198,23 @@ test('You can delete a reservation with related records through it', async () =>
 
   await (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION)).updateReservation(reservation)
   expect(mock).toHaveBeenCalled()
-  const expectedBodyData = [new ReservationCollection(reservationData, new Map(
-    [
-      ['B25__ReservationContact__c', [{ Id: dummyId1, Name: '', attributes: { type: 'B25__ReservationContact__c' } }]],
-      ['B25__Resource_Reservation__c', [{ Id: dummyId2, Name: '', attributes: { type: 'B25__Resource_Reservation__c' } }]]
-    ]), new Map()
+  const expectedBodyData = [new ReservationProcessRequest(
+    reservationData,
+    null,
+    null,
+    [],
+    {
+      B25__ReservationContact__c: [{ Id: dummyId1, Name: '', attributes: { type: 'B25__ReservationContact__c' } }],
+      B25__Resource_Reservation__c: [{ Id: dummyId2, Name: '', attributes: { type: 'B25__Resource_Reservation__c' } }]
+    },
+    {}
   )]
   expect(mock).toHaveBeenCalledWith(
-    'https://api.gomeddo.com/api/v3/proxy/B25/v1/reservation-collection',
+    'https://api.gomeddo.com/api/v3/proxy/B25LP/v1/reservations',
     {
       method: 'PATCH',
       body: JSON.stringify(expectedBodyData),
-      headers: { Authorization: 'Bearer key' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY' }
     }
   )
 })

@@ -13,7 +13,7 @@ test('Custom properties are included in the rest body', () => {
   const reservation = new Reservation()
   reservation.setCustomProperty('B25__Resource__c', 'test')
   const restData = reservation.getReservationProcessRequest()
-  const expectedRestData = new ReservationProcessRequest({ B25__Resource__c: 'test' }, null, null, [])
+  const expectedRestData = new ReservationProcessRequest({ B25__Resource__c: 'test' }, null, null, [], {}, {})
   expect(restData).toStrictEqual(expectedRestData)
 })
 
@@ -23,7 +23,7 @@ test('Set resource sets the resource id', () => {
   const resource = new Resource(resourceGenerator.getResource())
   reservation.setResource(resource)
   const restData = reservation.getReservationProcessRequest()
-  const expectedRestData = new ReservationProcessRequest({ B25__Resource__c: 'Id 1' }, null, null, [])
+  const expectedRestData = new ReservationProcessRequest({ B25__Resource__c: 'Id 1' }, null, null, [], {}, {})
   expect(restData).toStrictEqual(expectedRestData)
 })
 
@@ -31,7 +31,7 @@ test('Set start datetime sets the start datetime of the reservation', () => {
   const date = new Date(Date.UTC(2020, 0, 1, 12, 0, 0))
   const reservation = new Reservation().setStartDatetime(date)
   const restData = reservation.getReservationProcessRequest()
-  const expectedRestData = new ReservationProcessRequest({ B25__Start__c: '2020-01-01T12:00:00.000Z' }, null, null, [])
+  const expectedRestData = new ReservationProcessRequest({ B25__Start__c: '2020-01-01T12:00:00.000Z' }, null, null, [], {}, {})
   expect(restData).toStrictEqual(expectedRestData)
 })
 
@@ -39,7 +39,7 @@ test('Set end datetime sets the end datetime of the reservation', () => {
   const date = new Date(Date.UTC(2020, 0, 1, 12, 0, 0))
   const reservation = new Reservation().setEndDatetime(date)
   const restData = reservation.getReservationProcessRequest()
-  const expectedRestData = new ReservationProcessRequest({ B25__End__c: '2020-01-01T12:00:00.000Z' }, null, null, [])
+  const expectedRestData = new ReservationProcessRequest({ B25__End__c: '2020-01-01T12:00:00.000Z' }, null, null, [], {}, {})
   expect(restData).toStrictEqual(expectedRestData)
 })
 
@@ -51,7 +51,7 @@ test('Set contact adds a contact to the reservation', () => {
     LastName: 'lastname',
     Email: 'email'
   }
-  const expectedRestData = new ReservationProcessRequest({}, null, contact, [])
+  const expectedRestData = new ReservationProcessRequest({}, null, contact, [], {}, {})
   expect(restData).toStrictEqual(expectedRestData)
 })
 
@@ -63,7 +63,7 @@ test('Set lead adds a lead to the reservation', () => {
     LastName: 'lastname',
     Email: 'email'
   }
-  const expectedRestData = new ReservationProcessRequest({}, lead, null, [])
+  const expectedRestData = new ReservationProcessRequest({}, lead, null, [], {}, {})
   expect(restData).toStrictEqual(expectedRestData)
 })
 
@@ -83,6 +83,12 @@ test('Add service reservations to the reservation', () => {
     B25__Quantity__c: 12,
     B25__Unit_Price__c: 18
   }]
-  const expectedRestData = new ReservationProcessRequest({}, null, null, serviceReservations)
+  const expectedRelatedRecords = {
+    B25__Service_Reservation__c: [
+      { B25__Quantity__c: 2, B25__Service__c: 'Service Id 1', B25__Unit_Price__c: 10, attributes: { type: 'B25__Service_Reservation__c' } },
+      { B25__Quantity__c: 12, B25__Service__c: 'Service Id 2', B25__Unit_Price__c: 18, attributes: { type: 'B25__Service_Reservation__c' } }
+    ]
+  }
+  const expectedRestData = new ReservationProcessRequest({}, null, null, serviceReservations, expectedRelatedRecords, {})
   expect(restData).toStrictEqual(expectedRestData)
 })

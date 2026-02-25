@@ -41,7 +41,7 @@ enum Environment {
  * GoMeddo object allows for interaction with GoMeddo
  */
 class GoMeddo {
-  static version: string = '0.0.22'
+  static version: string = '0.0.23'
   private readonly environment: Environment
   private readonly api: GoMeddoAPI
 
@@ -205,21 +205,21 @@ class GoMeddo {
     Object.entries(result.reservation).forEach(([fieldName, fieldValue]) => {
       outputReservation.setCustomProperty(fieldName, fieldValue)
     })
-    if (result.contact !== null) {
+    if (result.contact !== null && result.contact !== undefined) {
       const contact = new Contact('', '', '') // Note these values are custom properties and will be overriden
       Object.entries(result.contact).forEach(([fieldName, fieldValue]) => {
         contact.setCustomProperty(fieldName, fieldValue)
       })
       outputReservation.setContact(contact)
     }
-    if (result.lead !== null) {
+    if (result.lead !== null && result.lead !== undefined) {
       const lead = new Lead('', '', '') // Note these values are custom properties and will be overriden
       Object.entries(result.lead).forEach(([fieldName, fieldValue]) => {
         lead.setCustomProperty(fieldName, fieldValue)
       })
       outputReservation.setLead(lead)
     }
-    if (result.serviceReservations !== null) {
+    if (result.serviceReservations !== null && result.serviceReservations !== undefined) {
       const serviceReservations = result.serviceReservations.map((serviceReservation: SFServiceReservation) => {
         const matchingService = reservation.serviceReservations.find(
           (originalServiceReservation) => {
@@ -262,21 +262,21 @@ class GoMeddo {
     Object.entries(result.reservation).forEach(([fieldName, fieldValue]) => {
       outputReservation.setCustomProperty(fieldName, fieldValue)
     })
-    if (result.contact !== null) {
+    if (result.contact !== null && result.contact !== undefined) {
       const contact = new Contact('', '', '') // Note these values are custom properties and will be overriden
       Object.entries(result.contact).forEach(([fieldName, fieldValue]) => {
         contact.setCustomProperty(fieldName, fieldValue)
       })
       outputReservation.setContact(contact)
     }
-    if (result.lead !== null) {
+    if (result.lead !== null && result.lead !== undefined) {
       const lead = new Lead('', '', '') // Note these values are custom properties and will be overriden
       Object.entries(result.lead).forEach(([fieldName, fieldValue]) => {
         lead.setCustomProperty(fieldName, fieldValue)
       })
       outputReservation.setLead(lead)
     }
-    if (result.paymentUrl !== null) {
+    if (result.paymentUrl !== null && result.paymentUrl !== undefined) {
       outputReservation.setPaymentUrl(result.paymentUrl)
     }
 

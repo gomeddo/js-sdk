@@ -91,7 +91,7 @@ test('It adds timelines if requested', async () => {
   expect(availabilityFetchMock).toBeCalledWith(availabilityRequestUrl, {
     method: 'POST',
     body: JSON.stringify(requestBody),
-    headers: { Authorization: 'Bearer key' }
+    headers: { Authorization: 'Bearer YOUR_API_KEY' }
   })
   expect(result.numberOfresources()).toBe(1)
   const resourceOne = result.getResource('Name 1')
@@ -147,7 +147,7 @@ test('It adds service timelines if requested', async () => {
   expect(serviceAvailabilityFetchMock).toBeCalledWith(serviceRequestUrl, {
     method: 'POST',
     body: JSON.stringify(requestBody),
-    headers: { Authorization: 'Bearer key' }
+    headers: { Authorization: 'Bearer YOUR_API_KEY' }
   })
   expect(result.numberOfresources()).toBe(2)
   const resourceOne = result.getResource('Name 1')
@@ -295,7 +295,7 @@ const expectSearchMockToHaveBeenCalledWith = (mock: FetchMock, ids: string[], na
     {
       method: 'POST',
       body: getExpectedBody(ids, names, condition),
-      headers: { Authorization: 'Bearer key' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY' }
     }
   )
 }
