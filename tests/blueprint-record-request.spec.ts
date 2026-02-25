@@ -113,7 +113,7 @@ const expectSearchMockToHaveBeenCalledWith = (mock: FetchMock, ids: string[], na
     {
       method: 'POST',
       body: getExpectedBody(ids, names, condition),
-      headers: { Authorization: 'Bearer key' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY' }
     }
   )
 }

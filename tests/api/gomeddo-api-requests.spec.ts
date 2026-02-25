@@ -24,7 +24,7 @@ test('url and body are constructed correctly for saveReservation', async () => {
     {
       method: 'POST',
       body: JSON.stringify(saveRequest),
-      headers: { Authorization: 'Bearer key' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY' }
     }
   )
 })
@@ -48,7 +48,7 @@ test('the get availabilities makes the correct request', async () => {
     {
       method: 'POST',
       body: JSON.stringify(requestBody),
-      headers: { Authorization: 'Bearer key' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY' }
     }
   )
 })
@@ -67,7 +67,7 @@ test('price calculation makes the correct request', async () => {
     {
       method: 'POST',
       body: JSON.stringify(body),
-      headers: { Authorization: 'Bearer key' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY' }
     }
   )
 })
@@ -94,7 +94,7 @@ test('getTimeSlots makes the correct request and processes response correctly', 
     {
       method: 'POST',
       body: JSON.stringify(requestBody),
-      headers: { Authorization: 'Bearer key' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY' }
     }
   )
 
