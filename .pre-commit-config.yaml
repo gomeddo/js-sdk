@@ -23,3 +23,9 @@ repos:
           |mjs|cjs\
           )$"
         additional_dependencies: ['ts-standard@11.0.0']
+    -   id: jest
+        name: jest
+        entry: npx jest
+        language: system
+        pass_filenames: false
+        always_run: true

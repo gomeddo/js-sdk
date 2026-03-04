@@ -13,7 +13,7 @@ class FrontendBuilderSaveRequest extends ReservationProcessRequest {
   ) {
     super(
       reservationProcessRequest.reservation,
-      null,
+      reservationProcessRequest.lead ?? null,
       reservationProcessRequest.contact,
       undefined,
       reservationProcessRequest.relatedRecords ?? undefined,
@@ -27,7 +27,10 @@ class FrontendBuilderSaveRequest extends ReservationProcessRequest {
     // Override to remove properties from instance
     delete this.serviceReservations
     delete this.relatedRecordsToDelete
-    delete this.lead
+    // Backwards compatibility: if lead is null, remove it.
+    if (this.lead == null) {
+      delete this.lead
+    }
   }
 }
 
