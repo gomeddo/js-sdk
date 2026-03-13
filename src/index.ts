@@ -41,7 +41,7 @@ enum Environment {
  * GoMeddo object allows for interaction with GoMeddo
  */
 class GoMeddo {
-  static version: string = '0.0.24'
+  static version: string = '0.0.25'
   private readonly environment: Environment
   private readonly api: GoMeddoAPI
 
@@ -278,6 +278,12 @@ class GoMeddo {
     }
     if (result.paymentUrl !== null && result.paymentUrl !== undefined) {
       outputReservation.setPaymentUrl(result.paymentUrl)
+    }
+    if (result.transactionId !== null && result.transactionId !== undefined) {
+      outputReservation.transactionId = result.transactionId
+    }
+    if (result.eventCredentials !== null && result.eventCredentials !== undefined) {
+      outputReservation.eventCredentials = result.eventCredentials
     }
 
     return outputReservation
