@@ -298,6 +298,7 @@ test('saveFrontendBuilderReservation passes through eventCredentials when presen
       B25__End__c: '2020-01-01T13:00:00.000Z'
     },
     paymentUrl: 'https://dev.api.payment25.com/api/paynow/test-uuid',
+    transactionId: 'test-transaction-id',
     eventCredentials
   }))
   const reservation = new Reservation()
@@ -309,6 +310,7 @@ test('saveFrontendBuilderReservation passes through eventCredentials when presen
   const result = await (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION)).saveFrontendBuilderReservation(reservation, details)
   expect(result.eventCredentials).toStrictEqual(eventCredentials)
   expect(result.paymentUrl).toBe('https://dev.api.payment25.com/api/paynow/test-uuid')
+  expect(result.transactionId).toBe('test-transaction-id')
 })
 
 test('saveFrontendBuilderReservation leaves eventCredentials null when not in response', async () => {
@@ -328,4 +330,5 @@ test('saveFrontendBuilderReservation leaves eventCredentials null when not in re
   const result = await (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION)).saveFrontendBuilderReservation(reservation, details)
   expect(result.eventCredentials).toBeNull()
   expect(result.paymentUrl).toBeNull()
+  expect(result.transactionId).toBeNull()
 })
