@@ -19,6 +19,7 @@ export default class Reservation extends SObject {
   public relatedRecords: Map<string, Array<Partial<CustomSFSObject>>> = new Map()
   public removedRelatedRecords: Map<string, Array<Partial<CustomSFSObject>>> = new Map()
   public paymentUrl: string | null = null
+  public eventCredentials: Record<string, any> | null = null
 
   /**
    * Attatch this reservation to the given resource.

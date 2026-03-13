@@ -279,6 +279,9 @@ class GoMeddo {
     if (result.paymentUrl !== null && result.paymentUrl !== undefined) {
       outputReservation.setPaymentUrl(result.paymentUrl)
     }
+    if (result.eventCredentials !== null && result.eventCredentials !== undefined) {
+      outputReservation.eventCredentials = result.eventCredentials
+    }
 
     return outputReservation
   }

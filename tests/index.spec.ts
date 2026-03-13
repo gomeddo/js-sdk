@@ -3,6 +3,7 @@ import { ReservationProcessRequest } from '../src/api/request-bodies/reservation
 import { getSObject } from './__utils__/s-object-data'
 import { dummyId0, dummyId1, dummyId2 } from './__utils__/salesforce-dummy-ids'
 import ReservationCollection from '../src/api/request-bodies/reservation-collection'
+import FrontendBuilderDetails from '../src/frontend-builder-details'
 
 beforeEach(() => {
   fetchMock.resetMocks()
@@ -275,4 +276,56 @@ test('You can recalculate the price of the reservation through it with VAT rates
   expect(result.getCustomProperty('B25LP__Total_Incl__c')).toStrictEqual(150 + (150 * 0.2) + 276 + (276 * 0.1))
   expect(result.serviceReservations[0].getCustomProperty('B25__Subtotal__c')).toStrictEqual(276)
   expect(result.serviceReservations[0].getCustomProperty('B25LP__Subtotal_Incl__c')).toStrictEqual(276 + (276 * 0.1))
+})
+
+test('saveFrontendBuilderReservation passes through eventCredentials when present', async () => {
+  const eventCredentials = {
+    region: 'eu-central-1',
+    websocket_hostname: 'xxxxx.appsync-realtime-api.eu-central-1.amazonaws.com',
+    http_hostname: 'xxxxx.appsync-api.eu-central-1.amazonaws.com',
+    credentials: {
+      AccessKeyId: 'ASIA...',
+      SecretAccessKey: '...',
+      SessionToken: '...',
+      Expiration: '2026-03-12T16:43:45+00:00'
+    },
+    transaction_id: 'test-transaction-id'
+  }
+  fetchMock.once(JSON.stringify({
+    reservation: {
+      Id: dummyId0,
+      B25__Start__c: '2020-01-01T12:00:00.000Z',
+      B25__End__c: '2020-01-01T13:00:00.000Z'
+    },
+    paymentUrl: 'https://dev.api.payment25.com/api/paynow/test-uuid',
+    eventCredentials
+  }))
+  const reservation = new Reservation()
+  reservation.setStartDatetime(new Date(Date.UTC(2020, 0, 1, 12, 0, 0)))
+  reservation.setEndDatetime(new Date(Date.UTC(2020, 0, 1, 13, 0, 0)))
+  const details = new (FrontendBuilderDetails as any)(null)
+  details.setFrontendBuilderDeveloperName('testBuilder')
+  details.setBlueprintDeveloperName('testBlueprint')
+  const result = await (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION)).saveFrontendBuilderReservation(reservation, details)
+  expect(result.eventCredentials).toStrictEqual(eventCredentials)
+  expect(result.paymentUrl).toBe('https://dev.api.payment25.com/api/paynow/test-uuid')
+})
+
+test('saveFrontendBuilderReservation leaves eventCredentials null when not in response', async () => {
+  fetchMock.once(JSON.stringify({
+    reservation: {
+      Id: dummyId0,
+      B25__Start__c: '2020-01-01T12:00:00.000Z',
+      B25__End__c: '2020-01-01T13:00:00.000Z'
+    }
+  }))
+  const reservation = new Reservation()
+  reservation.setStartDatetime(new Date(Date.UTC(2020, 0, 1, 12, 0, 0)))
+  reservation.setEndDatetime(new Date(Date.UTC(2020, 0, 1, 13, 0, 0)))
+  const details = new (FrontendBuilderDetails as any)(null)
+  details.setFrontendBuilderDeveloperName('testBuilder')
+  details.setBlueprintDeveloperName('testBlueprint')
+  const result = await (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION)).saveFrontendBuilderReservation(reservation, details)
+  expect(result.eventCredentials).toBeNull()
+  expect(result.paymentUrl).toBeNull()
 })
