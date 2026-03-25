@@ -227,7 +227,8 @@ export default class Reservation extends SObject {
         const quantity = serviceReservation.quantity ?? 0
         const unitPrice = serviceReservation.unitPrice ?? 0
         return serviceCosts + (quantity * unitPrice)
-      }, 0)
+      }, 0),
+      this.getRelatedRecordsRestData()
     )
   }
 
