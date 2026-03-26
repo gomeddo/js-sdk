@@ -278,6 +278,28 @@ test('You can recalculate the price of the reservation through it with VAT rates
   expect(result.serviceReservations[0].getCustomProperty('B25LP__Subtotal_Incl__c')).toStrictEqual(276 + (276 * 0.1))
 })
 
+test('You can recalculate the price with related records included', async () => {
+  fetchMock.once(JSON.stringify({
+    reservation: {
+      B25__Subtotal__c: 100
+    },
+    serviceReservations: [],
+    serviceCosts: 0
+  }))
+  const reservation = new Reservation()
+  reservation.setCustomProperty('B25__Quantity__c', 10)
+  reservation.setCustomProperty('B25__Base_Price__c', 10)
+  const relatedRecord = new SObject()
+  relatedRecord.setCustomProperty('Quantity__c', 5)
+  reservation.addRelatedRecord('B25__Resource_Reservation__c', relatedRecord)
+  const result = await (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION)).calculatePrice(reservation)
+  expect(result.getCustomProperty('B25__Subtotal__c')).toStrictEqual(100)
+  const sentBody = JSON.parse((fetchMock as any).mock.calls[0][1].body)
+  expect(sentBody.relatedRecords).toStrictEqual({
+    B25__Resource_Reservation__c: [{ Quantity__c: 5, attributes: { type: 'B25__Resource_Reservation__c' } }]
+  })
+})
+
 test('saveFrontendBuilderReservation passes through eventCredentials when present', async () => {
   const eventCredentials = {
     region: 'eu-central-1',

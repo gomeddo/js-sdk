@@ -72,6 +72,31 @@ test('price calculation makes the correct request', async () => {
   )
 })
 
+test('price calculation includes relatedRecords in the request body', async () => {
+  const mock = fetchMock.once(JSON.stringify({
+    reservation: {},
+    serviceReservations: [],
+    serviceCosts: 0,
+    relatedRecords: {}
+  }))
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+  const relatedRecords = {
+    Custom_Junction__c: [{ Custom_Field__c: 'value', attributes: { type: 'Custom_Junction__c' } }]
+  }
+  const body = new ReservationPriceCalculationRequest({}, [], 0, relatedRecords)
+  await api.calculatePrice(body)
+  expect(mock).toHaveBeenCalledWith(
+    'https://api.gomeddo.com/api/v3/proxy/B25/v1/priceCalculation',
+    {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: { Authorization: 'Bearer YOUR_API_KEY' }
+    }
+  )
+  const sentBody = JSON.parse((mock as any).mock.calls[0][1].body)
+  expect(sentBody.relatedRecords).toStrictEqual(relatedRecords)
+})
+
 test('getTimeSlots makes the correct request and processes response correctly', async () => {
   const mock = fetchMock.once(JSON.stringify({
     timeSlots: [

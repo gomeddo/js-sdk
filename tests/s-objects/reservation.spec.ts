@@ -1,5 +1,6 @@
+import ReservationPriceCalculationRequest from '../../src/api/request-bodies/reservation-price-calculation-request'
 import { ReservationProcessRequest } from '../../src/api/request-bodies/reservation-save-request'
-import { Contact, Lead, Reservation, Resource, Service } from '../../src/index'
+import { Contact, Lead, Reservation, Resource, Service, SObject } from '../../src/index'
 import { ResourceGenerator } from '../__utils__/resource-responses'
 import { getSObject } from '../__utils__/s-object-data'
 
@@ -91,4 +92,52 @@ test('Add service reservations to the reservation', () => {
   }
   const expectedRestData = new ReservationProcessRequest({}, null, null, serviceReservations, expectedRelatedRecords, {})
   expect(restData).toStrictEqual(expectedRestData)
+})
+
+test('Price calculation includes related records', () => {
+  const reservation = new Reservation()
+  const relatedRecord = new SObject()
+  relatedRecord.setCustomProperty('Quantity__c', 5)
+  reservation.addRelatedRecord('B25__Resource_Reservation__c', relatedRecord)
+  const priceData = reservation.getPriceCalculationData()
+  const expectedPriceData = new ReservationPriceCalculationRequest(
+    {},
+    [],
+    0,
+    {
+      B25__Resource_Reservation__c: [{ Quantity__c: 5, attributes: { type: 'B25__Resource_Reservation__c' } }]
+    }
+  )
+  expect(priceData).toStrictEqual(expectedPriceData)
+})
+
+test('Price calculation includes empty related records by default', () => {
+  const reservation = new Reservation()
+  const priceData = reservation.getPriceCalculationData()
+  const expectedPriceData = new ReservationPriceCalculationRequest({}, [], 0, {})
+  expect(priceData).toStrictEqual(expectedPriceData)
+})
+
+test('Price calculation includes service reservations and related records together', () => {
+  const service = new Service({ ...getSObject('Service Id 1'), B25__Price__c: 10 }, [])
+  const reservation = new Reservation()
+  reservation.addService(service, 2)
+  const relatedRecord = new SObject()
+  relatedRecord.setCustomProperty('Custom_Field__c', 'value')
+  reservation.addRelatedRecord('Custom_Junction__c', relatedRecord)
+  const priceData = reservation.getPriceCalculationData()
+  expect(priceData.serviceCosts).toBe(20)
+  expect(priceData.serviceReservations).toStrictEqual([{
+    B25__Service__c: 'Service Id 1',
+    B25__Quantity__c: 2,
+    B25__Unit_Price__c: 10
+  }])
+  expect(priceData.relatedRecords).toStrictEqual({
+    B25__Service_Reservation__c: [
+      { B25__Quantity__c: 2, B25__Service__c: 'Service Id 1', B25__Unit_Price__c: 10, attributes: { type: 'B25__Service_Reservation__c' } }
+    ],
+    Custom_Junction__c: [
+      { Custom_Field__c: 'value', attributes: { type: 'Custom_Junction__c' } }
+    ]
+  })
 })
