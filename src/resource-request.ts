@@ -3,7 +3,7 @@ import ServiceTimeSlotRequest from './api/request-bodies/service-availability-re
 import ResourceResult from './resource-result'
 import { SFResource } from './s-objects/resource'
 import { AndCondition, Condition, Operator, OrCondition } from './filters/conditions'
-import { isSalesforceId } from './utils/salesforce-utils'
+import { isSalesforceId, splitIntoIdsAndNames } from './utils/salesforce-utils'
 import FindAvailableIdsRequest from './find-available-ids-request'
 import DimensionRecordRequest from './dimension-record-request'
 import GoMeddoAPI from './api/gomeddo-api-requests'
@@ -39,11 +39,11 @@ export default class ResourceRequest extends DimensionRecordRequest {
   /**
    * Filter the resources to only include resources of the specific type or types
    *
-   * @param typeIds the ids of the resource types to include.
+   * @param types the ids or names of the resource types to include.
    * @returns The updated resource request.
    */
-  public withType (...typeIds: string[]): ResourceRequest {
-    typeIds.forEach(typeId => this.types.add(typeId))
+  public withType (...types: string[]): ResourceRequest {
+    types.forEach(type => this.types.add(type))
     return this
   }
 
@@ -98,7 +98,15 @@ export default class ResourceRequest extends DimensionRecordRequest {
     }
     let condition: AndCondition | undefined = new AndCondition([])
     if (this.types.size !== 0) {
-      condition.conditions.push(new OrCondition([...this.types].map(type => new Condition('B25__Resource_Type__r.Name', Operator.EQUAL, type))))
+      const splitData = splitIntoIdsAndNames(this.types)
+      const typeCondition = new OrCondition([])
+      if (splitData.ids.length !== 0) {
+        typeCondition.conditions.push(new Condition('B25__Resource_Type__c', Operator.IN, splitData.ids))
+      }
+      if (splitData.names.length !== 0) {
+        typeCondition.conditions.push(new Condition('B25__Resource_Type__r.Name', Operator.IN, splitData.names))
+      }
+      condition.conditions.push(typeCondition)
     }
     if (this.condition !== undefined) {
       condition.conditions.push(this.condition)

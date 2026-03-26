@@ -193,7 +193,24 @@ test('It combines multiple parents into a single request', async () => {
   expectSearchMockToHaveBeenCalledWith(resourceFetchMock, [dummyId0, dummyId1], [], undefined, [])
 })
 
-test('It adds a type id to the request if a type is requested', async () => {
+test('It sends the correct request if a type id is provided', async () => {
+  const resourceGenerator = new ResourceGenerator('Id', 'Name')
+  const resourceFetchMock = fetchMock.doMock(JSON.stringify(resourceGenerator.getResourceArray(2)))
+
+  await getResourceRequest()
+    .withType(dummyId0)
+    .getResults()
+  const expectedCondition =
+    new APIConditionGroup('AND', [
+      new APIConditionGroup('OR', [
+        new APICondition('B25__Resource_Type__c', 'IN', [dummyId0])
+      ])
+    ])
+  expect(resourceFetchMock).toBeCalledTimes(1)
+  expectSearchMockToHaveBeenCalledWith(resourceFetchMock, [], [], expectedCondition, [])
+})
+
+test('It sends the correct request if type ids are provided', async () => {
   const resourceGenerator = new ResourceGenerator('Id', 'Name')
   const resourceFetchMock = fetchMock.doMock(JSON.stringify(resourceGenerator.getResourceArray(2)))
 
@@ -203,8 +220,59 @@ test('It adds a type id to the request if a type is requested', async () => {
   const expectedCondition =
     new APIConditionGroup('AND', [
       new APIConditionGroup('OR', [
-        new APICondition('B25__Resource_Type__r.Name', '=', [dummyId0]),
-        new APICondition('B25__Resource_Type__r.Name', '=', [dummyId1])
+        new APICondition('B25__Resource_Type__c', 'IN', [dummyId0, dummyId1])
+      ])
+    ])
+  expect(resourceFetchMock).toBeCalledTimes(1)
+  expectSearchMockToHaveBeenCalledWith(resourceFetchMock, [], [], expectedCondition, [])
+})
+
+test('It sends the correct request if a type name is provided', async () => {
+  const resourceGenerator = new ResourceGenerator('Id', 'Name')
+  const resourceFetchMock = fetchMock.doMock(JSON.stringify(resourceGenerator.getResourceArray(2)))
+
+  await getResourceRequest()
+    .withType('Rentable Resource')
+    .getResults()
+  const expectedCondition =
+    new APIConditionGroup('AND', [
+      new APIConditionGroup('OR', [
+        new APICondition('B25__Resource_Type__r.Name', 'IN', ['Rentable Resource'])
+      ])
+    ])
+  expect(resourceFetchMock).toBeCalledTimes(1)
+  expectSearchMockToHaveBeenCalledWith(resourceFetchMock, [], [], expectedCondition, [])
+})
+
+test('It sends the correct request if type names are provided', async () => {
+  const resourceGenerator = new ResourceGenerator('Id', 'Name')
+  const resourceFetchMock = fetchMock.doMock(JSON.stringify(resourceGenerator.getResourceArray(2)))
+
+  await getResourceRequest()
+    .withType('Rentable Resource', 'Room')
+    .getResults()
+  const expectedCondition =
+    new APIConditionGroup('AND', [
+      new APIConditionGroup('OR', [
+        new APICondition('B25__Resource_Type__r.Name', 'IN', ['Rentable Resource', 'Room'])
+      ])
+    ])
+  expect(resourceFetchMock).toBeCalledTimes(1)
+  expectSearchMockToHaveBeenCalledWith(resourceFetchMock, [], [], expectedCondition, [])
+})
+
+test('It sends the correct request if type names and ids are mixed', async () => {
+  const resourceGenerator = new ResourceGenerator('Id', 'Name')
+  const resourceFetchMock = fetchMock.doMock(JSON.stringify(resourceGenerator.getResourceArray(2)))
+
+  await getResourceRequest()
+    .withType('Rentable Resource', dummyId0, 'Room', dummyId1)
+    .getResults()
+  const expectedCondition =
+    new APIConditionGroup('AND', [
+      new APIConditionGroup('OR', [
+        new APICondition('B25__Resource_Type__c', 'IN', [dummyId0, dummyId1]),
+        new APICondition('B25__Resource_Type__r.Name', 'IN', ['Rentable Resource', 'Room'])
       ])
     ])
   expect(resourceFetchMock).toBeCalledTimes(1)
@@ -256,13 +324,12 @@ test('It combines types and conditions with an and grouping', async () => {
 
   await getResourceRequest()
     .withCondition(new Condition('B25__Api_Visible__c', Operator.EQUAL, true))
-    .withType(dummyId0, dummyId1)
+    .withType('Rentable Resource', 'Room')
     .getResults()
 
   const expectedCondition = new APIConditionGroup('AND', [
     new APIConditionGroup('OR', [
-      new APICondition('B25__Resource_Type__r.Name', '=', [dummyId0]),
-      new APICondition('B25__Resource_Type__r.Name', '=', [dummyId1])
+      new APICondition('B25__Resource_Type__r.Name', 'IN', ['Rentable Resource', 'Room'])
     ]),
     new APIConditionGroup('OR', [
       new APICondition('B25__Api_Visible__c', '=', ['true'])
