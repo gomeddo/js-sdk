@@ -5,6 +5,7 @@ import AvailabilityTimeSlotRequest from './request-bodies/availability-request'
 import DimensionSearchBody from './request-bodies/dimension-search-body'
 import BlueprintSearchBody from './request-bodies/blueprint-search-body'
 import ReservationPriceCalculationRequest from './request-bodies/reservation-price-calculation-request'
+import ContextualPriceCalculationRequest from './request-bodies/contextual-price-calculation-request'
 import { ReservationProcessRequest } from './request-bodies/reservation-save-request'
 import ServiceTimeSlotRequest from './request-bodies/service-availability-request'
 import ServiceTimeSlotResponse from './service-availability-response'
@@ -154,6 +155,21 @@ export default class GoMeddoAPI {
 
   public async calculatePrice (calculationRequest: ReservationPriceCalculationRequest): Promise<ReservationPriceCalculationRequest> {
     const url = new URL('B25/v1/priceCalculation', this.baseUrl)
+    const response = await fetch(url.href, {
+      method: 'POST',
+      body: JSON.stringify(calculationRequest),
+      headers: this.getHeaders()
+    })
+    await this.checkResponse(response)
+    return await response.json()
+  }
+
+  /**
+   * Runs the contextual price calculation. The endpoint returns a flat map of
+   * the reservation fields that changed (full API names) rather than the whole record.
+   */
+  public async calculateContextualPrice (calculationRequest: ContextualPriceCalculationRequest): Promise<Record<string, any>> {
+    const url = new URL('B25/v1/contextualPriceCalculation', this.baseUrl)
     const response = await fetch(url.href, {
       method: 'POST',
       body: JSON.stringify(calculationRequest),

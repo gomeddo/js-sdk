@@ -424,13 +424,15 @@ class GoMeddo {
   /**
    * Sends the reservation object to salesforce to have the price calculations run.
    * The calculated price is then populated on the reservation returned.
+   * Note: In 0.0.27 the calculation endpoint changed from the original
+   * calculatePrice process to the new calculateContextualPrice path.
    *
    * @param reservation The reservation to calculate the price for.
    * @returns The reservation with updated price fields.
    */
   public async calculatePriceFrontendBuilder (reservation: Reservation): Promise<Reservation> {
-    const updatedPriceCalculationData = await this.api.calculatePrice(reservation.getPriceCalculationData())
-    Object.entries(updatedPriceCalculationData.reservation).forEach(([fieldName, value]) => reservation.setCustomProperty(fieldName, value))
+    const changedFields = await this.api.calculateContextualPrice(reservation.getContextualPriceCalculationData())
+    Object.entries(changedFields).forEach(([fieldName, value]) => reservation.setCustomProperty(fieldName, value))
     const priceFieldValue = reservation.getCustomProperty('B25__Price__c')
     const subtotalValue = (reservation.getCustomProperty('B25__Subtotal__c') ?? 0) as number
 

@@ -111,6 +111,38 @@ test('Price calculation includes related records', () => {
   expect(priceData).toStrictEqual(expectedPriceData)
 })
 
+test('Contextual price calculation wraps the reservation as the parent of the collection', () => {
+  const service = new Service({ ...getSObject('Service Id 1'), B25__Price__c: 10 }, [])
+  const reservation = new Reservation()
+  reservation.setCustomProperty('B25__Base_Price__c', 15)
+  reservation.addService(service, 2)
+  const relatedRecord = new SObject()
+  relatedRecord.setCustomProperty('Custom_Field__c', 'value')
+  reservation.addRelatedRecord('Custom_Junction__c', relatedRecord)
+
+  const contextualData = reservation.getContextualPriceCalculationData()
+
+  expect(contextualData.isParent).toBe(false)
+  expect(contextualData.collection.childReservations).toStrictEqual([])
+  // The reservation being processed is also the parent of the collection.
+  expect(contextualData.collection.parentReservation).toBe(contextualData.beingProcessed)
+  expect(contextualData.beingProcessed.reservation).toStrictEqual({ B25__Base_Price__c: 15 })
+  // Mirrors B25's convertToV1RequestData: the configured related records (which include the
+  // service reservation registered under its object name) plus the service reservations under
+  // the relationship name the contextual calculator actually reads.
+  expect(contextualData.beingProcessed.childRecords).toStrictEqual({
+    Custom_Junction__c: [
+      { Custom_Field__c: 'value', attributes: { type: 'Custom_Junction__c' } }
+    ],
+    B25__Service_Reservation__c: [
+      { B25__Quantity__c: 2, B25__Service__c: 'Service Id 1', B25__Unit_Price__c: 10, attributes: { type: 'B25__Service_Reservation__c' } }
+    ],
+    B25__ServiceReservations__r: [
+      { B25__Quantity__c: 2, B25__Service__c: 'Service Id 1', B25__Unit_Price__c: 10, attributes: { type: 'B25__Service_Reservation__c' } }
+    ]
+  })
+})
+
 test('Price calculation includes empty related records by default', () => {
   const reservation = new Reservation()
   const priceData = reservation.getPriceCalculationData()

@@ -2,6 +2,7 @@ import { Environment } from '../../src/index'
 import GoMeddoAPI from '../../src/api/gomeddo-api-requests'
 import AvailabilityTimeSlotRequest from '../../src/api/request-bodies/availability-request'
 import ReservationPriceCalculationRequest from '../../src/api/request-bodies/reservation-price-calculation-request'
+import ContextualPriceCalculationRequest from '../../src/api/request-bodies/contextual-price-calculation-request'
 import { ReservationProcessRequest } from '../../src/api/request-bodies/reservation-save-request'
 import { getAvailabilityResponse, getAvailabilitySlot } from '../__utils__/availability-responses'
 import TimeSlotRequestBody from '../../src/api/request-bodies/timeslots-request-body'
@@ -95,6 +96,22 @@ test('price calculation includes relatedRecords in the request body', async () =
   )
   const sentBody = JSON.parse((mock as any).mock.calls[0][1].body)
   expect(sentBody.relatedRecords).toStrictEqual(relatedRecords)
+})
+
+test('contextual price calculation makes the correct request', async () => {
+  const mock = fetchMock.once(JSON.stringify({ B25__Subtotal__c: 100 }))
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+  const body = new ContextualPriceCalculationRequest({ reservation: {}, childRecords: {} })
+  const result = await api.calculateContextualPrice(body)
+  expect(result).toStrictEqual({ B25__Subtotal__c: 100 })
+  expect(mock).toHaveBeenCalledWith(
+    'https://api.gomeddo.com/api/v3/proxy/B25/v1/contextualPriceCalculation',
+    {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: { Authorization: 'Bearer YOUR_API_KEY' }
+    }
+  )
 })
 
 test('getTimeSlots makes the correct request and processes response correctly', async () => {
