@@ -1,4 +1,5 @@
 import ReservationCollection from '../api/request-bodies/reservation-collection'
+import ContextualPriceCalculationRequest, { ContextualReservation } from '../api/request-bodies/contextual-price-calculation-request'
 import ReservationPriceCalculationRequest from '../api/request-bodies/reservation-price-calculation-request'
 import { ReservationProcessRequest } from '../api/request-bodies/reservation-save-request'
 import { isSalesforceId } from '../utils/salesforce-utils'
@@ -230,6 +231,25 @@ export default class Reservation extends SObject {
       }, 0),
       this.getRelatedRecordsRestData()
     )
+  }
+
+  /**
+   * @internal
+   * @returns Contextual price calculation request data for this reservation
+   */
+  public getContextualPriceCalculationData (): ContextualPriceCalculationRequest {
+    const beingProcessed: ContextualReservation = {
+      reservation: this.getSFSObject(),
+      childRecords: {
+        ...this.getRelatedRecordsRestData(),
+        // Each child record is deserialized as a generic SObject server side,
+        // so it must carry its attributes.type.
+        B25__ServiceReservations__r: this.serviceReservations.map(
+          serviceReservation => serviceReservation.getSFSObject('B25__Service_Reservation__c')
+        )
+      }
+    }
+    return new ContextualPriceCalculationRequest(beingProcessed, false)
   }
 
   /**

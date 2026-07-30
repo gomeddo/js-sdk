@@ -300,6 +300,35 @@ test('You can recalculate the price with related records included', async () => 
   })
 })
 
+test('calculatePriceFrontendBuilder applies the contextual change map and uses the contextual endpoint', async () => {
+  const mock = fetchMock.once(JSON.stringify({
+    B25__Subtotal__c: 150,
+    B25__Service_Costs__c: 0
+  }))
+  const reservation = new Reservation()
+  reservation.setCustomProperty('B25__Quantity__c', 10)
+  reservation.setCustomProperty('B25__Base_Price__c', 15)
+  const result = await (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION)).calculatePriceFrontendBuilder(reservation)
+  expect(result.getCustomProperty('B25__Subtotal__c')).toStrictEqual(150)
+  expect(result.getCustomProperty('B25__Service_Costs__c')).toStrictEqual(0)
+  // No B25__Price__c so Total_Price falls back to the subtotal.
+  expect(result.getCustomProperty('B25__Total_Price__c')).toStrictEqual(150)
+  expect(mock).toHaveBeenCalledWith(
+    'https://api.gomeddo.com/api/v3/proxy/B25/v1/contextualPriceCalculation',
+    expect.objectContaining({ method: 'POST' })
+  )
+})
+
+test('calculatePriceFrontendBuilder prefers an explicit price over the subtotal', async () => {
+  fetchMock.once(JSON.stringify({
+    B25__Subtotal__c: 150,
+    B25__Price__c: 200
+  }))
+  const reservation = new Reservation()
+  const result = await (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION)).calculatePriceFrontendBuilder(reservation)
+  expect(result.getCustomProperty('B25__Total_Price__c')).toStrictEqual(200)
+})
+
 test('saveFrontendBuilderReservation passes through eventCredentials when present', async () => {
   const eventCredentials = {
     region: 'eu-central-1',
