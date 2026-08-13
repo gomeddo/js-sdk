@@ -418,3 +418,12 @@ test('uploadFrontendBuilderReservationFile throws a RequestError on a rejected u
       .uploadFrontendBuilderReservationFile('token-uuid', 'field-1', file, 'contract.pdf', details)
   ).rejects.toThrow()
 })
+
+test('Environment.LOCAL points the api at a local landingpage backend', async () => {
+  const mock = fetchMock.once(JSON.stringify({ contentVersionId: '068xx', title: 'contract.pdf' }))
+  const details = new (FrontendBuilderDetails as any)(null)
+  details.setFrontendBuilderDeveloperName('testBuilder')
+  await (new GoMeddo('YOUR_API_KEY', Environment.LOCAL))
+    .uploadFrontendBuilderReservationFile('token-uuid', 'field-1', new Blob(['x']), 'contract.pdf', details)
+  expect(String(mock.mock.calls[0][0])).toBe('http://localhost:8000/api/v3/proxy/GMFB/v1/reservation-files')
+})

@@ -44,6 +44,9 @@ export default class GoMeddoAPI {
       case Environment.PRODUCTION:
         this.baseUrl = 'https://api.gomeddo.com/api/v3/proxy/'
         break
+      case Environment.LOCAL:
+        this.baseUrl = 'http://localhost:8000/api/v3/proxy/'
+        break
     }
   }
 

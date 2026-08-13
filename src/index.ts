@@ -36,6 +36,7 @@ enum Environment {
   ACCEPTANCE,
   STAGING,
   PRODUCTION,
+  LOCAL,
 }
 
 /**
