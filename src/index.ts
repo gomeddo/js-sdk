@@ -1,4 +1,4 @@
-import GoMeddoAPI from './api/gomeddo-api-requests'
+import GoMeddoAPI, { FrontendBuilderReservationFileResult } from './api/gomeddo-api-requests'
 import ResourceRequest from './resource-request'
 import ReservationRequest from './reservation-request'
 import TimeSlotsRequest from './timeslots-request'
@@ -29,6 +29,7 @@ import { FrontendBuilderSaveRequest as FrontendBuilderReservationProcessRequest 
 import { FrontendBuilderCancelRequest } from './api/request-bodies/frontend-builder-cancel-request'
 import { ReservationProcessRequest } from './api/request-bodies/reservation-save-request'
 import { FrontendBuilderGenerateChildRequest } from './api/request-bodies/frontend-builder-generate-child-request'
+export type { FrontendBuilderReservationFileResult }
 
 enum Environment {
   DEVELOP,
@@ -300,6 +301,22 @@ class GoMeddo {
   public async cancelFrontendBuilderReservation (reservationCancellationId: string, frontendBuilderDetails: FrontendBuilderDetails): Promise<Reservation> {
     const cancelRequest = this.buildFrontendBuilderCancelRequest(reservationCancellationId, frontendBuilderDetails)
     return await this.api.cancelFrontendBuilderReservation(cancelRequest) as any
+  }
+
+  /**
+   * Uploads a file to a reservation created through the Frontend Builder and links it
+   * to the reservation record in Salesforce. Requires file upload to be enabled for the
+   * frontend and the API key to have the file-upload scope.
+   *
+   * @param frontendBuilderId The Frontend_Builder_Id__c token returned on the saved reservation
+   * @param fieldId The id of the configured file upload field the file belongs to
+   * @param file The file contents to upload
+   * @param fileName The name of the file, including its extension
+   * @param frontendBuilderDetails The frontend builder object details to include
+   * @returns The stored file's ContentVersion id and title.
+   */
+  public async uploadFrontendBuilderReservationFile (frontendBuilderId: string, fieldId: string, file: Blob, fileName: string, frontendBuilderDetails: FrontendBuilderDetails): Promise<FrontendBuilderReservationFileResult> {
+    return await this.api.uploadFrontendBuilderReservationFile(frontendBuilderId, frontendBuilderDetails.getFrontendBuilderDeveloperName(), fieldId, file, fileName)
   }
 
   /**
