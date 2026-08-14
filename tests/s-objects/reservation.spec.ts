@@ -127,20 +127,42 @@ test('Contextual price calculation wraps the reservation as the parent of the co
   // The reservation being processed is also the parent of the collection.
   expect(contextualData.collection.parentReservation).toBe(contextualData.beingProcessed)
   expect(contextualData.beingProcessed.reservation).toStrictEqual({ B25__Base_Price__c: 15 })
-  // Mirrors B25's convertToV1RequestData: the configured related records (which include the
-  // service reservation registered under its object name) plus the service reservations under
-  // the relationship name the contextual calculator actually reads.
+  // The configured related records, plus the service reservations under the child relationship
+  // name the contextual calculator reads. The service reservations must not also appear under
+  // their object name, because B25 hands the whole child record map to the v1 price
+  // implementation as relatedRecords, which would then count them twice.
   expect(contextualData.beingProcessed.childRecords).toStrictEqual({
     Custom_Junction__c: [
       { Custom_Field__c: 'value', attributes: { type: 'Custom_Junction__c' } }
-    ],
-    B25__Service_Reservation__c: [
-      { B25__Quantity__c: 2, B25__Service__c: 'Service Id 1', B25__Unit_Price__c: 10, attributes: { type: 'B25__Service_Reservation__c' } }
     ],
     B25__ServiceReservations__r: [
       { B25__Quantity__c: 2, B25__Service__c: 'Service Id 1', B25__Unit_Price__c: 10, attributes: { type: 'B25__Service_Reservation__c' } }
     ]
   })
+})
+
+test('Contextual price calculation does not affect the related records sent when saving', () => {
+  const service = new Service({ ...getSObject('Service Id 1'), B25__Price__c: 10 }, [])
+  const reservation = new Reservation()
+  reservation.addService(service, 2)
+
+  reservation.getContextualPriceCalculationData()
+
+  // The save endpoints expect the service reservations under their object name, so dropping that
+  // key for the price calculation must not mutate the reservation itself.
+  expect(reservation.getReservationProcessRequest().relatedRecords).toStrictEqual({
+    B25__Service_Reservation__c: [
+      { B25__Quantity__c: 2, B25__Service__c: 'Service Id 1', B25__Unit_Price__c: 10, attributes: { type: 'B25__Service_Reservation__c' } }
+    ]
+  })
+})
+
+test('Service costs are the sum of the service reservation subtotals', () => {
+  const reservation = new Reservation()
+  expect(reservation.getServiceCosts()).toStrictEqual(0)
+  reservation.addService(new Service({ ...getSObject('Service Id 1'), B25__Price__c: 10 }, []), 2)
+  reservation.addService(new Service({ ...getSObject('Service Id 2'), B25__Price__c: 5 }, []), 3)
+  expect(reservation.getServiceCosts()).toStrictEqual(35)
 })
 
 test('Price calculation includes empty related records by default', () => {

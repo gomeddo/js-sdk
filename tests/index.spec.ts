@@ -311,12 +311,47 @@ test('calculatePriceFrontendBuilder applies the contextual change map and uses t
   const result = await (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION)).calculatePriceFrontendBuilder(reservation)
   expect(result.getCustomProperty('B25__Subtotal__c')).toStrictEqual(150)
   expect(result.getCustomProperty('B25__Service_Costs__c')).toStrictEqual(0)
-  // No B25__Price__c so Total_Price falls back to the subtotal.
+  // No B25__Price__c and no service costs, so Total_Price falls back to the subtotal.
   expect(result.getCustomProperty('B25__Total_Price__c')).toStrictEqual(150)
   expect(mock).toHaveBeenCalledWith(
     'https://api.gomeddo.com/api/v3/proxy/B25/v1/contextualPriceCalculation',
     expect.objectContaining({ method: 'POST' })
   )
+})
+
+test('calculatePriceFrontendBuilder adds the returned service costs to the total price', async () => {
+  fetchMock.once(JSON.stringify({
+    B25__Subtotal__c: 150,
+    B25__Service_Costs__c: 30
+  }))
+  const reservation = new Reservation()
+  const result = await (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION)).calculatePriceFrontendBuilder(reservation)
+  // Matches the Total_Price__c formula in Salesforce: Subtotal__c + Service_Costs__c.
+  expect(result.getCustomProperty('B25__Total_Price__c')).toStrictEqual(180)
+})
+
+test('calculatePriceFrontendBuilder falls back to locally calculated service costs', async () => {
+  fetchMock.once(JSON.stringify({
+    B25__Subtotal__c: 150
+  }))
+  const reservation = new Reservation()
+  reservation.addService(new Service({ ...getSObject('Service Id 1'), B25__Price__c: 10 }, []), 3)
+  const result = await (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION)).calculatePriceFrontendBuilder(reservation)
+  // The v1 fallback the endpoint uses when no contextual class is configured never returns
+  // Service_Costs__c, so the total would otherwise silently drop the services.
+  expect(result.getCustomProperty('B25__Total_Price__c')).toStrictEqual(180)
+})
+
+test('calculatePriceFrontendBuilder keeps service costs out of the total when a price is set', async () => {
+  fetchMock.once(JSON.stringify({
+    B25__Subtotal__c: 150,
+    B25__Service_Costs__c: 30,
+    B25__Price__c: 200
+  }))
+  const reservation = new Reservation()
+  const result = await (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION)).calculatePriceFrontendBuilder(reservation)
+  // Total_Price__c is IF(ISBLANK(Price__c), Subtotal__c + Service_Costs__c, Price__c).
+  expect(result.getCustomProperty('B25__Total_Price__c')).toStrictEqual(200)
 })
 
 test('calculatePriceFrontendBuilder prefers an explicit price over the subtotal', async () => {
