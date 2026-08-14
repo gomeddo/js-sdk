@@ -224,13 +224,24 @@ export default class Reservation extends SObject {
     return new ReservationPriceCalculationRequest(
       this.getSFSObject(),
       this.getServiceReservationRestData(),
-      this.serviceReservations.reduce((serviceCosts, serviceReservation) => {
-        const quantity = serviceReservation.quantity ?? 0
-        const unitPrice = serviceReservation.unitPrice ?? 0
-        return serviceCosts + (quantity * unitPrice)
-      }, 0),
+      this.getServiceCosts(),
       this.getRelatedRecordsRestData()
     )
+  }
+
+  /**
+   * The service costs of this reservation, matching the Service_Costs__c roll up summary on the
+   * reservation in Salesforce. Needed because that roll up does not exist before the reservation
+   * and its service reservations have been inserted.
+   *
+   * @returns The sum of the subtotals of every service reservation on this reservation.
+   */
+  public getServiceCosts (): number {
+    return this.serviceReservations.reduce((serviceCosts, serviceReservation) => {
+      const quantity = serviceReservation.quantity ?? 0
+      const unitPrice = serviceReservation.unitPrice ?? 0
+      return serviceCosts + (quantity * unitPrice)
+    }, 0)
   }
 
   /**
@@ -238,16 +249,20 @@ export default class Reservation extends SObject {
    * @returns Contextual price calculation request data for this reservation
    */
   public getContextualPriceCalculationData (): ContextualPriceCalculationRequest {
+    const childRecords = this.getRelatedRecordsRestData()
+    // addService registers each service reservation under the object name because that is what the
+    // save endpoints expect, but the contextual calculator reads them from the child relationship
+    // name. Send only the relationship name so the records are not submitted twice, which would
+    // double count them for any price implementation that sums over all of the related records.
+    delete childRecords.B25__Service_Reservation__c
+    // Each child record is deserialized as a generic SObject server side,
+    // so it must carry its attributes.type.
+    childRecords.B25__ServiceReservations__r = this.serviceReservations.map(
+      serviceReservation => serviceReservation.getSFSObject('B25__Service_Reservation__c')
+    )
     const beingProcessed: ContextualReservation = {
       reservation: this.getSFSObject(),
-      childRecords: {
-        ...this.getRelatedRecordsRestData(),
-        // Each child record is deserialized as a generic SObject server side,
-        // so it must carry its attributes.type.
-        B25__ServiceReservations__r: this.serviceReservations.map(
-          serviceReservation => serviceReservation.getSFSObject('B25__Service_Reservation__c')
-        )
-      }
+      childRecords
     }
     return new ContextualPriceCalculationRequest(beingProcessed, false)
   }

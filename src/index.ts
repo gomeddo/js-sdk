@@ -43,7 +43,7 @@ enum Environment {
  * GoMeddo object allows for interaction with GoMeddo
  */
 class GoMeddo {
-  static version: string = '0.0.26'
+  static version: string = '0.0.27'
   private readonly environment: Environment
   private readonly api: GoMeddoAPI
 
@@ -453,8 +453,14 @@ class GoMeddo {
     Object.entries(changedFields).forEach(([fieldName, value]) => reservation.setCustomProperty(fieldName, value))
     const priceFieldValue = reservation.getCustomProperty('B25__Price__c')
     const subtotalValue = (reservation.getCustomProperty('B25__Subtotal__c') ?? 0) as number
+    // Service_Costs__c is a roll up summary, so it does not exist yet before the reservation is
+    // inserted. The contextual calculator returns it in the change map, the v1 fallback the
+    // endpoint uses when no contextual class is configured does not, so recompute it locally
+    // when the response left it out.
+    const serviceCostsValue = (reservation.getCustomProperty('B25__Service_Costs__c') ?? reservation.getServiceCosts()) as number
 
-    reservation.setCustomProperty('B25__Total_Price__c', priceFieldValue ?? subtotalValue)
+    // Mirrors the Total_Price__c formula: IF(ISBLANK(Price__c), Subtotal__c + Service_Costs__c, Price__c)
+    reservation.setCustomProperty('B25__Total_Price__c', priceFieldValue ?? (subtotalValue + serviceCostsValue))
     return reservation
   }
 }
