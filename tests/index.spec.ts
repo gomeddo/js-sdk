@@ -383,3 +383,47 @@ test('saveFrontendBuilderReservation leaves eventCredentials null when not in re
   expect(result.paymentUrl).toBeNull()
   expect(result.transactionId).toBeNull()
 })
+
+test('uploadFrontendBuilderReservationFile posts multipart form data to the reservation-files endpoint', async () => {
+  const mock = fetchMock.once(JSON.stringify({ contentVersionId: '068xx', title: 'contract.pdf' }))
+  const details = new (FrontendBuilderDetails as any)(null)
+  details.setFrontendBuilderDeveloperName('testBuilder')
+  const file = new Blob(['file content'], { type: 'application/pdf' })
+
+  const result = await (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION))
+    .uploadFrontendBuilderReservationFile('token-uuid', 'field-1', file, 'contract.pdf', details)
+
+  expect(result).toStrictEqual({ contentVersionId: '068xx', title: 'contract.pdf' })
+  expect(mock).toHaveBeenCalledTimes(1)
+  const [url, init] = mock.mock.calls[0] as any
+  expect(url).toBe('https://api.gomeddo.com/api/v3/proxy/GMFB/v1/reservation-files')
+  expect(init.method).toBe('POST')
+  expect(init.headers).toStrictEqual({ Authorization: 'Bearer YOUR_API_KEY' })
+  expect(init.body).toBeInstanceOf(FormData)
+  const body = init.body as FormData
+  expect(body.get('frontendBuilderId')).toBe('token-uuid')
+  expect(body.get('frontendBuilderDeveloperName')).toBe('testBuilder')
+  expect(body.get('fieldId')).toBe('field-1')
+  expect((body.get('file') as File).name).toBe('contract.pdf')
+})
+
+test('uploadFrontendBuilderReservationFile throws a RequestError on a rejected upload', async () => {
+  fetchMock.once(JSON.stringify({ devMessage: 'disabled', userMessage: 'File upload is not available for this frontend.', errorCode: 14 }), { status: 403 })
+  const details = new (FrontendBuilderDetails as any)(null)
+  details.setFrontendBuilderDeveloperName('testBuilder')
+  const file = new Blob(['file content'], { type: 'application/pdf' })
+
+  await expect(
+    (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION))
+      .uploadFrontendBuilderReservationFile('token-uuid', 'field-1', file, 'contract.pdf', details)
+  ).rejects.toThrow()
+})
+
+test('Environment.LOCAL points the api at a local landingpage backend', async () => {
+  const mock = fetchMock.once(JSON.stringify({ contentVersionId: '068xx', title: 'contract.pdf' }))
+  const details = new (FrontendBuilderDetails as any)(null)
+  details.setFrontendBuilderDeveloperName('testBuilder')
+  await (new GoMeddo('YOUR_API_KEY', Environment.LOCAL))
+    .uploadFrontendBuilderReservationFile('token-uuid', 'field-1', new Blob(['x']), 'contract.pdf', details)
+  expect(String(mock.mock.calls[0][0])).toBe('http://localhost:8000/api/v3/proxy/GMFB/v1/reservation-files')
+})

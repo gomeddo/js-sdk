@@ -44,6 +44,9 @@ export default class GoMeddoAPI {
       case Environment.PRODUCTION:
         this.baseUrl = 'https://api.gomeddo.com/api/v3/proxy/'
         break
+      case Environment.LOCAL:
+        this.baseUrl = 'http://localhost:8000/api/v3/proxy/'
+        break
     }
   }
 
@@ -107,6 +110,23 @@ export default class GoMeddoAPI {
     })
     await this.checkResponse(response)
     return await response.json()
+  }
+
+  public async uploadFrontendBuilderReservationFile (frontendBuilderId: string, frontendBuilderDeveloperName: string, fieldId: string, file: Blob, fileName: string): Promise<FrontendBuilderReservationFileResult> {
+    const url = new URL('GMFB/v1/reservation-files', this.baseUrl)
+    const formData = new FormData()
+    formData.append('file', file, fileName)
+    formData.append('frontendBuilderId', frontendBuilderId)
+    formData.append('frontendBuilderDeveloperName', frontendBuilderDeveloperName)
+    formData.append('fieldId', fieldId)
+    const response = await fetch(url.href, {
+      method: 'POST',
+      body: formData,
+      // No Content-Type header: fetch sets the multipart boundary itself.
+      headers: this.getHeaders()
+    })
+    await this.checkResponse(response)
+    return await response.json() as FrontendBuilderReservationFileResult
   }
 
   public async generateChildReservation (generateChildRequest: FrontendBuilderGenerateChildRequest): Promise<SFReservation[]> {
@@ -324,6 +344,11 @@ export default class GoMeddoAPI {
     }
     throw new RequestError((await response.json()) as GoMeddoApiError)
   }
+}
+
+export interface FrontendBuilderReservationFileResult {
+  contentVersionId: string
+  title: string
 }
 
 class GoMeddoApiError {
