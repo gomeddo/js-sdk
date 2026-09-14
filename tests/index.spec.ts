@@ -354,6 +354,61 @@ test('calculatePriceFrontendBuilder keeps service costs out of the total when a 
   expect(result.getCustomProperty('B25__Total_Price__c')).toStrictEqual(200)
 })
 
+// Salesforce answers a request for a URL that does not exist, or an unhandled Apex failure, with its
+// own error shape rather than a GoMeddoApiError: an array of { errorCode, message }.
+const endpointMissing = JSON.stringify([{ errorCode: 'NOT_FOUND', message: 'Could not find a match for URL' }])
+const apexFailure = JSON.stringify([{ errorCode: 'APEX_ERROR', message: 'System.TypeException: Invalid conversion from runtime type List<SObject> to List<B25__Service_Reservation__c>' }])
+const legacyPriceResponse = JSON.stringify({
+  reservation: { attributes: { type: 'B25__Reservation__c' }, B25__Base_Price__c: 100, B25__Subtotal__c: 200 },
+  serviceReservations: [],
+  serviceCosts: 0,
+  relatedRecords: {}
+})
+
+test('calculatePriceFrontendBuilder falls back to the legacy endpoint when the contextual one does not exist', async () => {
+  // A package before 6.21 has no contextual endpoint at all.
+  fetchMock.once(endpointMissing, { status: 404 })
+  fetchMock.once(legacyPriceResponse)
+  const reservation = new Reservation()
+  const result = await (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION)).calculatePriceFrontendBuilder(reservation)
+  expect(result.getCustomProperty('B25__Subtotal__c')).toStrictEqual(200)
+  expect(result.getCustomProperty('B25__Total_Price__c')).toStrictEqual(200)
+  expect(fetchMock.mock.calls).toHaveLength(2)
+  expect(fetchMock.mock.calls[0][0]).toBe('https://api.gomeddo.com/api/v3/proxy/B25/v1/contextualPriceCalculation')
+  expect(fetchMock.mock.calls[1][0]).toBe('https://api.gomeddo.com/api/v3/proxy/B25/v1/priceCalculation')
+})
+
+test('calculatePriceFrontendBuilder falls back to the legacy endpoint when the contextual one fails in Apex', async () => {
+  // 6.21 through 7.3 have the endpoint but raise an unhandled exception on this payload.
+  fetchMock.once(apexFailure, { status: 500 })
+  fetchMock.once(legacyPriceResponse)
+  const reservation = new Reservation()
+  const result = await (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION)).calculatePriceFrontendBuilder(reservation)
+  expect(result.getCustomProperty('B25__Subtotal__c')).toStrictEqual(200)
+  expect(fetchMock.mock.calls).toHaveLength(2)
+  expect(fetchMock.mock.calls[1][0]).toBe('https://api.gomeddo.com/api/v3/proxy/B25/v1/priceCalculation')
+})
+
+test('calculatePriceFrontendBuilder does not fall back when the org rejects the request itself', async () => {
+  // A 4xx other than 404 is an answer about this request, not a missing endpoint.
+  fetchMock.once(JSON.stringify({ devMessage: 'bad body', userMessage: 'The request body was not valid for this endpoint.', errorCode: 4 }), { status: 400 })
+  const reservation = new Reservation()
+  await expect(
+    (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION)).calculatePriceFrontendBuilder(reservation)
+  ).rejects.toThrow('The request body was not valid for this endpoint.')
+  expect(fetchMock.mock.calls).toHaveLength(1)
+})
+
+test('calculatePriceFrontendBuilder still adds locally calculated service costs on the fallback path', async () => {
+  // The legacy endpoint never returns Service_Costs__c, so the total has to be completed locally.
+  fetchMock.once(endpointMissing, { status: 404 })
+  fetchMock.once(legacyPriceResponse)
+  const reservation = new Reservation()
+  reservation.addService(new Service({ ...getSObject('Service Id 1'), B25__Price__c: 10 }, []), 3)
+  const result = await (new GoMeddo('YOUR_API_KEY', Environment.PRODUCTION)).calculatePriceFrontendBuilder(reservation)
+  expect(result.getCustomProperty('B25__Total_Price__c')).toStrictEqual(230)
+})
+
 test('calculatePriceFrontendBuilder prefers an explicit price over the subtotal', async () => {
   fetchMock.once(JSON.stringify({
     B25__Subtotal__c: 150,

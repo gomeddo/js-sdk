@@ -1,4 +1,4 @@
-import GoMeddoAPI, { FrontendBuilderReservationFileResult } from './api/gomeddo-api-requests'
+import GoMeddoAPI, { RequestError, FrontendBuilderReservationFileResult } from './api/gomeddo-api-requests'
 import ResourceRequest from './resource-request'
 import ReservationRequest from './reservation-request'
 import TimeSlotsRequest from './timeslots-request'
@@ -43,7 +43,7 @@ enum Environment {
  * GoMeddo object allows for interaction with GoMeddo
  */
 class GoMeddo {
-  static version: string = '0.0.27'
+  static version: string = '0.0.28'
   private readonly environment: Environment
   private readonly api: GoMeddoAPI
 
@@ -442,14 +442,27 @@ class GoMeddo {
   /**
    * Sends the reservation object to salesforce to have the price calculations run.
    * The calculated price is then populated on the reservation returned.
-   * Note: In 0.0.27 the calculation endpoint changed from the original
-   * calculatePrice process to the new calculateContextualPrice path.
+   *
+   * The contextual price endpoint is asked first. It only exists from GoMeddo 6.21, and on
+   * 6.21 through 7.3 it rejects this request, so when it answers with a status that says it
+   * cannot serve the org at all the original price calculation endpoint is used instead. That
+   * endpoint exists on every version and, from 6.21, runs the same pricing engine, so the
+   * fallback changes where the request goes and not what comes back.
    *
    * @param reservation The reservation to calculate the price for.
    * @returns The reservation with updated price fields.
    */
   public async calculatePriceFrontendBuilder (reservation: Reservation): Promise<Reservation> {
-    const changedFields = await this.api.calculateContextualPrice(reservation.getContextualPriceCalculationData())
+    let changedFields: Record<string, any>
+    try {
+      changedFields = await this.api.calculateContextualPrice(reservation.getContextualPriceCalculationData())
+    } catch (error) {
+      if (!GoMeddo.isPriceEndpointUnavailable(error)) {
+        throw error
+      }
+      const legacyResult = await this.api.calculatePrice(reservation.getPriceCalculationData())
+      changedFields = legacyResult.reservation as Record<string, any>
+    }
     Object.entries(changedFields).forEach(([fieldName, value]) => reservation.setCustomProperty(fieldName, value))
     const priceFieldValue = reservation.getCustomProperty('B25__Price__c')
     const subtotalValue = (reservation.getCustomProperty('B25__Subtotal__c') ?? 0) as number
@@ -463,8 +476,19 @@ class GoMeddo {
     reservation.setCustomProperty('B25__Total_Price__c', priceFieldValue ?? (subtotalValue + serviceCostsValue))
     return reservation
   }
+
+  /**
+   * Whether a failed price request means the endpoint cannot serve this org, as opposed to the
+   * org rejecting this particular request. A 404 is a package version that predates the
+   * endpoint. A 5xx is an unhandled Apex failure, which 6.21 through 7.3 raise on this payload.
+   * Anything else is a real answer about the request and is left for the caller.
+   */
+  private static isPriceEndpointUnavailable (error: unknown): boolean {
+    return error instanceof RequestError && (error.status === 404 || error.status >= 500)
+  }
 }
 export {
+  RequestError,
   Environment,
   ResourceRequest,
   DimensionRecordRequest,
