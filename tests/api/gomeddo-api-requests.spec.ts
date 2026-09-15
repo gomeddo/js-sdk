@@ -1,5 +1,5 @@
 import { Environment } from '../../src/index'
-import GoMeddoAPI from '../../src/api/gomeddo-api-requests'
+import GoMeddoAPI, { RequestError } from '../../src/api/gomeddo-api-requests'
 import AvailabilityTimeSlotRequest from '../../src/api/request-bodies/availability-request'
 import ReservationPriceCalculationRequest from '../../src/api/request-bodies/reservation-price-calculation-request'
 import ContextualPriceCalculationRequest from '../../src/api/request-bodies/contextual-price-calculation-request'
@@ -142,4 +142,22 @@ test('getTimeSlots makes the correct request and processes response correctly', 
 
   expect(timeSlots).toBeInstanceOf(Array)
   expect(timeSlots[0]).toBeInstanceOf(ReservationTimeSlot)
+})
+
+test('a failed request exposes the HTTP status and reads a Salesforce array error body', async () => {
+  fetchMock.once(JSON.stringify([{ errorCode: 'NOT_FOUND', message: 'Could not find a match for URL' }]), { status: 404 })
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+  const failure = await api.calculateContextualPrice({ isParent: false, beingProcessed: { reservation: {}, childRecords: {} }, collection: { parentReservation: { reservation: {}, childRecords: {} }, childReservations: [] } } as any).catch(e => e)
+  expect(failure).toBeInstanceOf(RequestError)
+  expect(failure.status).toBe(404)
+  expect(failure.message).toBe('Could not find a match for URL')
+})
+
+test('a failed request still reads the GoMeddo error body', async () => {
+  fetchMock.once(JSON.stringify({ devMessage: 'dev', userMessage: 'Something went wrong.', errorCode: 4 }), { status: 400 })
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+  const failure = await api.calculateContextualPrice({ isParent: false, beingProcessed: { reservation: {}, childRecords: {} }, collection: { parentReservation: { reservation: {}, childRecords: {} }, childReservations: [] } } as any).catch(e => e)
+  expect(failure).toBeInstanceOf(RequestError)
+  expect(failure.status).toBe(400)
+  expect(failure.message).toBe('Something went wrong.')
 })

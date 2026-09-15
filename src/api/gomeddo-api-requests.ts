@@ -342,7 +342,7 @@ export default class GoMeddoAPI {
     if (response.ok) {
       return
     }
-    throw new RequestError((await response.json()) as GoMeddoApiError)
+    throw new RequestError((await response.json()) as GoMeddoApiError, response.status)
   }
 }
 
@@ -359,11 +359,29 @@ class GoMeddoApiError {
   fields: string[] = []
 }
 
-class RequestError extends Error {
+export class RequestError extends Error {
   apiError: GoMeddoApiError
-  constructor (apiError: GoMeddoApiError) {
-    super(apiError.userMessage)
+  /** HTTP status of the failed response, so callers can tell a missing endpoint from a rejected request. */
+  status: number
+
+  constructor (apiError: GoMeddoApiError, status: number = 0) {
+    super(RequestError.describe(apiError))
     this.apiError = apiError
+    this.status = status
     Object.setPrototypeOf(this, RequestError.prototype)
+  }
+
+  /**
+   * GoMeddo endpoints answer with a GoMeddoApiError object, but a platform level failure such as
+   * an unknown URL or an unhandled Apex exception answers with Salesforce's own shape, an array
+   * of { errorCode, message }. Read whichever is present so the error is never just "undefined".
+   */
+  private static describe (apiError: unknown): string {
+    if (Array.isArray(apiError)) {
+      const first = apiError[0] as { message?: string, errorCode?: string } | undefined
+      return first?.message ?? first?.errorCode ?? 'Request failed'
+    }
+    const asApiError = apiError as Partial<GoMeddoApiError> | null
+    return asApiError?.userMessage ?? asApiError?.devMessage ?? 'Request failed'
   }
 }
