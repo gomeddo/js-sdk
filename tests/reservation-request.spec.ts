@@ -251,7 +251,7 @@ const expectMockSearchMockToHaveBeenCalledWith = (mock: FetchMock, reservationId
     {
       method: 'POST',
       body: getExpectedBody(reservationIds, rangeStart, rangeEnd, condition),
-      headers: { Authorization: 'Bearer YOUR_API_KEY' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY', 'X-GoMeddo-Request-Id': expect.any(String) }
     }
   )
 }

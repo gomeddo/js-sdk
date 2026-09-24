@@ -34,7 +34,8 @@ describe('TimeSlotsRequest', () => {
       method: 'POST',
       body: JSON.stringify(new TimeSlotRequestBody(startOfRange.toISOString(), endOfRange.toISOString())),
       headers: {
-        Authorization: `Bearer ${apiKey}`
+        Authorization: `Bearer ${apiKey}`,
+        'X-GoMeddo-Request-Id': expect.any(String)
       }
     })
   })

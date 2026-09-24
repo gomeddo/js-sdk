@@ -41,7 +41,7 @@ test('You can save a reservations through it', async () => {
     {
       method: 'POST',
       body: JSON.stringify(expectedBodyData),
-      headers: { Authorization: 'Bearer YOUR_API_KEY' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY', 'X-GoMeddo-Request-Id': expect.any(String) }
     }
   )
 })
@@ -78,7 +78,7 @@ test('You can update a reservation through it', async () => {
     {
       method: 'PATCH',
       body: JSON.stringify(expectedBodyData),
-      headers: { Authorization: 'Bearer YOUR_API_KEY' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY', 'X-GoMeddo-Request-Id': expect.any(String) }
     }
   )
 })
@@ -100,7 +100,7 @@ test('You can update multiple reservations through it', async () => {
     {
       method: 'PATCH',
       body: JSON.stringify(expectedBodyData),
-      headers: { Authorization: 'Bearer YOUR_API_KEY' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY', 'X-GoMeddo-Request-Id': expect.any(String) }
     }
   )
 })
@@ -144,7 +144,7 @@ test('You can update a reservation with related records through it', async () =>
     {
       method: 'PATCH',
       body: JSON.stringify(expectedBodyData),
-      headers: { Authorization: 'Bearer YOUR_API_KEY' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY', 'X-GoMeddo-Request-Id': expect.any(String) }
     }
   )
 })
@@ -161,7 +161,7 @@ test('You can delete a reservation through it', async () => {
     {
       method: 'DELETE',
       body: JSON.stringify(expectedBodyData),
-      headers: { Authorization: 'Bearer YOUR_API_KEY' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY', 'X-GoMeddo-Request-Id': expect.any(String) }
     }
   )
 })
@@ -183,7 +183,7 @@ test('You can delete multiple reservations through it', async () => {
     {
       method: 'DELETE',
       body: JSON.stringify(expectedBodyData),
-      headers: { Authorization: 'Bearer YOUR_API_KEY' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY', 'X-GoMeddo-Request-Id': expect.any(String) }
     }
   )
 })
@@ -215,7 +215,7 @@ test('You can delete a reservation with related records through it', async () =>
     {
       method: 'PATCH',
       body: JSON.stringify(expectedBodyData),
-      headers: { Authorization: 'Bearer YOUR_API_KEY' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY', 'X-GoMeddo-Request-Id': expect.any(String) }
     }
   )
 })
@@ -488,7 +488,7 @@ test('uploadFrontendBuilderReservationFile posts multipart form data to the rese
   const [url, init] = mock.mock.calls[0] as any
   expect(url).toBe('https://api.gomeddo.com/api/v3/proxy/GMFB/v1/reservation-files')
   expect(init.method).toBe('POST')
-  expect(init.headers).toStrictEqual({ Authorization: 'Bearer YOUR_API_KEY' })
+  expect(init.headers).toStrictEqual({ Authorization: 'Bearer YOUR_API_KEY', 'X-GoMeddo-Request-Id': expect.any(String) })
   expect(init.body).toBeInstanceOf(FormData)
   const body = init.body as FormData
   expect(body.get('frontendBuilderId')).toBe('token-uuid')

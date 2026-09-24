@@ -26,6 +26,9 @@ import { FrontendBuilderCancelRequest } from './request-bodies/frontend-builder-
 import { FrontendBuilderGenerateChildRequest } from './request-bodies/frontend-builder-generate-child-request'
 import ApexTimeSlot from './request-bodies/apex-time-slot'
 
+export const REQUEST_ID_HEADER = 'X-GoMeddo-Request-Id'
+const MAX_DEV_MESSAGE_LENGTH = 500
+
 export default class GoMeddoAPI {
   private readonly baseUrl: string
   private readonly apiKey: string
@@ -76,6 +79,7 @@ export default class GoMeddoAPI {
       body: JSON.stringify(reservatinSearchBody),
       headers: this.getHeaders()
     })
+    await this.checkResponse(response)
     return await response.json()
   }
 
@@ -328,10 +332,18 @@ export default class GoMeddoAPI {
     return await response.json()
   }
 
+  /**
+   * The proxy tags every response with X-GoMeddo-Request-Id and echoes one sent by the client.
+   * Generating it here means the id exists even when the proxy is bypassed or never answers.
+   */
   private getHeaders (): Record<string, string> {
-    return {
+    const headers: Record<string, string> = {
       Authorization: `Bearer ${this.apiKey}`
     }
+    if (typeof globalThis.crypto?.randomUUID === 'function') {
+      headers[REQUEST_ID_HEADER] = globalThis.crypto.randomUUID()
+    }
+    return headers
   }
 
   private addFieldsToUrl (url: URL, fields: Set<string>): void {
@@ -342,7 +354,22 @@ export default class GoMeddoAPI {
     if (response.ok) {
       return
     }
-    throw new RequestError((await response.json()) as GoMeddoApiError, response.status)
+    const requestId = response.headers.get(REQUEST_ID_HEADER) ?? undefined
+    throw new RequestError(await GoMeddoAPI.readErrorBody(response), response.status, requestId)
+  }
+
+  /**
+   * A gateway timeout or a proxy failure answers with HTML or plain text rather than JSON.
+   * Reading the body as text first means a parse failure still yields a RequestError instead
+   * of a bare SyntaxError, and keeps the body around as the developer message.
+   */
+  private static async readErrorBody (response: Response): Promise<GoMeddoApiError> {
+    const text = await response.text().catch(() => '')
+    try {
+      return JSON.parse(text) as GoMeddoApiError
+    } catch {
+      return { ...new GoMeddoApiError(), userMessage: 'Request failed', devMessage: text.slice(0, MAX_DEV_MESSAGE_LENGTH) }
+    }
   }
 }
 
@@ -363,11 +390,14 @@ export class RequestError extends Error {
   apiError: GoMeddoApiError
   /** HTTP status of the failed response, so callers can tell a missing endpoint from a rejected request. */
   status: number
+  /** The proxy's X-GoMeddo-Request-Id for this call, to quote when reporting the failure. Absent when the response carried none. */
+  readonly requestId?: string
 
-  constructor (apiError: GoMeddoApiError, status: number = 0) {
+  constructor (apiError: GoMeddoApiError, status: number = 0, requestId?: string) {
     super(RequestError.describe(apiError))
     this.apiError = apiError
     this.status = status
+    this.requestId = requestId
     Object.setPrototypeOf(this, RequestError.prototype)
   }
 
