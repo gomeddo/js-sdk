@@ -285,7 +285,7 @@ export default class GoMeddoAPI {
     }
 
     return data.timeSlots.map((slot: any) => {
-      return new ReservationCollectionTimeSlot(slot.startDatetime, slot.endDatetime, slot.reservationCollections, slot.firstCollection)
+      return new ReservationCollectionTimeSlot(slot.startDatetime, slot.endDatetime, slot.reservationCollections, slot.firstCollection, slot.weight ?? undefined)
     })
   }
 

@@ -7,6 +7,8 @@ import { ReservationProcessRequest } from '../../src/api/request-bodies/reservat
 import { getAvailabilityResponse, getAvailabilitySlot } from '../__utils__/availability-responses'
 import TimeSlotRequestBody from '../../src/api/request-bodies/timeslots-request-body'
 import { ReservationTimeSlot } from '../../src/time-slots/reservation-time-slot'
+import { ReservationCollectionTimeSlot } from '../../src/time-slots/reservation-collection-time-slot'
+import DateRange from '../../src/date-range'
 import { dummyId0 } from '../__utils__/salesforce-dummy-ids'
 
 beforeEach(() => {
@@ -142,6 +144,32 @@ test('getTimeSlots makes the correct request and processes response correctly', 
 
   expect(timeSlots).toBeInstanceOf(Array)
   expect(timeSlots[0]).toBeInstanceOf(ReservationTimeSlot)
+})
+
+async function getBlueprintTimeslots (api: GoMeddoAPI): Promise<ReservationCollectionTimeSlot[]> {
+  const range = new DateRange(new Date(Date.UTC(2024, 0, 1)), 1)
+  return await api.getBlueprintTimeslots('Meeting', 60, 30, range, range, null, {}, null)
+}
+
+test('blueprint timeslots carry the weight from the response', async () => {
+  fetchMock.once(JSON.stringify({
+    timeSlots: [{ startDatetime: '2024-01-01T09:00:00Z', endDatetime: '2024-01-01T10:00:00Z', reservationCollections: [], firstCollection: null, weight: 7 }]
+  }))
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+  const timeSlots = await getBlueprintTimeslots(api)
+
+  expect(timeSlots[0]).toBeInstanceOf(ReservationCollectionTimeSlot)
+  expect(timeSlots[0].getWeight()).toBe(7)
+})
+
+test('blueprint timeslots without a weight leave it undefined', async () => {
+  fetchMock.once(JSON.stringify({
+    timeSlots: [{ startDatetime: '2024-01-01T09:00:00Z', endDatetime: '2024-01-01T10:00:00Z', reservationCollections: [], firstCollection: null }]
+  }))
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+  const timeSlots = await getBlueprintTimeslots(api)
+
+  expect(timeSlots[0].getWeight()).toBeUndefined()
 })
 
 test('a failed request exposes the HTTP status and reads a Salesforce array error body', async () => {
