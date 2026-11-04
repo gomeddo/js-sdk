@@ -1,5 +1,5 @@
 import { Environment } from '../../src/index'
-import GoMeddoAPI, { RequestError } from '../../src/api/gomeddo-api-requests'
+import GoMeddoAPI, { RequestError, REQUEST_ID_HEADER } from '../../src/api/gomeddo-api-requests'
 import AvailabilityTimeSlotRequest from '../../src/api/request-bodies/availability-request'
 import ReservationPriceCalculationRequest from '../../src/api/request-bodies/reservation-price-calculation-request'
 import ContextualPriceCalculationRequest from '../../src/api/request-bodies/contextual-price-calculation-request'
@@ -25,7 +25,7 @@ test('url and body are constructed correctly for saveReservation', async () => {
     {
       method: 'POST',
       body: JSON.stringify(saveRequest),
-      headers: { Authorization: 'Bearer YOUR_API_KEY' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY', 'X-GoMeddo-Request-Id': expect.any(String) }
     }
   )
 })
@@ -49,7 +49,7 @@ test('the get availabilities makes the correct request', async () => {
     {
       method: 'POST',
       body: JSON.stringify(requestBody),
-      headers: { Authorization: 'Bearer YOUR_API_KEY' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY', 'X-GoMeddo-Request-Id': expect.any(String) }
     }
   )
 })
@@ -68,7 +68,7 @@ test('price calculation makes the correct request', async () => {
     {
       method: 'POST',
       body: JSON.stringify(body),
-      headers: { Authorization: 'Bearer YOUR_API_KEY' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY', 'X-GoMeddo-Request-Id': expect.any(String) }
     }
   )
 })
@@ -91,7 +91,7 @@ test('price calculation includes relatedRecords in the request body', async () =
     {
       method: 'POST',
       body: JSON.stringify(body),
-      headers: { Authorization: 'Bearer YOUR_API_KEY' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY', 'X-GoMeddo-Request-Id': expect.any(String) }
     }
   )
   const sentBody = JSON.parse((mock as any).mock.calls[0][1].body)
@@ -109,7 +109,7 @@ test('contextual price calculation makes the correct request', async () => {
     {
       method: 'POST',
       body: JSON.stringify(body),
-      headers: { Authorization: 'Bearer YOUR_API_KEY' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY', 'X-GoMeddo-Request-Id': expect.any(String) }
     }
   )
 })
@@ -136,7 +136,7 @@ test('getTimeSlots makes the correct request and processes response correctly', 
     {
       method: 'POST',
       body: JSON.stringify(requestBody),
-      headers: { Authorization: 'Bearer YOUR_API_KEY' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY', 'X-GoMeddo-Request-Id': expect.any(String) }
     }
   )
 
@@ -160,4 +160,121 @@ test('a failed request still reads the GoMeddo error body', async () => {
   expect(failure).toBeInstanceOf(RequestError)
   expect(failure.status).toBe(400)
   expect(failure.message).toBe('Something went wrong.')
+})
+
+const priceRequest = { isParent: false, beingProcessed: { reservation: {}, childRecords: {} }, collection: { parentReservation: { reservation: {}, childRecords: {} }, childReservations: [] } } as any
+
+test('a failed request exposes the proxy request id from the response header', async () => {
+  fetchMock.once(JSON.stringify({ userMessage: 'Something went wrong.' }), { status: 400, headers: { [REQUEST_ID_HEADER]: 'req-123' } })
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+  const failure = await api.calculateContextualPrice(priceRequest).catch(e => e)
+  expect(failure).toBeInstanceOf(RequestError)
+  expect(failure.requestId).toBe('req-123')
+})
+
+const sentRequestId = (): string => (fetchMock.mock.calls[0] as any)[1].headers[REQUEST_ID_HEADER]
+
+test('a failed request without the response header falls back to the request id that was sent', async () => {
+  fetchMock.once(JSON.stringify({ userMessage: 'Something went wrong.' }), { status: 400 })
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+  const failure = await api.calculateContextualPrice(priceRequest).catch(e => e)
+  expect(failure).toBeInstanceOf(RequestError)
+  expect(sentRequestId()).toEqual(expect.any(String))
+  expect(failure.requestId).toBe(sentRequestId())
+})
+
+test('a gateway error with an HTML body and no response header keeps the sent request id', async () => {
+  fetchMock.once('<html>Bad Gateway</html>', { status: 502 })
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+  const failure = await api.calculateContextualPrice(priceRequest).catch(e => e)
+  expect(failure).toBeInstanceOf(RequestError)
+  expect(failure.status).toBe(502)
+  expect(failure.message).toBe('Request failed')
+  expect(failure.requestId).toBe(sentRequestId())
+})
+
+test('a network failure is wrapped in a RequestError carrying the sent request id', async () => {
+  fetchMock.mockRejectOnce(new TypeError('Failed to fetch'))
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+  const failure = await api.calculateContextualPrice(priceRequest).catch(e => e)
+  expect(failure).toBeInstanceOf(RequestError)
+  expect(failure.status).toBe(0)
+  expect(failure.message).toBe('Network request failed')
+  expect(failure.apiError.devMessage).toBe('Failed to fetch')
+  expect(failure.requestId).toBe(sentRequestId())
+})
+
+test('a proxy error body reports its first error as the message', async () => {
+  fetchMock.once(JSON.stringify({ errors: ['Incorrect authentication credentials.'] }), { status: 401 })
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+  const failure = await api.calculateContextualPrice(priceRequest).catch(e => e)
+  expect(failure).toBeInstanceOf(RequestError)
+  expect(failure.status).toBe(401)
+  expect(failure.message).toBe('Incorrect authentication credentials.')
+})
+
+test('a failed request with a non-JSON body still yields a RequestError with a string message', async () => {
+  const html = '<html>' + 'x'.repeat(600) + '</html>'
+  fetchMock.once(html, { status: 502, headers: { [REQUEST_ID_HEADER]: 'req-502' } })
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+  const failure = await api.calculateContextualPrice(priceRequest).catch(e => e)
+  expect(failure).toBeInstanceOf(RequestError)
+  expect(failure).not.toBeInstanceOf(SyntaxError)
+  expect(failure.message).toBe('Request failed')
+  expect(failure.status).toBe(502)
+  expect(failure.requestId).toBe('req-502')
+  expect(failure.apiError.userMessage).toBe('Request failed')
+  expect(failure.apiError.devMessage).toBe(html.slice(0, 500))
+  expect(failure.apiError.devMessage).toHaveLength(500)
+})
+
+test('searchReservations throws a RequestError on a failed response', async () => {
+  fetchMock.once(JSON.stringify({ userMessage: 'No access.' }), { status: 403, headers: { [REQUEST_ID_HEADER]: 'req-403' } })
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+  const failure = await api.searchReservations(new Set(), null, null, undefined, new Set(['Id'])).catch(e => e)
+  expect(failure).toBeInstanceOf(RequestError)
+  expect(failure.status).toBe(403)
+  expect(failure.requestId).toBe('req-403')
+})
+
+test('RequestError keeps working without a request id', () => {
+  const error = new RequestError({ userMessage: 'Nope' } as any, 400)
+  expect(error.message).toBe('Nope')
+  expect(error.status).toBe(400)
+  expect(error.requestId).toBeUndefined()
+})
+
+describe('request id header', () => {
+  const originalCrypto = globalThis.crypto
+
+  afterEach(() => {
+    Object.defineProperty(globalThis, 'crypto', { value: originalCrypto, writable: true, configurable: true })
+  })
+
+  test('is sent as a UUID when crypto.randomUUID is available', async () => {
+    Object.defineProperty(globalThis, 'crypto', { value: { randomUUID: () => 'generated-uuid' }, writable: true, configurable: true })
+    fetchMock.once('{}')
+    const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+    await api.saveReservation(new ReservationProcessRequest({}, null, null, []))
+    const [, init] = fetchMock.mock.calls[0] as any
+    expect(init.headers).toStrictEqual({ Authorization: 'Bearer YOUR_API_KEY', [REQUEST_ID_HEADER]: 'generated-uuid' })
+  })
+
+  test('is omitted when crypto.randomUUID is not available', async () => {
+    Object.defineProperty(globalThis, 'crypto', { value: undefined, writable: true, configurable: true })
+    fetchMock.once('{}')
+    const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+    await api.saveReservation(new ReservationProcessRequest({}, null, null, []))
+    const [, init] = fetchMock.mock.calls[0] as any
+    expect(init.headers).toStrictEqual({ Authorization: 'Bearer YOUR_API_KEY' })
+  })
+
+  test('leaves requestId undefined when none was sent and the response carries none', async () => {
+    Object.defineProperty(globalThis, 'crypto', { value: undefined, writable: true, configurable: true })
+    fetchMock.once(JSON.stringify({ userMessage: 'Something went wrong.' }), { status: 400 })
+    const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+    const failure = await api.calculateContextualPrice(priceRequest).catch(e => e)
+    expect(failure).toBeInstanceOf(RequestError)
+    expect(failure.requestId).toBeUndefined()
+  })
 })

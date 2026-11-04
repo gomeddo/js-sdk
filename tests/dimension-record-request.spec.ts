@@ -89,7 +89,7 @@ test('It adds timelines if requested', async () => {
   expect(availabilityFetchMock).toBeCalledWith(availabilityRequestUrl, {
     method: 'POST',
     body: JSON.stringify(requestBody),
-    headers: { Authorization: 'Bearer YOUR_API_KEY' }
+    headers: { Authorization: 'Bearer YOUR_API_KEY', 'X-GoMeddo-Request-Id': expect.any(String) }
   })
   expect(result.numberOfDimensionRecords()).toBe(1)
   const dimensionRecordOne = result.getDimensionRecord('Name 1')
@@ -169,7 +169,7 @@ const expectSearchMockToHaveBeenCalledWith = (mock: FetchMock, ids: string[], na
     {
       method: 'POST',
       body: getExpectedBody(ids, names, condition),
-      headers: { Authorization: 'Bearer YOUR_API_KEY' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY', 'X-GoMeddo-Request-Id': expect.any(String) }
     }
   )
 }

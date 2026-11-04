@@ -76,7 +76,7 @@ const expectMockToHaveBeenCalledWith = (mock: FetchMock, prototype: object, addi
     {
       method: 'POST',
       body: expectedBody,
-      headers: { Authorization: 'Bearer YOUR_API_KEY' }
+      headers: { Authorization: 'Bearer YOUR_API_KEY', 'X-GoMeddo-Request-Id': expect.any(String) }
     }
   )
 }

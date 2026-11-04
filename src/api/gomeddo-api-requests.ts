@@ -26,6 +26,9 @@ import { FrontendBuilderCancelRequest } from './request-bodies/frontend-builder-
 import { FrontendBuilderGenerateChildRequest } from './request-bodies/frontend-builder-generate-child-request'
 import ApexTimeSlot from './request-bodies/apex-time-slot'
 
+export const REQUEST_ID_HEADER = 'X-GoMeddo-Request-Id'
+const MAX_DEV_MESSAGE_LENGTH = 500
+
 export default class GoMeddoAPI {
   private readonly baseUrl: string
   private readonly apiKey: string
@@ -58,12 +61,7 @@ export default class GoMeddoAPI {
     const url = new URL('B25/v1/dimensionRecords/search', this.baseUrl)
     this.addFieldsToUrl(url, fields)
     const dimensionSearchBody = new DimensionSearchBody(dimension, parentIds, parentNames, apiCondition, true)
-    const response = await fetch(url.href, {
-      method: 'POST',
-      body: JSON.stringify(dimensionSearchBody),
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
+    const response = await this.send(url, 'POST', JSON.stringify(dimensionSearchBody))
     return await response.json()
   }
 
@@ -71,44 +69,25 @@ export default class GoMeddoAPI {
     const url = new URL('B25/v1/reservations/search', this.baseUrl)
     this.addFieldsToUrl(url, fields)
     const reservatinSearchBody = new ReservationSearchBody([...reservationIds], rangeStart, rangeEnd, apiCondition)
-    const response = await fetch(url.href, {
-      method: 'POST',
-      body: JSON.stringify(reservatinSearchBody),
-      headers: this.getHeaders()
-    })
+    const response = await this.send(url, 'POST', JSON.stringify(reservatinSearchBody))
     return await response.json()
   }
 
   public async saveReservation (saveRequest: ReservationProcessRequest): Promise<object> {
     const url = new URL('B25LP/v1/reservations', this.baseUrl)
-    const response = await fetch(url.href, {
-      method: 'POST',
-      body: JSON.stringify(saveRequest),
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
+    const response = await this.send(url, 'POST', JSON.stringify(saveRequest))
     return await response.json()
   }
 
   public async saveFrontendBuilderReservation (saveRequest: FrontendBuilderReservationProcessRequest): Promise<object> {
     const url = new URL('GMFB/v1/reservations', this.baseUrl)
-    const response = await fetch(url.href, {
-      method: 'POST',
-      body: JSON.stringify(saveRequest),
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
+    const response = await this.send(url, 'POST', JSON.stringify(saveRequest))
     return await response.json()
   }
 
   public async cancelFrontendBuilderReservation (cancelRequest: FrontendBuilderCancelRequest): Promise<object> {
     const url = new URL('GMFB/v1/cancel-reservations', this.baseUrl)
-    const response = await fetch(url.href, {
-      method: 'POST',
-      body: JSON.stringify(cancelRequest),
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
+    const response = await this.send(url, 'POST', JSON.stringify(cancelRequest))
     return await response.json()
   }
 
@@ -119,68 +98,37 @@ export default class GoMeddoAPI {
     formData.append('frontendBuilderId', frontendBuilderId)
     formData.append('frontendBuilderDeveloperName', frontendBuilderDeveloperName)
     formData.append('fieldId', fieldId)
-    const response = await fetch(url.href, {
-      method: 'POST',
-      body: formData,
-      // No Content-Type header: fetch sets the multipart boundary itself.
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
+    // No Content-Type header: fetch sets the multipart boundary itself.
+    const response = await this.send(url, 'POST', formData)
     return await response.json() as FrontendBuilderReservationFileResult
   }
 
   public async generateChildReservation (generateChildRequest: FrontendBuilderGenerateChildRequest): Promise<SFReservation[]> {
     const url = new URL('GMFB/v1/generate-child-reservation', this.baseUrl)
-    const response = await fetch(url.href, {
-      method: 'POST',
-      body: JSON.stringify(generateChildRequest),
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
-
+    const response = await this.send(url, 'POST', JSON.stringify(generateChildRequest))
     const body = await response.json()
     return Array.isArray(body?.reservations) ? body.reservations as SFReservation[] : []
   }
 
   public async getParentReservations (parentReservationRequest: FrontendBuilderReservationProcessRequest): Promise<SFReservation[]> {
     const url = new URL('GMFB/v1/parent-reservations', this.baseUrl)
-    const response = await fetch(url.href, {
-      method: 'POST',
-      body: JSON.stringify(parentReservationRequest),
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
+    const response = await this.send(url, 'POST', JSON.stringify(parentReservationRequest))
     return await response.json()
   }
 
   public async updateReservationCollection (reservationCollections: ReservationProcessRequest[]): Promise<void> {
     const url = new URL('B25LP/v1/reservations', this.baseUrl)
-    const response = await fetch(url.href, {
-      method: 'PATCH',
-      body: JSON.stringify(reservationCollections),
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
+    await this.send(url, 'PATCH', JSON.stringify(reservationCollections))
   }
 
   public async deleteReservationCollection (reservationCollections: ReservationCollection[]): Promise<void> {
     const url = new URL('B25/v1/reservation-collection', this.baseUrl)
-    const response = await fetch(url.href, {
-      method: 'DELETE',
-      body: JSON.stringify(reservationCollections),
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
+    await this.send(url, 'DELETE', JSON.stringify(reservationCollections))
   }
 
   public async calculatePrice (calculationRequest: ReservationPriceCalculationRequest): Promise<ReservationPriceCalculationRequest> {
     const url = new URL('B25/v1/priceCalculation', this.baseUrl)
-    const response = await fetch(url.href, {
-      method: 'POST',
-      body: JSON.stringify(calculationRequest),
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
+    const response = await this.send(url, 'POST', JSON.stringify(calculationRequest))
     return await response.json()
   }
 
@@ -190,47 +138,27 @@ export default class GoMeddoAPI {
    */
   public async calculateContextualPrice (calculationRequest: ContextualPriceCalculationRequest): Promise<Record<string, any>> {
     const url = new URL('B25/v1/contextualPriceCalculation', this.baseUrl)
-    const response = await fetch(url.href, {
-      method: 'POST',
-      body: JSON.stringify(calculationRequest),
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
+    const response = await this.send(url, 'POST', JSON.stringify(calculationRequest))
     return await response.json()
   }
 
   public async getAvailability (requestBody: AvailabilityTimeSlotRequest): Promise<AvailabilityTimeSlotResponse[]> {
     const url = new URL('B25/v1/availability', this.baseUrl)
-    const response = await fetch(url.href, {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
+    const response = await this.send(url, 'POST', JSON.stringify(requestBody))
     const data = (await response.json()) as any[]
     return data.map(data => new AvailabilityTimeSlotResponse(data))
   }
 
   public async getServiceAvailability (requestBody: ServiceTimeSlotRequest): Promise<ServiceTimeSlotResponse[]> {
     const url = new URL('B25/v1/services/availability', this.baseUrl)
-    const response = await fetch(url.href, {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
+    const response = await this.send(url, 'POST', JSON.stringify(requestBody))
     const data = await response.json()
     return Object.keys(data.resources).map(dimensionId => new ServiceTimeSlotResponse(data.resources[dimensionId]))
   }
 
   public async findAvailableDimensionIds (requestBody: FindAvailableIdsRequest): Promise<string[]> {
     const url = new URL('B25/v1/findAvailableDimensionIds', this.baseUrl)
-    const response = await fetch(url.href, {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
+    const response = await this.send(url, 'POST', JSON.stringify(requestBody))
     const data = await response.json()
     return data
   }
@@ -241,22 +169,13 @@ export default class GoMeddoAPI {
       url.searchParams.append('reservationId', reservationId)
     }
     this.addFieldsToUrl(url, fields)
-    const response = await fetch(url.href, {
-      method: 'GET',
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
+    const response = await this.send(url, 'GET')
     return await response.json()
   }
 
   public async getTimeSlots (requestBody: TimeSlotRequestBody): Promise<ReservationTimeSlot[]> {
     const url = new URL('B25/v1/timeSlots', this.baseUrl)
-    const response = await fetch(url.href, {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
+    const response = await this.send(url, 'POST', JSON.stringify(requestBody))
     const data = await response.json()
 
     if (data.timeSlots === undefined) {
@@ -273,12 +192,7 @@ export default class GoMeddoAPI {
   ): Promise<ReservationCollectionTimeSlot[]> {
     const url = new URL('B25/v1/blueprints/timeSlots', this.baseUrl)
     const blueprintTimeslotGenerationBody = new BlueprintTimeslotGenerationBody(blueprintName, duration, interval, timeslotRange, mdaRange, fixedSlots, prototype, relatedRecords)
-    const response = await fetch(url.href, {
-      method: 'POST',
-      body: JSON.stringify(blueprintTimeslotGenerationBody),
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
+    const response = await this.send(url, 'POST', JSON.stringify(blueprintTimeslotGenerationBody))
     const data = await response.json()
     if (data.timeSlots === undefined) {
       return []
@@ -293,12 +207,7 @@ export default class GoMeddoAPI {
     const url = new URL('B25/v1/blueprints/search', this.baseUrl)
     this.addFieldsToUrl(url, fields)
     const blueprintSearchBody = new BlueprintSearchBody(ids, names, apiCondition)
-    const response = await fetch(url.href, {
-      method: 'POST',
-      body: JSON.stringify(blueprintSearchBody),
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
+    const response = await this.send(url, 'POST', JSON.stringify(blueprintSearchBody))
     return await response.json()
   }
 
@@ -306,12 +215,7 @@ export default class GoMeddoAPI {
     const url = new URL(`B25/v1/blueprints/${blueprintIdentifier}/fields/${fieldIdentifier}/options`, this.baseUrl)
     this.addFieldsToUrl(url, fields)
     const blueprintFieldOptionsBody = new BlueprintFieldOptionsBody(reservation)
-    const response = await fetch(url.href, {
-      method: 'POST',
-      body: JSON.stringify(blueprintFieldOptionsBody),
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
+    const response = await this.send(url, 'POST', JSON.stringify(blueprintFieldOptionsBody))
     return await response.json()
   }
 
@@ -319,30 +223,68 @@ export default class GoMeddoAPI {
     const url = new URL(`B25/v1/blueprints/${blueprintIdentifier}/relatedLists/${relatedListIdentifier}/fields/${fieldIdentifier}/options`, this.baseUrl)
     this.addFieldsToUrl(url, fields)
     const blueprintFieldOptionsBody = new BlueprintFieldOptionsBody(reservation)
-    const response = await fetch(url.href, {
-      method: 'POST',
-      body: JSON.stringify(blueprintFieldOptionsBody),
-      headers: this.getHeaders()
-    })
-    await this.checkResponse(response)
+    const response = await this.send(url, 'POST', JSON.stringify(blueprintFieldOptionsBody))
     return await response.json()
   }
 
+  /**
+   * Every call goes through here so the generated request id stays in scope for the whole
+   * round trip. A network or CORS failure, or a gateway error without the response header,
+   * still produces a RequestError carrying the id that was sent.
+   */
+  private async send (url: URL, method: string, body?: BodyInit): Promise<Response> {
+    const headers = this.getHeaders()
+    const sentRequestId = headers[REQUEST_ID_HEADER]
+    const init: RequestInit = body === undefined ? { method, headers } : { method, body, headers }
+    let response: Response
+    try {
+      response = await fetch(url.href, init)
+    } catch (error) {
+      const devMessage = error instanceof Error ? error.message : String(error)
+      throw new RequestError({ ...new GoMeddoApiError(), userMessage: 'Network request failed', devMessage }, 0, sentRequestId)
+    }
+    await GoMeddoAPI.checkResponse(response, sentRequestId)
+    return response
+  }
+
+  /**
+   * The proxy tags every response with X-GoMeddo-Request-Id and echoes one sent by the client.
+   * Generating it here means the id exists even when the proxy is bypassed or never answers.
+   */
   private getHeaders (): Record<string, string> {
-    return {
+    const headers: Record<string, string> = {
       Authorization: `Bearer ${this.apiKey}`
     }
+    if (typeof globalThis.crypto?.randomUUID === 'function') {
+      headers[REQUEST_ID_HEADER] = globalThis.crypto.randomUUID()
+    }
+    return headers
   }
 
   private addFieldsToUrl (url: URL, fields: Set<string>): void {
     url.searchParams.append('fields', [...fields].join(','))
   }
 
-  private async checkResponse (response: Response): Promise<void> {
+  private static async checkResponse (response: Response, sentRequestId: string | undefined): Promise<void> {
     if (response.ok) {
       return
     }
-    throw new RequestError((await response.json()) as GoMeddoApiError, response.status)
+    const requestId = response.headers.get(REQUEST_ID_HEADER) ?? sentRequestId
+    throw new RequestError(await GoMeddoAPI.readErrorBody(response), response.status, requestId)
+  }
+
+  /**
+   * A gateway timeout or a proxy failure answers with HTML or plain text rather than JSON.
+   * Reading the body as text first means a parse failure still yields a RequestError instead
+   * of a bare SyntaxError, and keeps the body around as the developer message.
+   */
+  private static async readErrorBody (response: Response): Promise<GoMeddoApiError> {
+    const text = await response.text().catch(() => '')
+    try {
+      return JSON.parse(text) as GoMeddoApiError
+    } catch {
+      return { ...new GoMeddoApiError(), userMessage: 'Request failed', devMessage: text.slice(0, MAX_DEV_MESSAGE_LENGTH) }
+    }
   }
 }
 
@@ -357,24 +299,33 @@ class GoMeddoApiError {
   errorCode: number = 0
   hardConflicts: unknown[] = []// TODO this is a conflict array this is currently just set to any[] but we might want to specify
   fields: string[] = []
+  /** Only set by the proxy's own errors, e.g. a rejected API key. */
+  errors?: string[]
 }
 
 export class RequestError extends Error {
   apiError: GoMeddoApiError
-  /** HTTP status of the failed response, so callers can tell a missing endpoint from a rejected request. */
+  /** HTTP status of the failed response, so callers can tell a missing endpoint from a rejected request. 0 when no response arrived. */
   status: number
+  /**
+   * The X-GoMeddo-Request-Id for this call, to quote when reporting the failure. Taken from the response
+   * header, falling back to the id the SDK sent. Absent only when the runtime could not generate one.
+   */
+  readonly requestId?: string
 
-  constructor (apiError: GoMeddoApiError, status: number = 0) {
+  constructor (apiError: GoMeddoApiError, status: number = 0, requestId?: string) {
     super(RequestError.describe(apiError))
     this.apiError = apiError
     this.status = status
+    this.requestId = requestId
     Object.setPrototypeOf(this, RequestError.prototype)
   }
 
   /**
    * GoMeddo endpoints answer with a GoMeddoApiError object, but a platform level failure such as
    * an unknown URL or an unhandled Apex exception answers with Salesforce's own shape, an array
-   * of { errorCode, message }. Read whichever is present so the error is never just "undefined".
+   * of { errorCode, message }, and the proxy's own errors (e.g. a bad API key) answer with
+   * { errors: string[] }. Read whichever is present so the error is never just "undefined".
    */
   private static describe (apiError: unknown): string {
     if (Array.isArray(apiError)) {
@@ -382,6 +333,8 @@ export class RequestError extends Error {
       return first?.message ?? first?.errorCode ?? 'Request failed'
     }
     const asApiError = apiError as Partial<GoMeddoApiError> | null
-    return asApiError?.userMessage ?? asApiError?.devMessage ?? 'Request failed'
+    const proxyErrors: unknown = asApiError?.errors
+    const firstProxyError = Array.isArray(proxyErrors) && typeof proxyErrors[0] === 'string' ? proxyErrors[0] : undefined
+    return asApiError?.userMessage ?? asApiError?.devMessage ?? firstProxyError ?? 'Request failed'
   }
 }
