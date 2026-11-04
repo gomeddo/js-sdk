@@ -172,6 +172,26 @@ test('blueprint timeslots without a weight leave it undefined', async () => {
   expect(timeSlots[0].getWeight()).toBeUndefined()
 })
 
+test('blueprint timeslots with a null weight leave it undefined', async () => {
+  fetchMock.once(JSON.stringify({
+    timeSlots: [{ startDatetime: '2024-01-01T09:00:00Z', endDatetime: '2024-01-01T10:00:00Z', reservationCollections: [], firstCollection: null, weight: null }]
+  }))
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+  const timeSlots = await getBlueprintTimeslots(api)
+
+  expect(timeSlots[0].getWeight()).toBeUndefined()
+})
+
+test('blueprint timeslots with a non-numeric weight leave it undefined', async () => {
+  fetchMock.once(JSON.stringify({
+    timeSlots: [{ startDatetime: '2024-01-01T09:00:00Z', endDatetime: '2024-01-01T10:00:00Z', reservationCollections: [], firstCollection: null, weight: '7' }]
+  }))
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+  const timeSlots = await getBlueprintTimeslots(api)
+
+  expect(timeSlots[0].getWeight()).toBeUndefined()
+})
+
 test('a failed request exposes the HTTP status and reads a Salesforce array error body', async () => {
   fetchMock.once(JSON.stringify([{ errorCode: 'NOT_FOUND', message: 'Could not find a match for URL' }]), { status: 404 })
   const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
