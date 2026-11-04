@@ -17,6 +17,7 @@ repos:
         name: ts-standard
         entry: ts-standard --fix
         language: node
+        language_version: system
         files: "\\.(\
           js|jsx\
           |ts|tsx\

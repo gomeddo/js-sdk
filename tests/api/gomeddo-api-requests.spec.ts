@@ -172,12 +172,45 @@ test('a failed request exposes the proxy request id from the response header', a
   expect(failure.requestId).toBe('req-123')
 })
 
-test('a failed request without the header leaves requestId undefined', async () => {
+const sentRequestId = (): string => (fetchMock.mock.calls[0] as any)[1].headers[REQUEST_ID_HEADER]
+
+test('a failed request without the response header falls back to the request id that was sent', async () => {
   fetchMock.once(JSON.stringify({ userMessage: 'Something went wrong.' }), { status: 400 })
   const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
   const failure = await api.calculateContextualPrice(priceRequest).catch(e => e)
   expect(failure).toBeInstanceOf(RequestError)
-  expect(failure.requestId).toBeUndefined()
+  expect(sentRequestId()).toEqual(expect.any(String))
+  expect(failure.requestId).toBe(sentRequestId())
+})
+
+test('a gateway error with an HTML body and no response header keeps the sent request id', async () => {
+  fetchMock.once('<html>Bad Gateway</html>', { status: 502 })
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+  const failure = await api.calculateContextualPrice(priceRequest).catch(e => e)
+  expect(failure).toBeInstanceOf(RequestError)
+  expect(failure.status).toBe(502)
+  expect(failure.message).toBe('Request failed')
+  expect(failure.requestId).toBe(sentRequestId())
+})
+
+test('a network failure is wrapped in a RequestError carrying the sent request id', async () => {
+  fetchMock.mockRejectOnce(new TypeError('Failed to fetch'))
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+  const failure = await api.calculateContextualPrice(priceRequest).catch(e => e)
+  expect(failure).toBeInstanceOf(RequestError)
+  expect(failure.status).toBe(0)
+  expect(failure.message).toBe('Network request failed')
+  expect(failure.apiError.devMessage).toBe('Failed to fetch')
+  expect(failure.requestId).toBe(sentRequestId())
+})
+
+test('a proxy error body reports its first error as the message', async () => {
+  fetchMock.once(JSON.stringify({ errors: ['Incorrect authentication credentials.'] }), { status: 401 })
+  const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+  const failure = await api.calculateContextualPrice(priceRequest).catch(e => e)
+  expect(failure).toBeInstanceOf(RequestError)
+  expect(failure.status).toBe(401)
+  expect(failure.message).toBe('Incorrect authentication credentials.')
 })
 
 test('a failed request with a non-JSON body still yields a RequestError with a string message', async () => {
@@ -234,5 +267,14 @@ describe('request id header', () => {
     await api.saveReservation(new ReservationProcessRequest({}, null, null, []))
     const [, init] = fetchMock.mock.calls[0] as any
     expect(init.headers).toStrictEqual({ Authorization: 'Bearer YOUR_API_KEY' })
+  })
+
+  test('leaves requestId undefined when none was sent and the response carries none', async () => {
+    Object.defineProperty(globalThis, 'crypto', { value: undefined, writable: true, configurable: true })
+    fetchMock.once(JSON.stringify({ userMessage: 'Something went wrong.' }), { status: 400 })
+    const api = new GoMeddoAPI('YOUR_API_KEY', Environment.PRODUCTION)
+    const failure = await api.calculateContextualPrice(priceRequest).catch(e => e)
+    expect(failure).toBeInstanceOf(RequestError)
+    expect(failure.requestId).toBeUndefined()
   })
 })
